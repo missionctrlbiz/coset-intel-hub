@@ -78,7 +78,7 @@ export async function POST(request: Request) {
 
         let supabase;
         let adminSupabase;
-        
+
         try {
             supabase = createSupabaseServerClient();
             adminSupabase = createSupabaseAdminClient();
