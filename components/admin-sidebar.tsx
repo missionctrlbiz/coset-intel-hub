@@ -1,52 +1,65 @@
-import Link from 'next/link';
-import { BarChart3, FileText, HelpCircle, LayoutDashboard, UploadCloud } from 'lucide-react';
+import Link from "next/link";
+import { FileText, LayoutDashboard, UploadCloud } from "lucide-react";
 
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 
 const items = [
-    { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
-    { href: '/admin/content', label: 'Content', icon: FileText },
-    { href: '/admin/upload', label: 'Uploads', icon: UploadCloud },
+  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/content", label: "Content", icon: FileText },
+  { href: "/admin/upload", label: "Uploads", icon: UploadCloud },
 ];
 
 export function AdminSidebar({ pathname }: { pathname: string }) {
-    return (
-        <aside className="hidden min-h-screen w-72 shrink-0 border-r border-line bg-panel px-5 py-6 lg:block">
-            <div className="mb-8 space-y-1 px-3">
-                <p className="font-display text-2xl font-extrabold text-navy">COSET HUB</p>
-                <p className="text-sm text-muted">Intelligence Admin</p>
-            </div>
+  return (
+    <aside className="hidden min-h-screen w-72 shrink-0 border-r border-line bg-panel px-5 py-6 lg:block">
+      <div className="border-b border-line px-3 pb-6">
+        <p className="font-display text-2xl font-extrabold text-navy">
+          COSET HUB
+        </p>
+        <p className="mt-1 text-sm text-muted">Admin</p>
+      </div>
 
-            <nav className="space-y-2">
-                {items.map((item) => {
-                    const Icon = item.icon;
-                    const active = pathname === item.href;
-                    return (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            className={cn(
-                                'flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition',
-                                active ? 'bg-mist text-navy shadow-soft' : 'text-muted hover:bg-panel-alt hover:text-navy'
-                            )}
-                        >
-                            <Icon className="h-4 w-4" />
-                            {item.label}
-                        </Link>
-                    );
-                })}
-            </nav>
+      <nav className="mt-6 space-y-2">
+        {items.map((item) => {
+          const Icon = item.icon;
+          const active = pathname === item.href;
 
-            <div className="mt-10 rounded-2xl bg-ink p-5 text-white shadow-editorial">
-                <p className="mb-2 font-display text-lg font-bold">Curation Status</p>
-                <p className="text-sm text-white/70">Metadata quality has improved by 18% since the last ingestion cycle.</p>
-            </div>
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition",
+                active
+                  ? "bg-mist text-navy shadow-soft"
+                  : "text-muted hover:bg-panel-alt hover:text-navy",
+              )}
+            >
+              <Icon className="h-4 w-4" />
+              {item.label}
+            </Link>
+          );
+        })}
+      </nav>
 
-            <button className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-ember px-4 py-3 font-semibold text-white transition hover:brightness-110">
-                <HelpCircle className="h-4 w-4" />
-                Help Center
-            </button>
-        </aside>
-    );
+      <div className="mt-8 rounded-2xl border border-line bg-panel-alt px-4 py-4">
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">
+          Focus
+        </p>
+        <p className="mt-2 text-sm leading-6 text-muted">
+          Manage uploads, review report status, and keep CoSET publication
+          content organized.
+        </p>
+      </div>
+
+      <div className="mt-6 px-1">
+        <Link
+          href="/reports"
+          className="text-sm font-semibold text-navy transition hover:text-ember"
+        >
+          View public hub
+        </Link>
+      </div>
+    </aside>
+  );
 }
