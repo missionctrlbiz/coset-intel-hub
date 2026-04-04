@@ -8,10 +8,9 @@ import {
   type LucideIcon,
   Presentation,
   UploadCloud,
+  X,
 } from "lucide-react";
 import { useMemo, useRef, useState, useTransition } from "react";
-
-import { ChipInput } from "@/components/chip-input";
 
 const steps = ["Upload", "Details", "Review"];
 const stepProgressClasses = ["w-1/3", "w-2/3", "w-full"];
@@ -217,6 +216,19 @@ export function UploadWizard() {
 
   return (
     <div className="space-y-8">
+      <div>
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">
+          Upload report
+        </p>
+        <h1 className="mt-3 font-display text-4xl font-extrabold tracking-[-0.05em] text-ink sm:text-5xl">
+          Create a CoSET draft from a source file
+        </h1>
+        <p className="mt-4 max-w-3xl text-base leading-8 text-muted">
+          Upload a document, confirm the title and summary, and save it as a
+          draft for review in the admin content table.
+        </p>
+      </div>
+
       <div className="relative grid gap-5 md:grid-cols-3">
         <div className="absolute left-0 top-5 hidden h-px w-full bg-line md:block" />
         <div
@@ -584,17 +596,90 @@ function MetadataStep({
         label="Categories"
         placeholder="Add category and press Enter"
         value={categories}
-        onChange={setCategories}
+        onValueChange={setCategories}
       />
 
       <ChipInput
         label="Tags"
         placeholder="Add tag and press Enter"
         value={tags}
-        onChange={setTags}
+        onValueChange={setTags}
         limit={5}
       />
     </div>
+  );
+}
+
+type ChipInputProps = {
+  label: string;
+  placeholder: string;
+  value: string[];
+  onValueChange: (next: string[]) => void;
+  limit?: number;
+};
+
+function ChipInput({
+  label,
+  placeholder,
+  value,
+  onValueChange,
+  limit = 3,
+}: ChipInputProps) {
+  const [draft, setDraft] = useState("");
+
+  function commitValue() {
+    const cleaned = draft.trim();
+    if (!cleaned || value.includes(cleaned) || value.length >= limit) {
+      setDraft("");
+      return;
+    }
+
+    onValueChange([...value, cleaned]);
+    setDraft("");
+  }
+
+  return (
+    <label className="block space-y-3">
+      <span className="text-sm font-semibold text-navy">{label}</span>
+      <div className="rounded-2xl border border-line bg-panel px-4 py-3 shadow-soft transition focus-within:border-ember focus-within:ring-2 focus-within:ring-ember/30">
+        <div className="mb-3 flex flex-wrap gap-2">
+          {value.map((item) => (
+            <span
+              key={item}
+              className="inline-flex items-center gap-2 rounded-full bg-mist px-3 py-1 text-sm font-medium text-navy"
+            >
+              {item}
+              <button
+                type="button"
+                aria-label={`Remove ${item}`}
+                title={`Remove ${item}`}
+                onClick={() =>
+                  onValueChange(value.filter((entry) => entry !== item))
+                }
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </span>
+          ))}
+        </div>
+        <input
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              commitValue();
+            }
+          }}
+          onBlur={commitValue}
+          placeholder={placeholder}
+          className="w-full bg-transparent text-sm outline-none placeholder:text-muted"
+        />
+      </div>
+      <p className="text-xs text-muted">
+        Up to {limit} values. Press Enter to add each one.
+      </p>
+    </label>
   );
 }
 
