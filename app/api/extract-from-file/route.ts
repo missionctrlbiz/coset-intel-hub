@@ -76,8 +76,18 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Expected a file upload under the "file" field.' }, { status: 400 });
         }
 
-        const supabase = createSupabaseServerClient();
-        const adminSupabase = createSupabaseAdminClient();
+        let supabase;
+        let adminSupabase;
+        
+        try {
+            supabase = createSupabaseServerClient();
+            adminSupabase = createSupabaseAdminClient();
+        } catch (error) {
+            return NextResponse.json(
+                { error: 'Database connection unavailable. Please check your environment configuration.' },
+                { status: 500 }
+            );
+        }
         const {
             data: { user },
         } = await supabase.auth.getUser();
@@ -114,7 +124,7 @@ export async function POST(request: Request) {
                     excerpt: textPreview,
                 });
             } catch (error) {
-                aiError = error instanceof Error ? error.message : 'Unknown GenAI error.';
+                aiError = error instanceof Error ? error.message : 'Unknown extraction error.';
             }
         }
 
@@ -167,7 +177,7 @@ export async function POST(request: Request) {
         if (reportError || !report) {
             await adminSupabase.storage.from('report-uploads').remove([storagePath]);
 
-            return NextResponse.json({ error: reportError?.message ?? 'Failed to create report draft.' }, { status: 500 });
+            return NextResponse.json({ error: reportError?.message ?? 'We could not create the draft right now.' }, { status: 500 });
         }
 
         const { data: ingestion, error: ingestionError } = await adminSupabase
@@ -188,12 +198,12 @@ export async function POST(request: Request) {
             .single();
 
         if (ingestionError || !ingestion) {
-            return NextResponse.json({ error: ingestionError?.message ?? 'Failed to persist ingestion record.' }, { status: 500 });
+            return NextResponse.json({ error: ingestionError?.message ?? 'The draft was created, but we could not finish processing it right now.' }, { status: 500 });
         }
 
         return NextResponse.json(
             {
-                message: 'Upload persisted. A draft report and ingestion record were created successfully.',
+                message: 'Draft created successfully and ready for review.',
                 fileName: file.name,
                 fileType: file.type,
                 size: file.size,
@@ -208,7 +218,7 @@ export async function POST(request: Request) {
         );
     } catch (error) {
         return NextResponse.json(
-            { error: error instanceof Error ? error.message : 'Unexpected upload persistence failure.' },
+            { error: error instanceof Error ? error.message : 'We could not complete this upload right now.' },
             { status: 500 }
         );
     }

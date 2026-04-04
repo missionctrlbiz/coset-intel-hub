@@ -31,7 +31,7 @@ export default async function AdminContentPage() {
 
                 {!user ? (
                     <section className="mb-8 rounded-[2rem] border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900 shadow-soft">
-                        Sign in with your Supabase account to view live admin content. Static fallback data is shown below until an authenticated session is available.
+                        Sign in to view live admin content. Static fallback data is shown below until an authenticated session is available.
                     </section>
                 ) : null}
 

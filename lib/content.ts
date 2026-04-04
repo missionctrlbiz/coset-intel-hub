@@ -2,7 +2,7 @@ import type { User } from '@supabase/supabase-js';
 
 import type { Database, Json } from '@/lib/database.types';
 import { blogPosts as fallbackBlogPosts, getReportBySlug as getFallbackReportBySlug, reports as fallbackReports, type Report as SeedReport } from '@/lib/site-data';
-import { createSupabasePublicClient, createSupabaseServerClient } from '@/lib/supabase/clients';
+import { createSupabasePublicClient, createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase/clients';
 
 type ReportRow = Database['public']['Tables']['reports']['Row'];
 type BlogPostRow = Database['public']['Tables']['blog_posts']['Row'];
@@ -266,12 +266,7 @@ export async function getPublishedBlogPosts() {
 }
 
 export async function getAdminContentReports(): Promise<AdminContentResult> {
-    const supabase = createSupabaseServerClient();
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
+    if (!isSupabaseConfigured()) {
         return {
             reports: mapFallbackAdminReports(),
             canManage: false,
@@ -281,37 +276,62 @@ export async function getAdminContentReports(): Promise<AdminContentResult> {
         };
     }
 
-    const { data: profileData } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
-    const profile = profileData as Pick<ProfileRow, 'email' | 'full_name' | 'role'> | null;
+    try {
+        const supabase = createSupabaseServerClient();
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
 
-    const canManage = profile?.role === 'admin' || profile?.role === 'editor';
+        if (!user) {
+            return {
+                reports: mapFallbackAdminReports(),
+                canManage: false,
+                isFallback: true,
+                profile: null,
+                user: null,
+            };
+        }
 
-    let query = supabase
-        .from('reports')
-        .select('id, slug, title, category, author, published_at, updated_at, status')
-        .order('updated_at', { ascending: false });
+        const { data: profileData } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
+        const profile = profileData as Pick<ProfileRow, 'email' | 'full_name' | 'role'> | null;
 
-    if (!canManage) {
-        query = query.eq('status', 'published');
-    }
+        const canManage = profile?.role === 'admin' || profile?.role === 'editor';
 
-    const { data, error } = await query;
+        let query = supabase
+            .from('reports')
+            .select('id, slug, title, category, author, published_at, updated_at, status')
+            .order('updated_at', { ascending: false });
 
-    if (error || !data || data.length === 0) {
+        if (!canManage) {
+            query = query.eq('status', 'published');
+        }
+
+        const { data, error } = await query;
+
+        if (error || !data || data.length === 0) {
+            return {
+                reports: mapFallbackAdminReports(),
+                canManage,
+                isFallback: true,
+                profile: profile ?? null,
+                user,
+            };
+        }
+
         return {
-            reports: mapFallbackAdminReports(),
+            reports: data.map(mapAdminReportRow),
             canManage,
-            isFallback: true,
+            isFallback: false,
             profile: profile ?? null,
             user,
         };
+    } catch {
+        return {
+            reports: mapFallbackAdminReports(),
+            canManage: false,
+            isFallback: true,
+            profile: null,
+            user: null,
+        };
     }
-
-    return {
-        reports: data.map(mapAdminReportRow),
-        canManage,
-        isFallback: false,
-        profile: profile ?? null,
-        user,
-    };
 }

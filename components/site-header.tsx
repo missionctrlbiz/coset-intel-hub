@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Bell, LogOut, Search, User } from 'lucide-react';
 
 import { ThemeToggle } from '@/components/theme-toggle';
-import { createSupabaseServerClient as createClient } from '@/lib/supabase/clients';
+import { createSupabaseServerClient as createClient, isSupabaseConfigured } from '@/lib/supabase/clients';
 import { cn } from '@/lib/utils';
 
 type SiteHeaderProps = {
@@ -11,8 +11,20 @@ type SiteHeaderProps = {
 };
 
 export async function SiteHeader({ dark = false }: SiteHeaderProps) {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    let user: { email?: string | null } | null = null;
+
+    if (isSupabaseConfigured()) {
+        try {
+            const supabase = createClient();
+            const {
+                data: { user: authUser },
+            } = await supabase.auth.getUser();
+
+            user = authUser;
+        } catch {
+            user = null;
+        }
+    }
 
     return (
         <header
@@ -47,15 +59,15 @@ export async function SiteHeader({ dark = false }: SiteHeaderProps) {
                             placeholder="Search intelligence..."
                         />
                     </div>
-                    
+
                     {user ? (
                         <div className="flex items-center gap-3">
                             <div className={cn('hidden items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold md:flex', dark ? 'border-white/10 bg-white/5 text-white/70' : 'border-line bg-mist text-muted')}>
                                 <User className="h-3 w-3" />
                                 {user.email?.split('@')[0]}
                             </div>
-                            <Link 
-                                href="/login" 
+                            <Link
+                                href="/login"
                                 className={cn('rounded-full p-2 transition', dark ? 'hover:bg-white/10' : 'hover:bg-mist')}
                                 title="Admin Desk"
                             >
@@ -63,8 +75,8 @@ export async function SiteHeader({ dark = false }: SiteHeaderProps) {
                             </Link>
                         </div>
                     ) : (
-                        <Link 
-                            href="/login" 
+                        <Link
+                            href="/login"
                             className="rounded-full bg-ember px-5 py-2.5 text-sm font-bold text-white shadow-soft transition hover:brightness-110"
                         >
                             Sign In
@@ -76,4 +88,4 @@ export async function SiteHeader({ dark = false }: SiteHeaderProps) {
             </div>
         </header>
     );
-}
+}

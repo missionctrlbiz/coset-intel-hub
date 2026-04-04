@@ -15,9 +15,9 @@ export default function LoginPage() {
     async function handleSubmit(formData: FormData) {
         setIsLoading(true);
         setError(null);
-        
+
         const result = await login(formData);
-        
+
         if (result?.error) {
             setError(result.error);
             setIsLoading(false);
@@ -28,13 +28,13 @@ export default function LoginPage() {
         <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-hero-radial p-4">
             <div className="absolute inset-0 bg-grid-fade bg-grid opacity-30" />
             <div className="absolute inset-0 bg-gradient-to-br from-ink/90 via-ink/80 to-teal/40" />
-            
+
             <div className="absolute inset-0">
-                <Image 
-                    src="/coset-eye-banner.jpg" 
-                    alt="Background" 
-                    fill 
-                    priority 
+                <Image
+                    src="/coset-eye-banner.jpg"
+                    alt="Background"
+                    fill
+                    priority
                     className="object-cover opacity-[0.12] mix-blend-screen"
                 />
             </div>
@@ -43,20 +43,20 @@ export default function LoginPage() {
                 <div className="relative w-full max-w-lg">
                     <div className="mb-10 text-center">
                         <Link href="/" className="mb-12 inline-block">
-                             <Image 
-                                src="/logo.png" 
-                                alt="CoSET" 
-                                width={512} 
-                                height={256} 
-                                className="mx-auto w-[160px] invert grayscale brightness-200" 
-                             />
+                            <Image
+                                src="/logo.png"
+                                alt="CoSET"
+                                width={512}
+                                height={256}
+                                className="mx-auto w-[160px] invert grayscale brightness-200"
+                            />
                         </Link>
                         <p className="mt-8 text-xs font-bold uppercase tracking-[0.4em] text-ember">Intelligence Hub Authority</p>
                         <h1 className="mt-4 font-display text-4xl font-extrabold tracking-[-0.04em] text-white">Administrator Portal</h1>
                         <p className="mt-4 text-white/55">Enter your executive credentials to manage socio-ecological signals.</p>
                     </div>
 
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
@@ -100,7 +100,7 @@ export default function LoginPage() {
 
                                 <AnimatePresence>
                                     {error && (
-                                        <motion.div 
+                                        <motion.div
                                             initial={{ opacity: 0, height: 0 }}
                                             animate={{ opacity: 1, height: 'auto' }}
                                             exit={{ opacity: 0, height: 0 }}
@@ -140,7 +140,7 @@ export default function LoginPage() {
                     </motion.div>
 
                     <div className="mt-12 grid gap-4 sm:grid-cols-2">
-                         <div className="rounded-2xl border border-white/5 bg-white/5 p-4 backdrop-blur-sm">
+                        <div className="rounded-2xl border border-white/5 bg-white/5 p-4 backdrop-blur-sm">
                             <div className="flex items-center gap-3">
                                 <div className="rounded-lg bg-teal/20 p-2 text-teal-400">
                                     <Fingerprint className="h-4 w-4" />
@@ -148,16 +148,16 @@ export default function LoginPage() {
                                 <p className="text-xs font-bold uppercase tracking-[0.1em] text-white/70">Role-Based Access</p>
                             </div>
                             <p className="mt-3 text-xs leading-5 text-white/40">Only editor and admin roles can manage hub content through the administrative desk.</p>
-                         </div>
-                         <div className="rounded-2xl border border-white/5 bg-white/5 p-4 backdrop-blur-sm">
+                        </div>
+                        <div className="rounded-2xl border border-white/5 bg-white/5 p-4 backdrop-blur-sm">
                             <div className="flex items-center gap-3">
                                 <div className="rounded-lg bg-ember/20 p-2 text-ember-400">
                                     <Sparkles className="h-4 w-4" />
                                 </div>
-                                <p className="text-xs font-bold uppercase tracking-[0.1em] text-white/70">AI Policy</p>
+                                <p className="text-xs font-bold uppercase tracking-[0.1em] text-white/70">Editorial Policy</p>
                             </div>
-                            <p className="mt-3 text-xs leading-5 text-white/40">AI-generated content must be manually reviewed and approved by staff before publication.</p>
-                         </div>
+                            <p className="mt-3 text-xs leading-5 text-white/40">Generated draft content must be manually reviewed and approved by staff before publication.</p>
+                        </div>
                     </div>
                 </div>
             </SectionWrapper>

@@ -1,8 +1,11 @@
-import { Lexend } from 'next/font/google';
 import localFont from 'next/font/local';
 
-export const cosetSans = Lexend({
-    subsets: ['latin'],
+export const cosetSans = localFont({
+    src: [
+        { path: '../public/fonts/mtn-brighter-sans-regular.otf', weight: '400', style: 'normal' },
+        { path: '../public/fonts/mtn-brighter-sans-medium.otf', weight: '500', style: 'normal' },
+        { path: '../public/fonts/mtn-brighter-sans-bold.otf', weight: '700', style: 'normal' },
+    ],
     variable: '--font-coset-sans',
     display: 'swap',
 });

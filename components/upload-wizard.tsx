@@ -36,13 +36,28 @@ export function UploadWizard() {
         return true;
     }, [selectedFile, step, summary, title, isExtracting]);
 
+    async function readApiResponse<T extends Record<string, unknown>>(response: Response): Promise<T | null> {
+        const contentType = response.headers.get('content-type') ?? '';
+        const responseText = await response.text();
+
+        if (!responseText.trim()) {
+            return null;
+        }
+
+        if (contentType.includes('application/json')) {
+            return JSON.parse(responseText) as T;
+        }
+
+        return null;
+    }
+
     async function extractMetadata(file: File) {
         setIsExtracting(true);
         setExtractionError(null);
         try {
             const formData = new FormData();
             formData.append('file', file);
-            // We tell the server not to persist yet, just return the extraction
+            // Request metadata extraction without persisting the draft yet.
             formData.append('previewOnly', 'true');
 
             const response = await fetch('/api/extract-from-file', {
@@ -50,7 +65,28 @@ export function UploadWizard() {
                 body: formData,
             });
 
-            const data = await response.json();
+            const data = await readApiResponse<{
+                aiDraft?: {
+                    title?: string;
+                    summary?: string;
+                    category?: string[];
+                    tags?: string[];
+                };
+                aiError?: string;
+                error?: string;
+            }>(response);
+
+            if (!response.ok) {
+                setExtractionError(data?.error ?? 'We could not extract document details right now. You can still continue and enter them manually.');
+                setStep(1);
+                return;
+            }
+
+            if (!data) {
+                setExtractionError('We could not read the extraction response. You can still continue and enter the details manually.');
+                setStep(1);
+                return;
+            }
 
             if (data.aiDraft) {
                 if (data.aiDraft.title) setTitle(data.aiDraft.title);
@@ -62,7 +98,7 @@ export function UploadWizard() {
             if (data.aiError) {
                 setExtractionError(data.aiError);
             }
-            
+
             setStep(1);
         } catch (error) {
             setExtractionError('Failed to parse document for metadata extraction.');
@@ -98,26 +134,34 @@ export function UploadWizard() {
                     method: 'POST',
                 });
 
-                const payload = (await response.json()) as {
+                const payload = await readApiResponse<{
                     error?: string;
                     message?: string;
                     report?: { slug: string };
-                };
+                }>(response);
 
                 if (!response.ok) {
-                    setResult({ tone: 'error', message: payload.error ?? 'The draft could not be saved.' });
+                    setResult({ tone: 'error', message: payload?.error ?? 'We could not create the draft right now. Please try again.' });
+                    return;
+                }
+
+                if (!payload) {
+                    setResult({
+                        tone: 'error',
+                        message: 'We received an unexpected response while creating the draft. Please refresh the page and try again.',
+                    });
                     return;
                 }
 
                 setResult({
                     tone: 'success',
-                    message: payload.message ?? 'Draft report saved to the database and queued for editorial review.',
+                    message: payload.message ?? 'Draft created successfully and ready for review.',
                     reportSlug: payload.report?.slug,
                 });
             } catch (error) {
                 setResult({
                     tone: 'error',
-                    message: error instanceof Error ? error.message : 'Unexpected upload error.',
+                    message: 'We could not create the draft right now. Please try again.',
                 });
             }
         });
@@ -210,6 +254,12 @@ export function UploadWizard() {
                         </div>
                     ) : null}
 
+                    {extractionError ? (
+                        <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-900">
+                            <p>{extractionError}</p>
+                        </div>
+                    ) : null}
+
                     <div className="mt-8 flex items-center justify-between gap-4">
                         <button
                             type="button"
@@ -243,15 +293,27 @@ export function UploadWizard() {
                     </div>
 
                     <div className="rounded-[2rem] border border-line bg-panel p-6 shadow-soft">
-                        <p className="mb-4 font-display text-lg font-bold text-navy">Featured Image</p>
-                        <div className="flex aspect-[4/3] items-center justify-center rounded-[1.5rem] border border-dashed border-line bg-mist text-muted">
+                        <div className="mb-4 flex items-start justify-between gap-3">
+                            <div>
+                                <p className="font-display text-lg font-bold text-navy">Featured Image</p>
+                                <p className="mt-1 text-sm text-muted">Optional. Draft uploads can be created without a cover image.</p>
+                            </div>
+                            <span className="rounded-full bg-mist px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-muted">
+                                Optional
+                            </span>
+                        </div>
+                        <div className="flex aspect-[4/3] flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-line bg-mist px-5 text-center text-muted">
                             <ImagePlus className="h-8 w-8" />
+                            <p className="mt-4 text-sm font-medium text-navy">No cover image selected in this step</p>
+                            <p className="mt-2 max-w-xs text-xs leading-6 text-muted">
+                                The report will use a default image until an editor adds a featured asset later in the content workflow.
+                            </p>
                         </div>
                     </div>
 
                     <div className="rounded-[2rem] bg-ink p-6 text-white shadow-editorial">
                         <p className="mb-2 font-display text-lg font-bold">Publish Flow</p>
-                        <p className="mb-5 text-sm text-white/70">Prepared for AI-assisted extraction, metadata population, and review approval. Drafts are saved to Supabase when you finish step three.</p>
+                        <p className="mb-5 text-sm text-white/70">Prepared for document extraction, metadata population, and review approval. Drafts are created when you finish step three.</p>
                         <button type="button" disabled className="w-full rounded-xl bg-ember px-4 py-3 font-semibold text-white/90 opacity-70">
                             Publish Report
                         </button>
@@ -360,7 +422,7 @@ function ReviewStep({ title, summary, categories, tags, selectedFile }: { title:
             <div className="rounded-[2rem] border border-line bg-mist p-6">
                 <div className="mb-5 flex items-center gap-3 text-teal">
                     <CheckCircle2 className="h-5 w-5" />
-                    <p className="font-semibold">Metadata validated. The AI pipeline can now generate HTML content and autofill structured fields.</p>
+                    <p className="font-semibold">Metadata validated. The processing flow can now generate draft content and autofill structured fields.</p>
                 </div>
                 <div className="space-y-5">
                     <div>
