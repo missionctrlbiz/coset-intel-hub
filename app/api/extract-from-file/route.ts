@@ -100,6 +100,7 @@ export async function POST(request: Request) {
         const summaryInput = String(formData.get('summary') ?? '').trim();
         const categoriesInput = formData.getAll('categories').map(String);
         const tagsInput = formData.getAll('tags').map(String);
+        const previewOnly = formData.get('previewOnly') === 'true';
         const textPreview = canExtractText(file) ? (await file.text()).trim().slice(0, 12000) : '';
 
         let aiDraft = null;
@@ -115,6 +116,15 @@ export async function POST(request: Request) {
             } catch (error) {
                 aiError = error instanceof Error ? error.message : 'Unknown GenAI error.';
             }
+        }
+
+        if (previewOnly) {
+            return NextResponse.json({
+                success: true,
+                message: 'Extraction completed for preview.',
+                aiDraft,
+                aiError,
+            });
         }
 
         const categories = uniqueStrings([...categoriesInput, ...(aiDraft?.category ?? [])], 3);

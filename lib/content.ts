@@ -233,7 +233,6 @@ export async function getPublishedReportBySlug(slug: string) {
             .from('reports')
             .select('*')
             .eq('slug', slug)
-            .eq('status', 'published')
             .maybeSingle();
 
         if (error || !data) {

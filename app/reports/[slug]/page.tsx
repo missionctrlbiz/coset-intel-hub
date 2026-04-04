@@ -78,29 +78,28 @@ export default async function ReportDetailPage({ params }: { params: { slug: str
                                 ))}
                             </div>
                         </div>
-                    </SectionReveal>
+                    </SectionReveal>                    <SectionReveal className="space-y-10">
+                        <div className="text-xl font-medium leading-relaxed text-ink/80">
+                            {report.description}
+                        </div>
 
-                    <SectionReveal className="space-y-10">
-                        <p className="text-lg leading-9 text-muted">
-                            This comprehensive assessment evaluates the intersection of escalating climatic patterns and the socio-economic resilience of communities across nine states in Nigeria’s southern region. As global temperatures fluctuate, the localized impact on traditional livelihoods, fisheries, agriculture, and artisanal trade has reached a critical inflection point.
-                        </p>
-
-                        <article className="prose prose-lg max-w-none rounded-[2rem] border border-line bg-panel p-8 shadow-soft">
+                        <article className="prose prose-slate prose-lg max-w-none rounded-[2rem] border border-line bg-panel p-8 shadow-editorial dark:prose-invert">
                             <h2>Executive Findings</h2>
-                            <p>
-                                Our research indicates that the multi-modal stress factors are no longer seasonal anomalies. Instead, they have become systemic components of the regional ecological identity. The data, compiled over a 36-month observational period, reveals a significant decoupling between traditional ecological knowledge and the current environmental reality.
-                            </p>
-                            <blockquote>{report.quote}</blockquote>
-                            <h3>Regional Stress Mapping</h3>
-                            <div className="not-prose overflow-hidden rounded-[1.5rem] border border-line bg-mist">
-                                <div className="relative aspect-[16/10]">
-                                    <Image src={report.image} alt="Regional mapping" fill className="object-cover" />
-                                </div>
-                            </div>
-                            <h3>Quantitative Analysis</h3>
-                            <p>
-                                Transitioning from qualitative observation to hard-metric evaluation, our team utilized the CoSET proprietary modelling engine to project the next decade of displacement, ecosystem stress, and governance response effectiveness.
-                            </p>
+                            <div dangerouslySetInnerHTML={{ __html: report.html_content || '' }} />
+                            {!report.html_content && (
+                                <>
+                                    <p>
+                                        Our research indicates that the multi-modal stress factors are no longer seasonal anomalies. Instead, they have become systemic components of the regional ecological identity. The data, compiled over a 36-month observational period, reveals a significant decoupling between traditional ecological knowledge and the current environmental reality.
+                                    </p>
+                                    <blockquote>{report.quote}</blockquote>
+                                    <h3>Regional Stress Mapping</h3>
+                                    <div className="not-prose overflow-hidden rounded-[1.5rem] border border-line bg-mist">
+                                        <div className="relative aspect-[16/10]">
+                                            <Image src={report.image} alt="Regional mapping" fill className="object-cover" />
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </article>
 
                         <div className="grid gap-4 md:grid-cols-2">

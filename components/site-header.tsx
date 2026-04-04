@@ -1,15 +1,19 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Bell, Search } from 'lucide-react';
+import { Bell, LogOut, Search, User } from 'lucide-react';
 
 import { ThemeToggle } from '@/components/theme-toggle';
+import { createSupabaseServerClient as createClient } from '@/lib/supabase/clients';
 import { cn } from '@/lib/utils';
 
 type SiteHeaderProps = {
     dark?: boolean;
 };
 
-export function SiteHeader({ dark = false }: SiteHeaderProps) {
+export async function SiteHeader({ dark = false }: SiteHeaderProps) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
     return (
         <header
             className={cn(
@@ -43,17 +47,33 @@ export function SiteHeader({ dark = false }: SiteHeaderProps) {
                             placeholder="Search intelligence..."
                         />
                     </div>
-                    <button
-                        type="button"
-                        aria-label="View notifications"
-                        title="View notifications"
-                        className={cn('rounded-full p-2 transition', dark ? 'hover:bg-white/10' : 'hover:bg-mist')}
-                    >
-                        <Bell className="h-4 w-4" />
-                    </button>
+                    
+                    {user ? (
+                        <div className="flex items-center gap-3">
+                            <div className={cn('hidden items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold md:flex', dark ? 'border-white/10 bg-white/5 text-white/70' : 'border-line bg-mist text-muted')}>
+                                <User className="h-3 w-3" />
+                                {user.email?.split('@')[0]}
+                            </div>
+                            <Link 
+                                href="/login" 
+                                className={cn('rounded-full p-2 transition', dark ? 'hover:bg-white/10' : 'hover:bg-mist')}
+                                title="Admin Desk"
+                            >
+                                <Bell className="h-4 w-4" />
+                            </Link>
+                        </div>
+                    ) : (
+                        <Link 
+                            href="/login" 
+                            className="rounded-full bg-ember px-5 py-2.5 text-sm font-bold text-white shadow-soft transition hover:brightness-110"
+                        >
+                            Sign In
+                        </Link>
+                    )}
+
                     <ThemeToggle darkSurface={dark} />
                 </div>
             </div>
         </header>
     );
-}
+}

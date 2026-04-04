@@ -33,7 +33,12 @@ export async function generateExtractionDraft(input: { fileName: string; fileTyp
 
     const response = await client.models.generateContent({
         model: defaultModel,
-        contents: `You are CoSET's report extraction assistant.
+        contents: [
+            {
+                role: 'user',
+                parts: [
+                    {
+                        text: `You are CoSET's report extraction assistant.
 Analyze the uploaded file excerpt and return JSON only.
 
 Required JSON shape:
@@ -55,6 +60,10 @@ File name: ${input.fileName}
 File type: ${input.fileType || 'unknown'}
 Excerpt:
 ${input.excerpt.slice(0, 12000)}`,
+                    },
+                ],
+            },
+        ],
     });
 
     const rawText = response.text?.trim();
@@ -63,10 +72,15 @@ ${input.excerpt.slice(0, 12000)}`,
         return null;
     }
 
-    const parsed = JSON.parse(normalizeJsonResponse(rawText)) as ExtractionDraft;
+    try {
+        const parsed = JSON.parse(normalizeJsonResponse(rawText)) as ExtractionDraft;
 
-    return {
-        ...parsed,
-        model: defaultModel,
-    };
+        return {
+            ...parsed,
+            model: defaultModel,
+        };
+    } catch (error) {
+        console.error('Failed to parse GenAI response:', error);
+        return null;
+    }
 }

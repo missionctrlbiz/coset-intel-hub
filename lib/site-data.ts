@@ -14,6 +14,7 @@ export type Report = {
     highlight: string[];
     quote: string;
     metrics: { label: string; value: string; note: string }[];
+    html_content?: string | null;
 };
 
 export const reports: Report[] = [

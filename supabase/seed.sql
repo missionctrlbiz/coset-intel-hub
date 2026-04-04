@@ -207,7 +207,7 @@ values
         jsonb_build_object(
             'title', 'Socio-Ecological Impact of Climate Volatility in the Niger Delta',
             'summary', 'Seeded AI draft metadata for local development.',
-            'categories', jsonb_build_array('Regional Analysis', 'Climate Resilience'),
+            'category', jsonb_build_array('Regional Analysis', 'Climate Resilience'),
             'tags', jsonb_build_array('Niger Delta', 'Policy Brief', 'Biodiversity', 'Hydro-met')
         ),
         'completed'

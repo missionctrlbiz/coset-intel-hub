@@ -27,12 +27,50 @@ export function UploadWizard() {
     const [result, setResult] = useState<{ tone: 'error' | 'success'; message: string; reportSlug?: string } | null>(null);
     const [isPending, startTransition] = useTransition();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isExtracting, setIsExtracting] = useState(false);
+    const [extractionError, setExtractionError] = useState<string | null>(null);
 
     const canAdvance = useMemo(() => {
-        if (step === 0) return selectedFile !== null;
+        if (step === 0) return selectedFile !== null && !isExtracting;
         if (step === 1) return title.trim().length > 0 && summary.trim().length > 0;
         return true;
-    }, [selectedFile, step, summary, title]);
+    }, [selectedFile, step, summary, title, isExtracting]);
+
+    async function extractMetadata(file: File) {
+        setIsExtracting(true);
+        setExtractionError(null);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            // We tell the server not to persist yet, just return the extraction
+            formData.append('previewOnly', 'true');
+
+            const response = await fetch('/api/extract-from-file', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const data = await response.json();
+
+            if (data.aiDraft) {
+                if (data.aiDraft.title) setTitle(data.aiDraft.title);
+                if (data.aiDraft.summary) setSummary(data.aiDraft.summary);
+                if (data.aiDraft.category) setCategories(data.aiDraft.category);
+                if (data.aiDraft.tags) setTags(data.aiDraft.tags);
+            }
+
+            if (data.aiError) {
+                setExtractionError(data.aiError);
+            }
+            
+            setStep(1);
+        } catch (error) {
+            setExtractionError('Failed to parse document for metadata extraction.');
+            setStep(1);
+        } finally {
+            setIsExtracting(false);
+        }
+    }
 
     function handleFileSelection(file: File | null) {
         setSelectedFile(file);
@@ -86,6 +124,11 @@ export function UploadWizard() {
     }
 
     function handleAdvance() {
+        if (step === 0 && selectedFile) {
+            extractMetadata(selectedFile);
+            return;
+        }
+
         if (step < 2) {
             setStep((current) => Math.min(current + 1, 2));
             return;
@@ -182,7 +225,7 @@ export function UploadWizard() {
                             onClick={handleAdvance}
                             className="rounded-full bg-ember px-6 py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
                         >
-                            {step === 2 ? (isPending ? 'Saving Draft...' : 'Create Draft') : 'Continue'}
+                            {step === 0 && isExtracting ? 'Extracting...' : step === 2 ? (isPending ? 'Saving Draft...' : 'Create Draft') : 'Continue'}
                         </button>
                     </div>
                 </div>
