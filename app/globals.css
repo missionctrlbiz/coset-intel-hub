@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --color-ink: 8 26 51;
+  --color-navy: 11 47 82;
+  --color-teal: 14 107 107;
+  --color-ember: 242 140 40;
+  --color-mist: 245 247 251;
+  --color-sand: 247 243 235;
+  --color-line: 219 227 238;
+  --color-muted: 94 107 125;
+  --color-panel: 255 255 255;
+  --color-panel-alt: 241 245 249;
+  --body-start: 252 253 255;
+  --body-end: 245 247 251;
+}
+
+html.dark {
+  color-scheme: dark;
+  --color-ink: 236 242 248;
+  --color-navy: 169 208 244;
+  --color-teal: 111 207 194;
+  --color-ember: 255 170 86;
+  --color-mist: 23 31 45;
+  --color-sand: 33 42 57;
+  --color-line: 59 75 99;
+  --color-muted: 160 173 190;
+  --color-panel: 10 20 33;
+  --color-panel-alt: 17 27 41;
+  --body-start: 3 10 22;
+  --body-end: 8 16 29;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgb(var(--color-ember) / 0.12), transparent 25%),
+    radial-gradient(circle at 85% 10%, rgb(var(--color-teal) / 0.1), transparent 22%),
+    linear-gradient(180deg, rgb(var(--body-start)) 0%, rgb(var(--body-end)) 100%);
+  color: rgb(var(--color-ink));
+}
+
+body,
+header,
+footer,
+aside,
+article,
+section,
+button,
+input,
+textarea,
+select {
+  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+::selection {
+  background: rgb(var(--color-ember) / 0.24);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgb(var(--color-muted) / 0.72);
+}
+
+.prose {
+  --tw-prose-body: rgb(var(--color-muted));
+  --tw-prose-headings: rgb(var(--color-ink));
+  --tw-prose-links: rgb(var(--color-teal));
+  --tw-prose-bold: rgb(var(--color-ink));
+  --tw-prose-quotes: rgb(var(--color-navy));
+  --tw-prose-quote-borders: rgb(var(--color-ember));
+  --tw-prose-bullets: rgb(var(--color-teal));
+  --tw-prose-counters: rgb(var(--color-muted));
+  --tw-prose-captions: rgb(var(--color-muted));
+  --tw-prose-hr: rgb(var(--color-line));
+  --tw-prose-th-borders: rgb(var(--color-line));
+  --tw-prose-td-borders: rgb(var(--color-line));
+}
+
+.prose h2,
+.prose h3,
+.prose h4 {
+  font-family: var(--font-coset-sans), sans-serif;
+  letter-spacing: -0.03em;
+}

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CoSET Intelligence Hub</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&amp;family=Manrope:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed": "#d3e4ff",
+                        "on-primary-fixed": "#001c38",
+                        "on-primary-container": "#7a97c0",
+                        "tertiary-fixed-dim": "#9ad77e",
+                        "secondary-fixed": "#ffdbcf",
+                        "secondary": "#a83900",
+                        "tertiary": "#051f00",
+                        "surface-container-lowest": "#ffffff",
+                        "primary": "#001a34",
+                        "error-container": "#ffdad6",
+                        "surface-dim": "#dadadc",
+                        "primary-container": "#0b2f52",
+                        "secondary-container": "#ff692a",
+                        "on-tertiary-fixed-variant": "#1c5207",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#b5f397",
+                        "on-tertiary-fixed": "#052100",
+                        "on-secondary-fixed-variant": "#802900",
+                        "tertiary-container": "#0c3600",
+                        "surface-variant": "#e2e2e5",
+                        "surface-container": "#eeeef0",
+                        "surface": "#f9f9fc",
+                        "surface-tint": "#426086",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#43474e",
+                        "on-background": "#1a1c1e",
+                        "background": "#f9f9fc",
+                        "on-secondary": "#ffffff",
+                        "surface-bright": "#f9f9fc",
+                        "inverse-on-surface": "#f0f0f3",
+                        "on-error": "#ffffff",
+                        "on-tertiary-container": "#6aa451",
+                        "secondary-fixed-dim": "#ffb59a",
+                        "on-primary": "#ffffff",
+                        "on-surface": "#1a1c1e",
+                        "surface-container-low": "#f3f3f6",
+                        "surface-container-highest": "#e2e2e5",
+                        "outline-variant": "#c3c6cf",
+                        "inverse-primary": "#aac9f4",
+                        "error": "#ba1a1a",
+                        "surface-container-high": "#e8e8ea",
+                        "primary-fixed-dim": "#aac9f4",
+                        "on-primary-fixed-variant": "#29486d",
+                        "outline": "#73777f",
+                        "on-secondary-container": "#5b1b00",
+                        "inverse-surface": "#2f3133",
+                        "on-secondary-fixed": "#380d00"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Lexend"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Manrope', sans-serif; }
+        h1, h2, h3, .font-lexend { font-family: 'Lexend', sans-serif; }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 glass-nav shadow-sm h-16 flex justify-between items-center px-8 font-lexend tracking-tight">
+<div class="text-2xl font-bold text-cyan-950">CoSET Intelligence Hub</div>
+<nav class="hidden md:flex gap-8 items-center">
+<a class="text-cyan-700 font-semibold border-b-2 border-orange-600 transition-all" href="#">Reports</a>
+<a class="text-slate-600 hover:text-cyan-800 transition-all" href="#">Datasets</a>
+<a class="text-slate-600 hover:text-cyan-800 transition-all" href="#">Insights</a>
+</nav>
+<div class="flex items-center gap-4">
+<div class="hidden lg:flex items-center bg-slate-100/50 rounded-full px-4 py-1.5 gap-2 group focus-within:bg-white focus-within:shadow-sm transition-all border border-transparent focus-within:border-outline-variant/15">
+<span class="material-symbols-outlined text-slate-400 text-sm">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-48 text-on-surface placeholder:text-slate-400" placeholder="Search Intelligence..." type="text"/>
+</div>
+<button class="p-2 rounded-full hover:bg-slate-100/50 transition-all">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+</button>
+<button class="p-2 rounded-full hover:bg-slate-100/50 transition-all">
+<span class="material-symbols-outlined text-on-surface-variant">settings</span>
+</button>
+<img alt="Researcher Profile" class="w-8 h-8 rounded-full object-cover" data-alt="portrait of a professional researcher in a modern office with soft natural lighting and warm tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0iPkUMi84O4KFQqfm8I10IITb2AAwHNKyAkNXnlcq9rFCYIg23HYWY1qaUMAFuEfBJuB9FNDosHJ0Y6Hqikz4O3DRk7weoiDhVoCTgKqP5IMUmlhoESvK7SXQlN5r37FnFPl-c7UKA2-mVoQ-ttJC_iHAR9pzdicS6r3ey2e6MgTuITYLRsLWTrq4KrTNv4VZ44BlVzC3iT75q0joxF3b8SIhSOlJlui6kL2O8J_KRl3-YcJr-VUB0SLTHPyGLrzshgewqOxe5rar"/>
+</div>
+</header>
+<div class="flex pt-16 min-h-screen">
+<!-- SideNavBar (Filter Shell) -->
+<aside class="hidden lg:flex flex-col w-64 fixed left-0 p-4 gap-2 bg-slate-50 h-[calc(100vh-4rem)] rounded-r-2xl font-lexend text-sm">
+<div class="px-2 py-4 mb-2">
+<div class="font-black text-cyan-900 flex items-center gap-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">analytics</span>
+                    Research Filters
+                </div>
+<div class="text-[10px] text-slate-500 uppercase tracking-widest mt-1">Socio-Ecological Data</div>
+</div>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 bg-white text-cyan-900 shadow-sm rounded-xl transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined text-orange-700">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-200/50 rounded-xl transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">public</span>
+<span>Global Trends</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-200/50 rounded-xl transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">map</span>
+<span>Regional Analysis</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-200/50 rounded-xl transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">description</span>
+<span>Policy Briefs</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-200/50 rounded-xl transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span>Archives</span>
+</a>
+</div>
+<div class="mt-auto space-y-4">
+<button class="w-full bg-secondary text-on-secondary py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-sm hover:opacity-90 transition-all">
+<span class="material-symbols-outlined">download</span>
+                    Export Data
+                </button>
+<div class="border-t border-slate-200 pt-4">
+<a class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:text-orange-600 transition-colors" href="#">
+<span class="material-symbols-outlined">help_outline</span>
+<span>Help Center</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 lg:ml-64 bg-background px-8 py-12">
+<!-- Hero Section -->
+<section class="mb-16 relative">
+<div class="max-w-4xl">
+<h1 class="text-6xl font-extrabold text-primary tracking-tight leading-tight mb-6">
+                        The Future of <span class="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-orange-400">Socio-Ecological</span> Intelligence.
+                    </h1>
+<p class="text-lg text-on-surface-variant max-w-2xl mb-10 leading-relaxed">
+                        Curated insights and high-fidelity data designed for global policy makers, environmental researchers, and change-makers.
+                    </p>
+<div class="relative max-w-2xl group">
+<div class="absolute inset-y-0 left-6 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-slate-400">search</span>
+</div>
+<input class="w-full pl-16 pr-32 py-5 rounded-full bg-surface-container-high border-none focus:ring-4 focus:ring-primary-fixed/30 transition-all text-lg shadow-sm" placeholder="Explore reports, datasets, and policy briefs..." type="text"/>
+<button class="absolute right-3 top-2.5 bottom-2.5 px-8 bg-primary text-on-primary rounded-full font-bold hover:scale-[0.98] transition-transform">
+                            Search
+                        </button>
+</div>
+</div>
+<!-- Floating Decorative Element -->
+<div class="absolute top-0 right-0 -z-10 w-96 h-96 opacity-10 blur-3xl rounded-full bg-secondary-container"></div>
+</section>
+<!-- Impact Metrics (Bento Style) -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
+<div class="bg-surface-container-low p-8 rounded-full flex flex-col items-center justify-center text-center group hover:bg-surface-bright transition-all">
+<div class="text-5xl font-extrabold text-primary mb-2">1,248</div>
+<div class="text-sm font-semibold uppercase tracking-widest text-slate-500">Reports Published</div>
+<div class="mt-4 flex items-center gap-1 text-tertiary-container bg-tertiary-fixed px-3 py-1 rounded-full text-xs font-bold">
+<span class="material-symbols-outlined text-xs">trending_up</span> +12% YoY
+                    </div>
+</div>
+<div class="bg-primary p-8 rounded-full flex flex-col items-center justify-center text-center text-on-primary">
+<div class="text-5xl font-extrabold mb-2">45k+</div>
+<div class="text-sm font-semibold uppercase tracking-widest opacity-70">Active Contributors</div>
+<div class="mt-4 flex -space-x-2">
+<img alt="Avatar" class="w-8 h-8 rounded-full border-2 border-primary object-cover" data-alt="professional user avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoSErKMGgUiY_rS_fc1cP0ZK8nlytk2M56lOxV3D32wYIMYY6zcqItnK4v2OoXznNTrtecs81QYT5YfrMPOSQSAkUbQ3qxboHJmeUx2G136x9Elo7iVmtw12Hllqraq0sXes_5e9_yhVxo6jfg_mgn7OqmX0OPdU1IAefoafnKLrZ3WsHnj8emNkSARdMBKb5XYtIyvn4rNvBAmLVQzXmjxwTU-IpnvbMDPthsMFmeIYwsrP-oPS_PaiLIejBAgA15DnaYJI_grDo1"/>
+<img alt="Avatar" class="w-8 h-8 rounded-full border-2 border-primary object-cover" data-alt="professional user avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvcir1AgQev06hnG9rwPNHaNxJ5YLr2bGWSJZOFkHN_43MewzjdY9Sd_Pb_HEiInyIqwEtavAUAgTnryNB2CwF1YMeVdmaWkK16xcgmD_8Oh3PjYljafjvGXiiacR1qoYaizDDT0pVYhIFtoXf4lfrYt74gHE-ljd5vOfjtlNb7kGw5ZbrZgeCQRLGLPr0j59wXcO2u6xUEvqniMNEbff-M_8oVVGleYnAFK7-xpv1R6Q10tXtrNl4kQ-faODSBwxYb2QC_JcqBDg_"/>
+<img alt="Avatar" class="w-8 h-8 rounded-full border-2 border-primary object-cover" data-alt="professional user avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQ9zxdh7bZPwW_PnEHjnsbN6BlvR_I53xgBIxceFpWvUAuBMwPBq3vN3fwnUk4NrwrOvxvE-KkAAPfiBsPs3f4nSYcJGKLuTSzKHsjHwULuEsaiipQLwy25A_8_zkq8klK7Iujr11WoCpR1BIipYS51B58TNg6VUvpX1Oo6tN6RiR4rUDN0dJUaNDwUMh_slcW8jxWkgxiouclyS4SEl71uCEDKqKuv607U14kOoonqUeJV3QuRl712btMm-NgkOh64DWvbPQy31tT"/>
+</div>
+</div>
+<div class="bg-surface-container-low p-8 rounded-full flex flex-col items-center justify-center text-center group hover:bg-surface-bright transition-all">
+<div class="text-5xl font-extrabold text-primary mb-2">182</div>
+<div class="text-sm font-semibold uppercase tracking-widest text-slate-500">Communities Reached</div>
+<div class="mt-4 text-secondary font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">public</span> Global Coverage
+                    </div>
+</div>
+</section>
+<!-- Featured Reports Carousel -->
+<section class="mb-20 overflow-hidden">
+<div class="flex justify-between items-end mb-8 px-2">
+<div>
+<h2 class="text-3xl font-bold text-primary">Featured Intelligence</h2>
+<p class="text-slate-500 mt-1">Our most impactful research for Q4 2024</p>
+</div>
+<div class="flex gap-2">
+<button class="p-3 bg-white shadow-sm rounded-full hover:bg-slate-50 transition-colors">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="p-3 bg-white shadow-sm rounded-full hover:bg-slate-50 transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="flex gap-8 pb-4">
+<div class="min-w-[420px] bg-surface-container-lowest rounded-full overflow-hidden group hover:bg-surface-bright transition-all">
+<div class="relative h-64 overflow-hidden">
+<img alt="Alpine Research" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="majestic mountain peak with clean blue sky and sharp landscape details" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjSxtXPsJ8bZdQXh_7vTB9_I9n1Bid6346jnZqctLPDCi01xZXAjQl1H74_ru80iGtt2iPQB6dB2HS3YOVL8BrBGz4MbKJZWMYD4fZyptYxnZXHxrq0pKziWHGQAGBWUeDy8iclXgDkZnv78jMyxMuDT9yQbFRxEzio649BsDmXIKMYUgeGtwH5czQb7ufVqP5jrmRCPElQwDoroxpf6V3URPruAgCux0w5P15XVVbSRiU_-wkmnaZp6Px88Vfk_psTE-OheCI7aOZ"/>
+<div class="absolute top-4 left-6 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-cyan-900">Climate Resilience</div>
+</div>
+<div class="p-8">
+<h3 class="text-xl font-bold text-cyan-950 mb-3">Alpine Ecosystems &amp; Trans-Border Policy</h3>
+<p class="text-sm text-slate-600 line-clamp-2">Exploring the shifting biodiversity of high-altitude corridors and its legislative implications for 2025.</p>
+<div class="mt-6 flex items-center justify-between">
+<span class="text-xs text-slate-400 font-medium">8 min read • Dec 12</span>
+<a class="text-secondary font-bold text-sm flex items-center gap-1 hover:gap-2 transition-all" href="#">Read Full Report <span class="material-symbols-outlined text-sm">arrow_forward</span></a>
+</div>
+</div>
+</div>
+<div class="min-w-[420px] bg-surface-container-lowest rounded-full overflow-hidden group hover:bg-surface-bright transition-all">
+<div class="relative h-64 overflow-hidden">
+<img alt="Marine Data" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="ocean waves crashing against rocky shoreline at dusk with deep teal and blue tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4V7SOJ3JIdiDcuGvl0R1Psobwe3Am-E1LOCSQYyj3O0UArz3WBJ10G6PF2N1UDPS2wW8g5flZNh1sCZEAl23lqLgbu-uVyMGWGFliU0vdx6NO8SH6eQonfuaeMkSNZ9P8vDMEP3V3NZjPxhyGGjhGJYZ6AtDyfNShNa2OtOEMvyJHhtVTBLvDJH7am2CYtRPc27h7R7f_eGz4IL6BtB9GRV0ce0zJgNeZntwDxp12d-9Rru0LqU8-YzHK3XVJk99dGttfKxTEc0xB"/>
+<div class="absolute top-4 left-6 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-cyan-900">Blue Economy</div>
+</div>
+<div class="p-8">
+<h3 class="text-xl font-bold text-cyan-950 mb-3">Sustainable Coastal Governance Models</h3>
+<p class="text-sm text-slate-600 line-clamp-2">A comprehensive dataset on community-led marine protected areas across Southeast Asia and the Pacific.</p>
+<div class="mt-6 flex items-center justify-between">
+<span class="text-xs text-slate-400 font-medium">15 min read • Dec 08</span>
+<a class="text-secondary font-bold text-sm flex items-center gap-1 hover:gap-2 transition-all" href="#">Read Full Report <span class="material-symbols-outlined text-sm">arrow_forward</span></a>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Latest Reports Grid (Editorial Style) -->
+<section class="mb-20">
+<h2 class="text-3xl font-bold text-primary mb-8 px-2">Latest Intelligence</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Card 1 -->
+<article class="bg-surface-container-low rounded-xl p-6 transition-all hover:translate-y-[-4px] hover:shadow-lg hover:bg-white border border-transparent hover:border-outline-variant/15">
+<div class="flex items-center gap-2 mb-4">
+<span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+<span class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Urban Development</span>
+</div>
+<h4 class="text-lg font-bold text-cyan-950 mb-4 leading-tight">Decarbonizing City Logistics: The 2025 Framework</h4>
+<div class="flex items-center justify-between pt-6 border-t border-slate-200">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-cyan-100 flex items-center justify-center text-[10px] font-bold text-cyan-900">DR</div>
+<span class="text-[10px] text-slate-500 font-semibold">Dr. Sarah Reeves</span>
+</div>
+<button class="p-2 rounded-full hover:bg-slate-100"><span class="material-symbols-outlined text-sm">bookmark</span></button>
+</div>
+</article>
+<!-- Card 2 -->
+<article class="bg-surface-container-low rounded-xl p-6 transition-all hover:translate-y-[-4px] hover:shadow-lg hover:bg-white border border-transparent hover:border-outline-variant/15">
+<div class="flex items-center gap-2 mb-4">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim"></span>
+<span class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Equity &amp; Justice</span>
+</div>
+<h4 class="text-lg font-bold text-cyan-950 mb-4 leading-tight">Just Transition: Resource Rights in Mining Communities</h4>
+<div class="flex items-center justify-between pt-6 border-t border-slate-200">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center text-[10px] font-bold text-orange-900">JL</div>
+<span class="text-[10px] text-slate-500 font-semibold">James L. O'Neil</span>
+</div>
+<button class="p-2 rounded-full hover:bg-slate-100"><span class="material-symbols-outlined text-sm">bookmark</span></button>
+</div>
+</article>
+<!-- Card 3 -->
+<article class="bg-surface-container-low rounded-xl p-6 transition-all hover:translate-y-[-4px] hover:shadow-lg hover:bg-white border border-transparent hover:border-outline-variant/15">
+<div class="flex items-center gap-2 mb-4">
+<span class="w-2 h-2 rounded-full bg-primary-fixed"></span>
+<span class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Tech for Good</span>
+</div>
+<h4 class="text-lg font-bold text-cyan-950 mb-4 leading-tight">AI-Driven Reforestation: Successes in the Amazon</h4>
+<div class="flex items-center justify-between pt-6 border-t border-slate-200">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-700">KM</div>
+<span class="text-[10px] text-slate-500 font-semibold">Kimberly Matsu</span>
+</div>
+<button class="p-2 rounded-full hover:bg-slate-100"><span class="material-symbols-outlined text-sm">bookmark</span></button>
+</div>
+</article>
+</div>
+</section>
+<!-- Planet Pulse Blog Feed & Newsletter (Asymmetric) -->
+<section class="grid grid-cols-1 lg:grid-cols-5 gap-12 mb-20 items-start">
+<div class="lg:col-span-3">
+<div class="flex items-center gap-4 mb-8">
+<h2 class="text-3xl font-bold text-primary">Planet Pulse</h2>
+<div class="h-px flex-1 bg-slate-200"></div>
+<a class="text-xs font-bold text-slate-500 hover:text-primary transition-colors" href="#">View All Posts</a>
+</div>
+<div class="space-y-10">
+<div class="flex gap-6 group cursor-pointer">
+<div class="w-32 h-32 flex-shrink-0 rounded-2xl overflow-hidden">
+<img alt="Blog" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="close-up of vibrant green moss on a dark forest floor with dew drops" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWFbquTH15RGsAoBC2A7dTWSF9fPLMFYvCwVvFfF1sNBC_soCu2QXPFVS0sLfHfBEMifXWSygcWef5GAQlTZ2LZlhnhZ1RONVBEyWZwI6xrHB4RFE4FYrpE_MSeJMo6sMAd1cZ3NRPhAgzGYMJChpwLG83Y8i6B4xDpBvzyF9RYze8ycqPgne_z2w_K8BZ_FTMxSm45AzQu537mexPpKd1ESkHL8jxhPjEi7iHtpnSzCB1pJntInx8gulfnxJDNfxA1liYnmI3nK1r"/>
+</div>
+<div>
+<h5 class="text-xl font-bold text-cyan-950 mb-2 group-hover:text-secondary transition-colors">The Micro-Ecology of Suburbia</h5>
+<p class="text-sm text-slate-500 leading-relaxed mb-3">Why backyards are becoming the most critical link in urban biodiversity corridors across the UK.</p>
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Field Notes • Dec 15</span>
+</div>
+</div>
+<div class="flex gap-6 group cursor-pointer">
+<div class="w-32 h-32 flex-shrink-0 rounded-2xl overflow-hidden">
+<img alt="Blog" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="solar panels stretching towards the horizon in a clean desert environment with bright sunlight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC33_KIAULzTVqZvcwuYxfuTmPrrdvfYpBnFHbFhoKLss4pLD7rDjfdNh2Ni1lUOVqrAAb92PqvwkpiBL5ko-jT0mC5AOVbnQ1pgrhfBt89gQ1RWkCA31sNVRT077Pxav4WRC6aXPXAAoeT4vgfxr4adFpaJP05NC0cKPmT-tPMiPSU3eU0PK90abHc7bFfQ60hlQKM1e17DUo8QeiNEhtj10xAyBE407QZgS5QjxX9nY8Q9cmPWRgBYOK69R_4Z1QHF7-bE1lbLTuY"/>
+</div>
+<div>
+<h5 class="text-xl font-bold text-cyan-950 mb-2 group-hover:text-secondary transition-colors">Grid Transformation in the Sahara</h5>
+<p class="text-sm text-slate-500 leading-relaxed mb-3">New data shows unprecedented efficiency gains in trans-continental energy sharing projects.</p>
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Global Energy • Dec 10</span>
+</div>
+</div>
+</div>
+</div>
+<div class="lg:col-span-2 bg-primary rounded-3xl p-10 text-on-primary relative overflow-hidden">
+<div class="relative z-10">
+<h2 class="text-3xl font-bold mb-4">Stay Curated.</h2>
+<p class="text-on-primary-container text-sm leading-relaxed mb-8">Receive a weekly briefing of the most critical socio-ecological intelligence directly in your inbox.</p>
+<div class="space-y-4">
+<input class="w-full bg-white/10 border-white/20 rounded-xl px-4 py-3 text-white placeholder:text-white/40 focus:ring-secondary focus:border-secondary transition-all" placeholder="email@organization.org" type="email"/>
+<button class="w-full bg-secondary-container text-on-secondary-container font-bold py-3 rounded-xl hover:opacity-90 transition-opacity">Subscribe to Hub Briefs</button>
+</div>
+<p class="mt-6 text-[10px] opacity-40">By subscribing, you agree to our privacy policy and data governance terms.</p>
+</div>
+<!-- Decorative Graphic -->
+<div class="absolute -bottom-20 -right-20 w-64 h-64 border-[32px] border-white/5 rounded-full"></div>
+</div>
+</section>
+</main>
+</div>
+<!-- Footer -->
+<footer class="w-full mt-auto bg-white border-t border-slate-100 flex flex-col md:flex-row justify-between items-center px-12 py-8 font-lexend text-xs">
+<div class="flex items-center gap-6 mb-4 md:mb-0">
+<span class="text-slate-400">© 2024 CoSET Intelligence Hub. All rights reserved.</span>
+</div>
+<div class="flex gap-8">
+<a class="text-slate-400 hover:text-orange-600 transition-colors" href="#">Privacy Policy</a>
+<a class="text-slate-400 hover:text-orange-600 transition-colors" href="#">Methodology</a>
+<a class="text-slate-400 hover:text-orange-600 transition-colors" href="#">Contact Support</a>
+</div>
+<div class="mt-4 md:mt-0 flex gap-4">
+<button class="p-2 text-slate-400 hover:text-primary transition-all opacity-80 hover:opacity-100">
+<span class="material-symbols-outlined text-sm">share</span>
+</button>
+<button class="p-2 text-slate-400 hover:text-primary transition-all opacity-80 hover:opacity-100">
+<span class="material-symbols-outlined text-sm">language</span>
+</button>
+</div>
+</footer>
+</body></html>

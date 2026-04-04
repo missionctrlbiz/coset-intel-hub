@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Coset Intelligence Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&amp;family=Manrope:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline": "#73777f",
+                    "on-secondary": "#ffffff",
+                    "tertiary-container": "#0c3600",
+                    "surface-container-high": "#e8e8ea",
+                    "on-primary": "#ffffff",
+                    "surface-variant": "#e2e2e5",
+                    "primary-fixed-dim": "#aac9f4",
+                    "primary-container": "#0b2f52",
+                    "error": "#ba1a1a",
+                    "on-primary-fixed-variant": "#29486d",
+                    "on-secondary-container": "#5b1b00",
+                    "on-primary-fixed": "#001c38",
+                    "secondary": "#a83900",
+                    "inverse-surface": "#2f3133",
+                    "inverse-primary": "#aac9f4",
+                    "outline-variant": "#c3c6cf",
+                    "tertiary": "#051f00",
+                    "on-secondary-fixed-variant": "#802900",
+                    "on-tertiary-fixed-variant": "#1c5207",
+                    "on-tertiary-fixed": "#052100",
+                    "surface-container-low": "#f3f3f6",
+                    "on-error-container": "#93000a",
+                    "on-tertiary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "primary-fixed": "#d3e4ff",
+                    "surface-container": "#eeeef0",
+                    "surface": "#f9f9fc",
+                    "on-primary-container": "#7a97c0",
+                    "surface-bright": "#f9f9fc",
+                    "surface-tint": "#426086",
+                    "secondary-fixed": "#ffdbcf",
+                    "background": "#f9f9fc",
+                    "tertiary-fixed-dim": "#9ad77e",
+                    "inverse-on-surface": "#f0f0f3",
+                    "error-container": "#ffdad6",
+                    "surface-dim": "#dadadc",
+                    "on-secondary-fixed": "#380d00",
+                    "tertiary-fixed": "#b5f397",
+                    "on-tertiary-container": "#6aa451",
+                    "secondary-fixed-dim": "#ffb59a",
+                    "primary": "#001a34",
+                    "surface-container-highest": "#e2e2e5",
+                    "on-surface": "#1a1c1e",
+                    "on-surface-variant": "#43474e",
+                    "secondary-container": "#ff692a",
+                    "on-background": "#1a1c1e",
+                    "surface-container-lowest": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Lexend"],
+                    "body": ["Manrope"],
+                    "label": ["Manrope"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .tonal-depth-layer-0 { background-color: #f9f9fc; }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-background font-body text-on-surface selection:bg-secondary-fixed selection:text-on-secondary-fixed">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl shadow-[0px_12px_32px_rgba(11,47,82,0.06)]">
+<div class="flex justify-between items-center px-8 h-20 max-w-screen-2xl mx-auto">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-bold tracking-tight text-[#0B2F52]">Coset</span>
+<div class="hidden md:flex gap-6 items-center font-['Lexend'] font-medium text-sm">
+<a class="text-slate-500 hover:text-[#a83900] transition-colors duration-300" href="#">Reports</a>
+<a class="text-slate-500 hover:text-[#a83900] transition-colors duration-300" href="#">Blog</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden lg:block">
+<input class="bg-surface-container-high rounded-full py-2 px-10 border-none focus:ring-2 focus:ring-primary w-64 text-sm font-label" placeholder="Search Intelligence..." type="text"/>
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">search</span>
+</div>
+<button class="material-symbols-outlined text-[#0B2F52] text-3xl scale-95 active:scale-90 transition-transform">account_circle</button>
+</div>
+</div>
+</nav>
+<main class="pt-20">
+<!-- Hero Section -->
+<section class="relative min-h-[870px] flex items-center overflow-hidden">
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover brightness-95 opacity-20" data-alt="Stunning aerial view of Niger Delta landscape with winding rivers and lush mangroves under a cinematic sunrise sky" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVBmAlRXSj1YxITJfOZcEl-JuWo1ZDr0LrnyZtqEGq1F8WO0xaiTGDdePBH96h2Dqu-c054342o1315FAWmzQThiMrH1QksOUFQPYozwLhxyOuWXysNY6pVGq655QonrAflsZZThpTW1LHw6aCzDftcl5LFVkZW-OHtHiDQpEjGdockEssRNqCdWjlR5jp4s2cpIKSxWOVDV2k6vhCIEbFmZaQnqILt4UXhicP5rsdWi82_jRgVvMewUcMy6UjRDTneQcyuEugQTCy"/>
+<div class="absolute inset-0 bg-gradient-to-tr from-white via-white/80 to-transparent"></div>
+</div>
+<div class="max-w-screen-2xl mx-auto px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 relative z-10">
+<div class="lg:col-span-8 flex flex-col justify-center">
+<span class="font-headline font-bold text-secondary uppercase tracking-[0.2em] text-sm mb-4">Coset Intelligence Hub</span>
+<h1 class="font-headline font-extrabold text-primary text-5xl md:text-7xl leading-[1.1] mb-6 tracking-tight">
+                        Uwem Nnyin: Empowering Transformation through Intelligence
+                    </h1>
+<p class="text-xl text-on-surface-variant max-w-2xl mb-10 leading-relaxed">
+                        Explore our latest research, reports, and insights on socio-ecological change in Nigeria. Data-driven narratives for a sustainable future.
+                    </p>
+<div class="relative max-w-xl group">
+<input class="w-full bg-surface-container-lowest border-none shadow-[0px_12px_32px_rgba(11,47,82,0.1)] rounded-full py-5 px-8 text-lg font-body focus:ring-2 focus:ring-secondary transition-all" placeholder="Search reports, gas flaring data, policy papers..." type="text"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 bg-secondary text-white p-3 rounded-full hover:scale-105 active:scale-95 transition-transform flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Main Content Area with Sidebar -->
+<div class="max-w-screen-2xl mx-auto px-8 py-20 flex flex-col lg:flex-row gap-12">
+<!-- SideNavBar -->
+<aside class="hidden lg:flex flex-col p-6 gap-y-4 h-screen w-72 sticky top-24 bg-slate-50 font-['Lexend'] text-sm tracking-wide rounded-xl">
+<div class="mb-6">
+<h3 class="font-bold text-[#0B2F52] text-xl">Filter Intelligence</h3>
+<p class="text-slate-600 text-xs mt-1">Refine your curated view</p>
+</div>
+<nav class="space-y-2">
+<button class="w-full flex items-center gap-3 px-4 py-3 bg-white text-[#0B2F52] font-semibold rounded-lg shadow-sm">
+<span class="material-symbols-outlined" data-icon="category">category</span>
+<span>Categories</span>
+</button>
+<button class="w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-white/50 transition-all rounded-lg">
+<span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+<span>Date Range</span>
+</button>
+<button class="w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-white/50 transition-all rounded-lg">
+<span class="material-symbols-outlined" data-icon="sell">sell</span>
+<span>Tags</span>
+</button>
+</nav>
+<div class="mt-8 pt-8 border-t border-slate-200">
+<div class="space-y-4">
+<label class="flex items-center gap-3 cursor-pointer">
+<input checked="" class="rounded text-secondary focus:ring-secondary" type="checkbox"/>
+<span class="text-xs">Environment</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer">
+<input class="rounded text-secondary focus:ring-secondary" type="checkbox"/>
+<span class="text-xs">Social Justice</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer">
+<input class="rounded text-secondary focus:ring-secondary" type="checkbox"/>
+<span class="text-xs">Policy Reform</span>
+</label>
+</div>
+</div>
+<button class="mt-auto bg-[#0B2F52] text-white py-4 rounded-xl font-bold hover:opacity-90 transition-opacity">
+                    Apply Filters
+                </button>
+</aside>
+<!-- Grid Content -->
+<div class="flex-1 space-y-24">
+<!-- Featured Reports Section -->
+<section>
+<div class="flex items-end justify-between mb-8">
+<div>
+<h2 class="font-headline font-extrabold text-3xl text-primary">Featured Insights</h2>
+<p class="text-on-surface-variant mt-2">Critical data milestones in socio-ecological progress.</p>
+</div>
+<div class="flex gap-2">
+<button class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Featured Card 1 -->
+<div class="group bg-surface-container-lowest p-8 rounded-full border border-outline-variant/10 shadow-[0px_12px_32px_rgba(11,47,82,0.03)] hover:shadow-xl transition-all relative overflow-hidden h-[400px] flex flex-col justify-end">
+<img class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="Aerial view of industrial gas flaring towers emitting bright flames against a dark evening sky over a Delta landscape" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAaEtPtNg3E5dfQT6XzIN4UFUEHywzPclkwZI6qK1ci4YrWWFsCphgPd5Fq_jLFRC4Ru67HlPc7r-eV1vSNGGVNvxSp24yoYzCxsHQdWRxEzRpaNwjJeb79zvJNNzt1xBnP2fuww3Wk5unsAoLSrAKCxYWUwlsZeBDrWmkiariYDDUVW_7qxu4IX-LFUhJwvKzI24Q2ghZYHfVWnkwuhOmpLBwByGifwJqqqkG6dq36aH-ZlGQcNHy8ZdrmExGjHUdo7PGXgbMuCcNd"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/30 to-transparent"></div>
+<div class="relative z-10 text-white">
+<span class="bg-secondary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4 inline-block">High Priority</span>
+<h3 class="text-3xl font-headline font-bold mb-2">Gas Flaring Sites Report</h3>
+<p class="text-slate-300 text-sm mb-6 line-clamp-2">Detailed mapping of active flaring sites across the Niger Delta and their impact on local health and crop yields.</p>
+<button class="flex items-center gap-2 font-bold text-sm hover:underline">
+                                    Read Analysis <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Featured Card 2 -->
+<div class="group bg-surface-container-lowest p-8 rounded-full border border-outline-variant/10 shadow-[0px_12px_32px_rgba(11,47,82,0.03)] hover:shadow-xl transition-all relative overflow-hidden h-[400px] flex flex-col justify-end">
+<img class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="Dynamic group of diverse activists engaged in a community discussion in an outdoor urban setting with natural daylight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdkC09Lg7xDipnllxtM90eOaqieATOmTU1JdR8ix5xbWRjhGyy6BYFzyvhLVowBZ4cWRarOmL7bnKOFD_MifNutZLcXIST8A97JXThHeMKyJVi3KAwK63pe6-XsdprGmDVBlpBOT2_VtHI7HCm_VPjSQlScS66MrVVGXeIZjiD1QaOgOczPKBFIBFjtiPC8SbcVM3bAwfMB2hVWGO3uKYeBJZGgdpt-men_SnfZJ2QF0LmRoiT5A3U575n2sOXkhQIzM8F29P8ddLl"/>
+<div class="absolute inset-0 bg-gradient-to-t from-secondary/90 via-secondary/30 to-transparent"></div>
+<div class="relative z-10 text-white">
+<span class="bg-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4 inline-block">Impact Study</span>
+<h3 class="text-3xl font-headline font-bold mb-2">Active Members Impact</h3>
+<p class="text-slate-100 text-sm mb-6 line-clamp-2">Measuring the tangible reach and transformation milestones achieved by our grassroots partner network.</p>
+<button class="flex items-center gap-2 font-bold text-sm hover:underline">
+                                    Explore Impact <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Latest Intelligence Grid -->
+<section>
+<div class="mb-12">
+<h2 class="font-headline font-extrabold text-3xl text-primary">Latest Intelligence</h2>
+<div class="flex flex-wrap gap-3 mt-6">
+<span class="bg-primary text-white px-4 py-2 rounded-full text-xs font-bold">All Reports</span>
+<span class="bg-surface-container-high text-on-surface-variant px-4 py-2 rounded-full text-xs font-bold hover:bg-surface-container-highest cursor-pointer">Ecological</span>
+<span class="bg-surface-container-high text-on-surface-variant px-4 py-2 rounded-full text-xs font-bold hover:bg-surface-container-highest cursor-pointer">Socio-Economic</span>
+<span class="bg-surface-container-high text-on-surface-variant px-4 py-2 rounded-full text-xs font-bold hover:bg-surface-container-highest cursor-pointer">Governance</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+<!-- Report Card 1 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 shadow-sm flex flex-col">
+<div class="flex justify-between items-start mb-6">
+<div class="w-12 h-12 rounded-lg bg-primary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="description">description</span>
+</div>
+<span class="text-[10px] font-bold text-outline uppercase tracking-wider">MAR 2024</span>
+</div>
+<h4 class="font-headline font-bold text-primary mb-3">Oil Spill Remediation Status Q1</h4>
+<p class="text-on-surface-variant text-sm mb-8 line-clamp-3">A status update on the ongoing cleanup efforts in Ogoni land, highlighting progress and remaining challenges.</p>
+<div class="mt-auto flex items-center justify-between pt-6 border-t border-outline-variant/10">
+<span class="text-xs font-bold text-secondary">Environment</span>
+<div class="flex gap-2">
+<button class="text-primary hover:bg-primary-fixed-dim p-2 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-xl">download</span>
+</button>
+<button class="text-primary hover:bg-primary-fixed-dim p-2 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-xl">visibility</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Report Card 2 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 shadow-sm flex flex-col">
+<div class="flex justify-between items-start mb-6">
+<div class="w-12 h-12 rounded-lg bg-secondary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary" data-icon="justice">gavel</span>
+</div>
+<span class="text-[10px] font-bold text-outline uppercase tracking-wider">FEB 2024</span>
+</div>
+<h4 class="font-headline font-bold text-primary mb-3">Community Rights Policy Paper</h4>
+<p class="text-on-surface-variant text-sm mb-8 line-clamp-3">Advocating for legislative reforms that empower indigenous communities in land rights and resource management.</p>
+<div class="mt-auto flex items-center justify-between pt-6 border-t border-outline-variant/10">
+<span class="text-xs font-bold text-secondary">Policy Reform</span>
+<div class="flex gap-2">
+<button class="text-primary hover:bg-primary-fixed-dim p-2 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-xl">download</span>
+</button>
+<button class="text-primary hover:bg-primary-fixed-dim p-2 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-xl">visibility</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Report Card 3 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 shadow-sm flex flex-col">
+<div class="flex justify-between items-start mb-6">
+<div class="w-12 h-12 rounded-lg bg-tertiary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary-container" data-icon="trending_up">trending_up</span>
+</div>
+<span class="text-[10px] font-bold text-outline uppercase tracking-wider">JAN 2024</span>
+</div>
+<h4 class="font-headline font-bold text-primary mb-3">Alternative Livelihoods Index</h4>
+<p class="text-on-surface-variant text-sm mb-8 line-clamp-3">Tracking the economic shift from extractive dependencies to sustainable agro-forestry and eco-tourism initiatives.</p>
+<div class="mt-auto flex items-center justify-between pt-6 border-t border-outline-variant/10">
+<span class="text-xs font-bold text-secondary">Social Justice</span>
+<div class="flex gap-2">
+<button class="text-primary hover:bg-primary-fixed-dim p-2 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-xl">download</span>
+</button>
+<button class="text-primary hover:bg-primary-fixed-dim p-2 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-xl">visibility</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Planet Pulse (Blog/News) -->
+<section class="bg-primary py-16 px-12 rounded-[2rem] text-white">
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+<div>
+<span class="text-secondary-fixed-dim font-bold text-sm uppercase tracking-widest">Global Updates</span>
+<h2 class="font-headline font-extrabold text-4xl mt-2">Planet Pulse</h2>
+</div>
+<a class="text-slate-300 hover:text-white flex items-center gap-2 group underline decoration-secondary" href="#">
+                            View All Stories <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+<article class="space-y-4">
+<div class="h-48 rounded-2xl overflow-hidden mb-4">
+<img class="w-full h-full object-cover" data-alt="Close up of vibrant green plant leaves with morning dew in a dense, sunlit tropical forest" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDq22U_fWHbXmyVLUMpfTEYUtsfWQM--6ftHxuLHB3HxYqmFvZCoUrMj6mLHhl2954rR_3JgMlr2zSCfVGM0Bu5CB9hDLm3ZfzYVFrKLQ4k7bdWRfX4KJU7o0DNHZAenwZAXYbLsjfRIOAvu4xdUJoXA0qO9cxJExE-_A0o5V1-RSG2fu0BfJVHLX6hyCDSuQq2x2AbRQfSs8VyMyplPGRxLtokj4lLZohjWLXENzz7Z_yd9zedT4YEOLiivrKL2Z4hpybXkBDiVi2f"/>
+</div>
+<div class="flex items-center gap-3">
+<span class="bg-white/10 px-3 py-1 rounded text-[10px] font-bold">Climate</span>
+<span class="text-[10px] opacity-60">2 DAYS AGO</span>
+</div>
+<h5 class="text-xl font-headline font-bold">New Reforestation Projects Launch in Akwa Ibom</h5>
+<p class="text-slate-400 text-sm leading-relaxed">Community-led initiative aims to restore 500 hectares of lost mangrove forest by 2026.</p>
+</article>
+<article class="space-y-4">
+<div class="h-48 rounded-2xl overflow-hidden mb-4">
+<img class="w-full h-full object-cover" data-alt="Digital representation of complex data networks and interconnected points in a sleek modern aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAiRFGGD4RASbVvcEWFhJWfySJ3o4ujuD19Rjf9ujF9tzxULK9h0ZbPUnfgQyO_z68y1CYa5BDKZhQcttnEsg6jDp_Ys2UWFGI_ochcZWXsEYWFQvZTE-L2DmXgJNhZ55qBgDSemii4W8GREr8e5-GlRuOGQ3HW2oJjmk-TF_oBCei_r7Tr_okuf-yE8UP2CkSR18rhQlr5IHqD5ykPfZML1oT8PauI_Inb-ePikSWXyA39sA2SMggUH8ZUq677rW8K4pgWcvCgn8qx"/>
+</div>
+<div class="flex items-center gap-3">
+<span class="bg-white/10 px-3 py-1 rounded text-[10px] font-bold">Innovation</span>
+<span class="text-[10px] opacity-60">1 WEEK AGO</span>
+</div>
+<h5 class="text-xl font-headline font-bold">Satellite Data Integration for Spill Detection</h5>
+<p class="text-slate-400 text-sm leading-relaxed">Leveraging real-time orbital imagery to identify pipeline breaches before major contamination occurs.</p>
+</article>
+<article class="space-y-4">
+<div class="h-48 rounded-2xl overflow-hidden mb-4">
+<img class="w-full h-full object-cover" data-alt="Group of diverse people in a modern office collaborating around a table with tablets and documents" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWpSsSkgHvKtYu9fhCVjz_27jXNuxpH0YjbdXGmylk5mWTLsDtXw0gNqIHay-xFMLe3Gj9fEvmooiNuZ1QCjrIFtSdakCrspbEcZzFk9cjZVLxegvgqn4pfIQGXDF2NcKpVEP9_LDvVRdnA4scVbWwsXd5t_iOvOFcpDewNhTS66e3lGJrWAiyvv3D0irE-5ZBxScfUheDAZtH9qCo18wrwC5rL1GFWNTpH736uff-QzRFuR0Z9BWlGAW0z3XwoZvFQZKKZyNvKEUJ"/>
+</div>
+<div class="flex items-center gap-3">
+<span class="bg-white/10 px-3 py-1 rounded text-[10px] font-bold">Voices</span>
+<span class="text-[10px] opacity-60">10 DAYS AGO</span>
+</div>
+<h5 class="text-xl font-headline font-bold">Community Spotlight: Resilience in Eket</h5>
+<p class="text-slate-400 text-sm leading-relaxed">How local fishermen are pivoting to sustainable aquaculture amidst changing coastal ecosystems.</p>
+</article>
+</div>
+</section>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-[#0B2F52] text-white w-full py-12">
+<div class="flex flex-col items-center justify-center space-y-6 w-full text-center max-w-screen-2xl mx-auto px-8">
+<div class="text-lg font-black text-white">Coset</div>
+<nav class="flex flex-wrap justify-center gap-x-8 gap-y-4 font-['Lexend'] text-xs uppercase tracking-widest">
+<a class="text-slate-300 hover:text-[#a83900] transition-colors" href="#">Privacy Policy</a>
+<a class="text-slate-300 hover:text-[#a83900] transition-colors" href="#">Terms of Service</a>
+<a class="text-slate-300 hover:text-[#a83900] transition-colors" href="#">Newsletter Signup</a>
+</nav>
+<div class="pt-6 border-t border-white/10 w-full max-w-md">
+<p class="font-['Lexend'] text-xs uppercase tracking-widest text-slate-300">© 2024 Coset Intelligence Hub. All rights reserved.</p>
+</div>
+</div>
+</footer>
+</body></html>
