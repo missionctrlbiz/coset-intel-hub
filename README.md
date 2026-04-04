@@ -78,6 +78,69 @@ Key areas:
 
 The repository includes local CoSET brand assets and stitched reference screens under `public/stitch/`. Those stitched HTML files are reference material for layout and flow, not production UI.
 
+## Supabase Setup
+
+This repository now includes a standard Supabase CLI scaffold under `supabase/`.
+
+Included pieces:
+
+- `supabase/config.toml`: local Supabase configuration
+- `supabase/migrations/20260404044730_init_coset_hub_schema.sql`: base schema migration
+- `supabase/seed.sql`: local development seed data
+
+The schema currently provisions:
+
+- `public.profiles`
+- `public.reports`
+- `public.blog_posts`
+- `public.report_ingestions`
+- storage buckets: `report-images`, `report-uploads`
+- RLS policies for public reads and editor/admin management
+- auth trigger to create a `profiles` row when a user is created
+
+### Local Supabase Commands
+
+If Docker is installed, you can run the local stack with:
+
+```bash
+supabase start
+supabase db reset
+```
+
+That will apply migrations and load `supabase/seed.sql`.
+
+### Linking A Remote Project
+
+To link the repo to the correct hosted Supabase project:
+
+```bash
+supabase login
+supabase link --project-ref <your-project-ref>
+supabase db push
+```
+
+If you want generated database types after linking:
+
+```bash
+supabase gen types typescript --linked > lib/database.types.ts
+```
+
+### Admin Role Bootstrapping
+
+After an admin user signs up, promote them with SQL similar to:
+
+```sql
+update public.profiles
+set role = 'admin'
+where email = 'admin@example.com';
+```
+
+The app policies are currently designed so:
+
+- published reports and blog posts are publicly readable
+- editor/admin users can manage reports, blog posts, ingestions, and storage objects
+- service-role operations bypass RLS as usual
+
 ## Environment Variables
 
 Create a local `.env` file based on `.env.example`.
@@ -171,7 +234,7 @@ Implemented:
 
 Planned or integration-dependent:
 
-- live Supabase persistence
+- remote Supabase project linkage and push from the correct Supabase account
 - full production content ingestion workflow
 - authenticated admin access controls
 - richer binary document extraction and persistence

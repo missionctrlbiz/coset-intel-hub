@@ -4,9 +4,16 @@ import { ArrowUpRight, Download, Eye, Grid2X2, List, SlidersHorizontal } from 'l
 
 import { SectionReveal } from '@/components/section-reveal';
 import { SiteHeader } from '@/components/site-header';
-import { cosetOrgLinks, filterGroups, reports } from '@/lib/site-data';
+import { getPublishedReports } from '@/lib/content';
+import { cosetOrgLinks, filterGroups } from '@/lib/site-data';
 
-export default function ReportsPage() {
+export const revalidate = 300;
+
+export default async function ReportsPage() {
+    const reports = await getPublishedReports();
+    const categoryFilters = Array.from(new Set(reports.flatMap((report) => report.category)));
+    const tagFilters = Array.from(new Set(reports.flatMap((report) => report.tags)));
+
     return (
         <>
             <SiteHeader />
@@ -16,9 +23,9 @@ export default function ReportsPage() {
                         <p className="font-display text-2xl font-bold text-navy">Research Filters</p>
                         <p className="mt-1 text-sm text-muted">Socio-ecological data and policy research.</p>
                         <div className="mt-8 space-y-8">
-                            <FilterSection title="Categories" items={filterGroups.categories} />
+                            <FilterSection title="Categories" items={categoryFilters.length > 0 ? categoryFilters : filterGroups.categories} />
                             <FilterSection title="Regions" items={filterGroups.regions} />
-                            <FilterSection title="Tags" items={filterGroups.tags} />
+                            <FilterSection title="Tags" items={tagFilters.length > 0 ? tagFilters : filterGroups.tags} />
                             <button className="w-full rounded-xl bg-ember px-4 py-3 font-semibold text-white transition hover:brightness-110">Export Data</button>
                         </div>
                     </aside>
@@ -42,7 +49,7 @@ export default function ReportsPage() {
                         <SectionReveal delay={0.08}>
                             <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
                                 <div className="flex flex-wrap gap-2">
-                                    {filterGroups.categories.map((item, index) => (
+                                    {(categoryFilters.length > 0 ? categoryFilters : filterGroups.categories).map((item, index) => (
                                         <span key={item} className={`rounded-full px-4 py-2 text-sm font-medium ${index === 0 ? 'bg-blue-100 text-navy' : 'bg-panel text-muted shadow-soft'}`}>
                                             {item}
                                         </span>
@@ -61,7 +68,7 @@ export default function ReportsPage() {
                                     <article className="grid gap-6 rounded-[2rem] border border-line bg-panel p-5 shadow-soft transition hover:shadow-editorial md:grid-cols-[220px_1fr] md:p-6">
                                         <div className="relative overflow-hidden rounded-[1.5rem] bg-mist">
                                             <div className="relative aspect-[4/5]">
-                                                <Image src={index === 0 ? '/coset-eye-banner.jpg' : index === 1 ? '/community-engagement.jpg' : '/CoSET-5-600x540.png'} alt={report.title} fill className="object-cover" />
+                                                <Image src={report.image} alt={report.title} fill className="object-cover" />
                                             </div>
                                         </div>
                                         <div className="flex flex-col">

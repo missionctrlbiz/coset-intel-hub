@@ -1,8 +1,9 @@
 'use client';
 
+import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
 import { CheckCircle2, Database, FileText, ImagePlus, type LucideIcon, Presentation, UploadCloud } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState, useTransition } from 'react';
 
 import { ChipInput } from '@/components/chip-input';
 
@@ -22,12 +23,76 @@ export function UploadWizard() {
     const [summary, setSummary] = useState(
         'A premium intelligence brief mapping the socio-ecological patterns shaping climate adaptation, community resilience, and policy response.'
     );
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [result, setResult] = useState<{ tone: 'error' | 'success'; message: string; reportSlug?: string } | null>(null);
+    const [isPending, startTransition] = useTransition();
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const canAdvance = useMemo(() => {
-        if (step === 0) return true;
+        if (step === 0) return selectedFile !== null;
         if (step === 1) return title.trim().length > 0 && summary.trim().length > 0;
         return true;
-    }, [step, summary, title]);
+    }, [selectedFile, step, summary, title]);
+
+    function handleFileSelection(file: File | null) {
+        setSelectedFile(file);
+        setResult(null);
+    }
+
+    function persistDraft() {
+        if (!selectedFile) {
+            setResult({ tone: 'error', message: 'Choose a source file before creating a draft.' });
+            return;
+        }
+
+        startTransition(async () => {
+            try {
+                const formData = new FormData();
+
+                formData.append('file', selectedFile);
+                formData.append('title', title);
+                formData.append('summary', summary);
+                categories.forEach((category) => formData.append('categories', category));
+                tags.forEach((tag) => formData.append('tags', tag));
+
+                const response = await fetch('/api/extract-from-file', {
+                    body: formData,
+                    method: 'POST',
+                });
+
+                const payload = (await response.json()) as {
+                    error?: string;
+                    message?: string;
+                    report?: { slug: string };
+                };
+
+                if (!response.ok) {
+                    setResult({ tone: 'error', message: payload.error ?? 'The draft could not be saved.' });
+                    return;
+                }
+
+                setResult({
+                    tone: 'success',
+                    message: payload.message ?? 'Draft report saved to the database and queued for editorial review.',
+                    reportSlug: payload.report?.slug,
+                });
+            } catch (error) {
+                setResult({
+                    tone: 'error',
+                    message: error instanceof Error ? error.message : 'Unexpected upload error.',
+                });
+            }
+        });
+    }
+
+    function handleAdvance() {
+        if (step < 2) {
+            setStep((current) => Math.min(current + 1, 2));
+            return;
+        }
+
+        persistDraft();
+    }
 
     return (
         <div className="space-y-8">
@@ -57,7 +122,13 @@ export function UploadWizard() {
                             exit={{ opacity: 0, x: -20 }}
                             transition={{ duration: 0.3 }}
                         >
-                            {step === 0 ? <UploadStep /> : null}
+                            {step === 0 ? (
+                                <UploadStep
+                                    onBrowse={() => fileInputRef.current?.click()}
+                                    onFileSelected={handleFileSelection}
+                                    selectedFile={selectedFile}
+                                />
+                            ) : null}
                             {step === 1 ? (
                                 <MetadataStep
                                     title={title}
@@ -70,14 +141,37 @@ export function UploadWizard() {
                                     setTags={setTags}
                                 />
                             ) : null}
-                            {step === 2 ? <ReviewStep title={title} summary={summary} categories={categories} tags={tags} /> : null}
+                            {step === 2 ? <ReviewStep title={title} summary={summary} categories={categories} tags={tags} selectedFile={selectedFile} /> : null}
                         </motion.div>
                     </AnimatePresence>
+
+                    <input
+                        ref={fileInputRef}
+                        hidden
+                        type="file"
+                        accept=".pdf,.csv,.doc,.docx,.ppt,.pptx,.txt,.md,.json,.html,.xml"
+                        onChange={(event) => handleFileSelection(event.target.files?.[0] ?? null)}
+                    />
+
+                    {result ? (
+                        <div className={`mt-6 rounded-2xl border px-4 py-4 text-sm ${result.tone === 'success' ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : 'border-rose-200 bg-rose-50 text-rose-900'}`}>
+                            <p>{result.message}</p>
+                            {result.tone === 'success' ? (
+                                <div className="mt-3 flex flex-wrap gap-3">
+                                    <Link href="/admin/content" className="font-semibold text-navy underline-offset-4 hover:underline">
+                                        Open content list
+                                    </Link>
+                                    {result.reportSlug ? <span className="text-xs uppercase tracking-[0.18em] text-muted">Draft slug: {result.reportSlug}</span> : null}
+                                </div>
+                            ) : null}
+                        </div>
+                    ) : null}
 
                     <div className="mt-8 flex items-center justify-between gap-4">
                         <button
                             type="button"
                             onClick={() => setStep((current) => Math.max(current - 1, 0))}
+                            disabled={isPending}
                             className="rounded-full border border-line px-5 py-3 text-sm font-semibold text-muted transition hover:border-navy hover:text-navy"
                         >
                             Back
@@ -85,10 +179,10 @@ export function UploadWizard() {
                         <button
                             type="button"
                             disabled={!canAdvance}
-                            onClick={() => setStep((current) => Math.min(current + 1, 2))}
+                            onClick={handleAdvance}
                             className="rounded-full bg-ember px-6 py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
                         >
-                            {step === 2 ? 'Ready for AI Processing' : 'Continue'}
+                            {step === 2 ? (isPending ? 'Saving Draft...' : 'Create Draft') : 'Continue'}
                         </button>
                     </div>
                 </div>
@@ -114,8 +208,10 @@ export function UploadWizard() {
 
                     <div className="rounded-[2rem] bg-ink p-6 text-white shadow-editorial">
                         <p className="mb-2 font-display text-lg font-bold">Publish Flow</p>
-                        <p className="mb-5 text-sm text-white/70">Prepared for AI-assisted extraction, metadata population, and review approval.</p>
-                        <button className="w-full rounded-xl bg-ember px-4 py-3 font-semibold text-white transition hover:brightness-110">Publish Report</button>
+                        <p className="mb-5 text-sm text-white/70">Prepared for AI-assisted extraction, metadata population, and review approval. Drafts are saved to Supabase when you finish step three.</p>
+                        <button type="button" disabled className="w-full rounded-xl bg-ember px-4 py-3 font-semibold text-white/90 opacity-70">
+                            Publish Report
+                        </button>
                     </div>
                 </aside>
             </div>
@@ -123,14 +219,21 @@ export function UploadWizard() {
     );
 }
 
-function UploadStep() {
+function UploadStep({ onBrowse, onFileSelected, selectedFile }: { onBrowse: () => void; onFileSelected: (file: File | null) => void; selectedFile: File | null }) {
     return (
         <div className="space-y-8">
             <div className="text-center">
                 <h2 className="font-display text-3xl font-extrabold text-navy">Upload Intelligence</h2>
                 <p className="mt-3 text-muted">Drag in PDFs, CSVs, PPTs, or policy papers to begin the extraction workflow.</p>
             </div>
-            <div className="rounded-[2rem] border-2 border-dashed border-line bg-mist px-6 py-12 text-center">
+            <div
+                className="rounded-[2rem] border-2 border-dashed border-line bg-mist px-6 py-12 text-center"
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={(event) => {
+                    event.preventDefault();
+                    onFileSelected(event.dataTransfer.files?.[0] ?? null);
+                }}
+            >
                 <div className="mx-auto mb-8 flex w-max items-center gap-3 rounded-full bg-panel px-6 py-3 shadow-soft">
                     <FileText className="h-5 w-5 text-navy" />
                     <Database className="h-5 w-5 text-ember" />
@@ -139,7 +242,14 @@ function UploadStep() {
                 <UploadCloud className="mx-auto mb-4 h-12 w-12 text-navy" />
                 <h3 className="font-display text-2xl font-bold text-navy">Drag & Drop Intel Assets</h3>
                 <p className="mt-2 text-muted">Support for PDF, CSV, DOCX, and PPT up to 50MB.</p>
-                <button className="mt-8 rounded-full bg-navy px-6 py-3 font-semibold text-white transition hover:bg-teal">Browse Files</button>
+                <button type="button" onClick={onBrowse} className="mt-8 rounded-full bg-navy px-6 py-3 font-semibold text-white transition hover:bg-teal">Browse Files</button>
+                {selectedFile ? (
+                    <div className="mx-auto mt-6 max-w-lg rounded-[1.5rem] border border-line bg-panel px-5 py-4 text-left shadow-soft">
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Selected File</p>
+                        <p className="mt-2 font-display text-xl font-bold text-navy">{selectedFile.name}</p>
+                        <p className="mt-2 text-sm text-muted">{(selectedFile.size / (1024 * 1024)).toFixed(2)} MB</p>
+                    </div>
+                ) : null}
             </div>
             <div className="grid gap-4 md:grid-cols-3">
                 {uploadAssetCards.map(({ title, copy, icon: RenderedIcon }) => {
@@ -197,7 +307,7 @@ function MetadataStep({ title, summary, categories, tags, setTitle, setSummary, 
     );
 }
 
-function ReviewStep({ title, summary, categories, tags }: { title: string; summary: string; categories: string[]; tags: string[] }) {
+function ReviewStep({ title, summary, categories, tags, selectedFile }: { title: string; summary: string; categories: string[]; tags: string[]; selectedFile: File | null }) {
     return (
         <div className="space-y-6">
             <div>
@@ -210,6 +320,10 @@ function ReviewStep({ title, summary, categories, tags }: { title: string; summa
                     <p className="font-semibold">Metadata validated. The AI pipeline can now generate HTML content and autofill structured fields.</p>
                 </div>
                 <div className="space-y-5">
+                    <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">Source File</p>
+                        <p className="mt-1 text-sm leading-7 text-muted">{selectedFile?.name ?? 'No file selected yet'}</p>
+                    </div>
                     <div>
                         <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">Title</p>
                         <p className="mt-1 font-display text-2xl font-bold text-navy">{title}</p>

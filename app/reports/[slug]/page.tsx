@@ -5,19 +5,24 @@ import { notFound } from 'next/navigation';
 
 import { SectionReveal } from '@/components/section-reveal';
 import { SiteHeader } from '@/components/site-header';
-import { getReportBySlug, reports } from '@/lib/site-data';
+import { getPublishedReportBySlug, getPublishedReportSlugs, getPublishedReports } from '@/lib/content';
 
-export function generateStaticParams() {
-    return reports.map((report) => ({ slug: report.slug }));
+export const revalidate = 300;
+
+export async function generateStaticParams() {
+    const slugs = await getPublishedReportSlugs();
+
+    return slugs.map((slug) => ({ slug }));
 }
 
-export default function ReportDetailPage({ params }: { params: { slug: string } }) {
-    const report = getReportBySlug(params.slug);
+export default async function ReportDetailPage({ params }: { params: { slug: string } }) {
+    const report = await getPublishedReportBySlug(params.slug);
 
     if (!report) {
         notFound();
     }
 
+    const reports = await getPublishedReports();
     const relatedReports = reports.filter((entry) => entry.slug !== report.slug).slice(0, 2);
 
     return (
@@ -26,7 +31,7 @@ export default function ReportDetailPage({ params }: { params: { slug: string } 
             <main>
                 <section className="relative overflow-hidden bg-ink text-white">
                     <div className="absolute inset-0">
-                        <Image src="/coset-eye-banner.jpg" alt={report.title} fill priority className="object-cover opacity-20" />
+                        <Image src={report.image} alt={report.title} fill priority className="object-cover opacity-20" />
                     </div>
                     <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/90 to-ink/70" />
                     <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
@@ -89,7 +94,7 @@ export default function ReportDetailPage({ params }: { params: { slug: string } 
                             <h3>Regional Stress Mapping</h3>
                             <div className="not-prose overflow-hidden rounded-[1.5rem] border border-line bg-mist">
                                 <div className="relative aspect-[16/10]">
-                                    <Image src="/coset-eye-banner.jpg" alt="Regional mapping" fill className="object-cover" />
+                                    <Image src={report.image} alt="Regional mapping" fill className="object-cover" />
                                 </div>
                             </div>
                             <h3>Quantitative Analysis</h3>
@@ -124,7 +129,7 @@ export default function ReportDetailPage({ params }: { params: { slug: string } 
                                 {relatedReports.map((related, index) => (
                                     <Link key={related.slug} href={`/reports/${related.slug}`} className="overflow-hidden rounded-[1.5rem] border border-line bg-mist transition hover:-translate-y-1 hover:shadow-soft">
                                         <div className="relative aspect-[16/10]">
-                                            <Image src={index === 0 ? '/community-engagement.jpg' : '/CoSET-5-600x540.png'} alt={related.title} fill className="object-cover" />
+                                            <Image src={related.image} alt={related.title} fill className="object-cover" />
                                         </div>
                                         <div className="p-5">
                                             <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">{related.category[0]}</p>

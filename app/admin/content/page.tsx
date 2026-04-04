@@ -1,9 +1,18 @@
 import { Plus, RefreshCw } from 'lucide-react';
 
 import { AdminSidebar } from '@/components/admin-sidebar';
-import { reports } from '@/lib/site-data';
+import { getAdminContentReports } from '@/lib/content';
 
-export default function AdminContentPage() {
+const statusClasses: Record<string, string> = {
+    Archived: 'bg-slate-200 text-slate-700',
+    Draft: 'bg-slate-200 text-slate-700',
+    Published: 'bg-emerald-100 text-emerald-800',
+    Scheduled: 'bg-blue-100 text-blue-800',
+};
+
+export default async function AdminContentPage() {
+    const { reports, canManage, isFallback, profile, user } = await getAdminContentReports();
+
     return (
         <div className="mx-auto flex max-w-[1600px]">
             <AdminSidebar pathname="/admin/content" />
@@ -19,6 +28,24 @@ export default function AdminContentPage() {
                         Create New Report
                     </button>
                 </div>
+
+                {!user ? (
+                    <section className="mb-8 rounded-[2rem] border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900 shadow-soft">
+                        Sign in with your Supabase account to view live admin content. Static fallback data is shown below until an authenticated session is available.
+                    </section>
+                ) : null}
+
+                {user && !canManage ? (
+                    <section className="mb-8 rounded-[2rem] border border-blue-200 bg-blue-50 px-5 py-4 text-sm text-navy shadow-soft">
+                        You are signed in as {profile?.email ?? user.email}, but your profile role is `{profile?.role ?? 'viewer'}`. You can see published content, but editor or admin role is required for full content management.
+                    </section>
+                ) : null}
+
+                {isFallback ? (
+                    <section className="mb-8 rounded-[2rem] border border-line bg-panel-alt px-5 py-4 text-sm text-muted shadow-soft">
+                        No live report rows were returned yet, so the table is temporarily showing seeded fallback content.
+                    </section>
+                ) : null}
 
                 <section className="mb-8 flex flex-wrap items-center gap-4 rounded-[2rem] border border-line bg-panel p-5 shadow-soft">
                     <button className="rounded-full bg-mist px-4 py-2 text-sm font-semibold text-muted">Filters</button>
@@ -53,17 +80,17 @@ export default function AdminContentPage() {
                                         <td className="px-6 py-5">
                                             <div>
                                                 <p className="font-semibold text-navy">{report.title}</p>
-                                                <p className="mt-1 text-xs text-muted">ID: REP-88{index + 10}10</p>
+                                                <p className="mt-1 text-xs text-muted">{report.slug}</p>
                                             </div>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold uppercase text-navy">{report.category[0]}</span>
+                                            <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold uppercase text-navy">{report.category}</span>
                                         </td>
                                         <td className="px-6 py-5 text-sm text-muted">{report.author}</td>
-                                        <td className="px-6 py-5 text-sm text-muted">{report.publishedAt}</td>
+                                        <td className="px-6 py-5 text-sm text-muted">{report.modified}</td>
                                         <td className="px-6 py-5">
-                                            <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${index === 0 ? 'bg-emerald-100 text-emerald-800' : index === 1 ? 'bg-blue-100 text-blue-800' : 'bg-slate-200 text-slate-700'}`}>
-                                                {index === 0 ? 'Published' : index === 1 ? 'Scheduled' : 'Draft'}
+                                            <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${statusClasses[report.status] ?? 'bg-slate-200 text-slate-700'}`}>
+                                                {report.status}
                                             </span>
                                         </td>
                                         <td className="px-6 py-5 text-right text-sm font-semibold text-navy">Edit • Preview • Delete</td>
