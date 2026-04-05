@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import type { Database } from '@/lib/database.types';
 import { parseDocument } from '@/lib/document-parser';
 import { generateExtractionDraft } from '@/lib/genai';
+import { processAndEmbedReport } from '@/lib/embeddings';
 import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/supabase/clients';
 
 export const runtime = 'nodejs';
@@ -198,6 +199,11 @@ export async function POST(request: Request) {
 
         if (ingestionError || !ingestion) {
             return NextResponse.json({ error: ingestionError?.message ?? 'The draft was created, but we could not finish processing it right now.' }, { status: 500 });
+        }
+
+        if (parseResult.text) {
+            // Process chunks and embed asynchronously in the background
+            processAndEmbedReport(report.id, parseResult.text);
         }
 
         return NextResponse.json(

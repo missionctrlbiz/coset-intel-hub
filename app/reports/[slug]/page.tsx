@@ -8,6 +8,7 @@ import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { getPublishedReportBySlug, getPublishedReportSlugs, getRelatedReports } from '@/lib/content';
 import { sanitizeHtml } from '@/lib/sanitize';
+import { FloatingChatWidget } from '@/components/floating-chat';
 
 export const revalidate = 300;
 
@@ -174,6 +175,7 @@ export default async function ReportDetailPage({ params }: { params: { slug: str
                     </SectionReveal>
                 </section>
             </main>
+            <FloatingChatWidget slug={report.slug} />
             <SiteFooter />
         </>
     );
