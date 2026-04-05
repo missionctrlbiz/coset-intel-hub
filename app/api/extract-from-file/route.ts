@@ -1,22 +1,13 @@
 import { NextResponse } from 'next/server';
 
 import type { Database } from '@/lib/database.types';
-import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/supabase/clients';
+import { parseDocument } from '@/lib/document-parser';
 import { generateExtractionDraft } from '@/lib/genai';
+import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/supabase/clients';
 
 export const runtime = 'nodejs';
 
 type ProfileRow = Database['public']['Tables']['profiles']['Row'];
-
-const textExtensions = ['.txt', '.md', '.csv', '.json', '.html', '.xml'];
-
-function canExtractText(file: File) {
-    if (file.type.startsWith('text/')) {
-        return true;
-    }
-
-    return textExtensions.some((extension) => file.name.toLowerCase().endsWith(extension));
-}
 
 function slugify(value: string) {
     return value
@@ -111,7 +102,10 @@ export async function POST(request: Request) {
         const categoriesInput = formData.getAll('categories').map(String);
         const tagsInput = formData.getAll('tags').map(String);
         const previewOnly = formData.get('previewOnly') === 'true';
-        const textPreview = canExtractText(file) ? (await file.text()).trim().slice(0, 12000) : '';
+
+        // ── Document parsing pipeline (PDF, DOCX, PPTX, TXT, etc.) ──
+        const parseResult = await parseDocument(file);
+        const textPreview = parseResult.text.slice(0, 12000);
 
         let aiDraft = null;
         let aiError: string | null = null;
@@ -134,6 +128,9 @@ export async function POST(request: Request) {
                 message: 'Extraction completed for preview.',
                 aiDraft,
                 aiError,
+                parserUsed: parseResult.parserUsed,
+                pageCount: parseResult.pageCount,
+                truncated: parseResult.truncated,
             });
         }
 
@@ -164,7 +161,7 @@ export async function POST(request: Request) {
                 highlight: [],
                 metrics: [],
                 quote: null,
-                read_time_minutes: estimateReadTimeMinutes(textPreview || description),
+                read_time_minutes: estimateReadTimeMinutes(parseResult.text || description),
                 slug,
                 source_type: 'upload',
                 status: 'draft',
@@ -180,18 +177,20 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: reportError?.message ?? 'We could not create the draft right now.' }, { status: 500 });
         }
 
+        const ingestionStatus = aiDraft ? 'drafted' : parseResult.text ? 'completed' : 'uploaded';
+
         const { data: ingestion, error: ingestionError } = await adminSupabase
             .from('report_ingestions')
             .insert({
                 ai_draft: aiDraft ?? {},
                 created_by: user.id,
                 error_message: aiError,
-                extracted_text: textPreview || null,
+                extracted_text: parseResult.text || null,
                 file_name: file.name,
                 file_size: file.size,
                 mime_type: file.type || null,
                 report_id: report.id,
-                status: aiDraft ? 'drafted' : textPreview ? 'completed' : 'uploaded',
+                status: ingestionStatus,
                 storage_path: storagePath,
             })
             .select('id, status')
@@ -207,8 +206,11 @@ export async function POST(request: Request) {
                 fileName: file.name,
                 fileType: file.type,
                 size: file.size,
-                extractionMode: textPreview ? 'text-preview' : 'metadata-only',
+                extractionMode: parseResult.parserUsed === 'none' ? 'metadata-only' : parseResult.parserUsed,
                 preview: textPreview ? textPreview.slice(0, 1200) : null,
+                parserUsed: parseResult.parserUsed,
+                pageCount: parseResult.pageCount,
+                truncated: parseResult.truncated,
                 aiDraft,
                 aiError,
                 ingestion,

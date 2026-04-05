@@ -200,13 +200,19 @@ function mapFallbackAdminReports(): AdminContentRow[] {
     }));
 }
 
-export async function getPublishedReports() {
+export async function getPublishedReports(searchQuery?: string) {
     try {
         const supabase = createSupabasePublicClient();
-        const { data, error } = await supabase
+        let query = supabase
             .from('reports')
             .select('*')
-            .eq('status', 'published')
+            .eq('status', 'published');
+
+        if (searchQuery) {
+            query = query.textSearch('search_vector', searchQuery, { type: 'websearch' });
+        }
+
+        const { data, error } = await query
             .order('featured', { ascending: false })
             .order('published_at', { ascending: false });
 
@@ -245,6 +251,32 @@ export async function getPublishedReportBySlug(slug: string) {
     }
 }
 
+export async function getRelatedReports(slug: string, categories: string[]) {
+    try {
+        const supabase = createSupabasePublicClient();
+        let query = supabase
+            .from('reports')
+            .select('*')
+            .eq('status', 'published')
+            .neq('slug', slug)
+            .limit(3);
+            
+        if (categories && categories.length > 0) {
+            query = query.overlaps('category', categories);
+        }
+
+        const { data, error } = await query;
+
+        if (error || !data || data.length === 0) {
+            return fallbackReports.filter((report) => report.slug !== slug).slice(0, 3);
+        }
+
+        return data.map(mapReportRow);
+    } catch {
+        return fallbackReports.filter((report) => report.slug !== slug).slice(0, 3);
+    }
+}
+
 export async function getPublishedBlogPosts() {
     try {
         const supabase = createSupabasePublicClient();
@@ -262,6 +294,39 @@ export async function getPublishedBlogPosts() {
         return data.map(mapBlogPostRow);
     } catch {
         return mapFallbackBlogPosts();
+    }
+}
+
+export async function getPublishedBlogPostBySlug(slug: string) {
+    try {
+        const supabase = createSupabasePublicClient();
+        const { data, error } = await supabase
+            .from('blog_posts')
+            .select('*')
+            .eq('slug', slug)
+            .maybeSingle();
+
+        if (error || !data) {
+            // Find in fallback
+            const fallbackIndex = parseInt(slug.replace('seed-blog-', ''), 10) - 1;
+            const fallback = mapFallbackBlogPosts()[fallbackIndex];
+            
+            return fallback 
+                ? { ...fallback, htmlContent: `<p>${fallback.excerpt}</p><p>This is a placeholder for the seed blog post content. In a production environment, this would be replaced with the full HTML content from the Supabase database.</p>` } 
+                : null;
+        }
+
+        // We will map row + html_content
+        return {
+            ...mapBlogPostRow(data),
+            htmlContent: data.html_content || '<p>No content available for this post.</p>',
+        };
+    } catch {
+        const fallbackIndex = parseInt(slug.replace('seed-blog-', ''), 10) - 1;
+        const fallback = mapFallbackBlogPosts()[fallbackIndex];
+        return fallback 
+            ? { ...fallback, htmlContent: `<p>${fallback.excerpt}</p><p>This is a placeholder for the seed blog post content. In a production environment, this would be replaced with the full HTML content from the Supabase database.</p>` } 
+            : null;
     }
 }
 

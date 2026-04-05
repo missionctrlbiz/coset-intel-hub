@@ -4,8 +4,10 @@ import { ArrowRight, CalendarDays, Clock3, Download, Link2, Share2, UserRound } 
 import { notFound } from 'next/navigation';
 
 import { SectionReveal } from '@/components/section-reveal';
+import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
-import { getPublishedReportBySlug, getPublishedReportSlugs, getPublishedReports } from '@/lib/content';
+import { getPublishedReportBySlug, getPublishedReportSlugs, getRelatedReports } from '@/lib/content';
+import { sanitizeHtml } from '@/lib/sanitize';
 
 export const revalidate = 300;
 
@@ -22,8 +24,7 @@ export default async function ReportDetailPage({ params }: { params: { slug: str
         notFound();
     }
 
-    const reports = await getPublishedReports();
-    const relatedReports = reports.filter((entry) => entry.slug !== report.slug).slice(0, 2);
+    const relatedReports = await getRelatedReports(report.slug, report.category);
 
     return (
         <>
@@ -31,7 +32,7 @@ export default async function ReportDetailPage({ params }: { params: { slug: str
             <main>
                 <section className="relative overflow-hidden bg-ink text-white">
                     <div className="absolute inset-0">
-                        <Image src={report.image} alt={report.title} fill priority className="object-cover opacity-20" />
+                        <Image src={report.image} alt={report.title} fill priority sizes="100vw" className="object-cover opacity-20" />
                     </div>
                     <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/90 to-ink/70" />
                     <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
@@ -85,7 +86,7 @@ export default async function ReportDetailPage({ params }: { params: { slug: str
 
                         <article className="prose prose-slate prose-lg max-w-none rounded-[2rem] border border-line bg-panel p-8 shadow-editorial dark:prose-invert">
                             <h2>Executive Findings</h2>
-                            <div dangerouslySetInnerHTML={{ __html: report.html_content || '' }} />
+                            <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(report.html_content) }} />
                             {!report.html_content && (
                                 <>
                                     <p>
@@ -95,7 +96,7 @@ export default async function ReportDetailPage({ params }: { params: { slug: str
                                     <h3>Regional Stress Mapping</h3>
                                     <div className="not-prose overflow-hidden rounded-[1.5rem] border border-line bg-mist">
                                         <div className="relative aspect-[16/10]">
-                                            <Image src={report.image} alt="Regional mapping" fill className="object-cover" />
+                                            <Image src={report.image} alt="Regional mapping" fill sizes="(max-width: 1200px) 100vw, 1200px" className="object-cover" />
                                         </div>
                                     </div>
                                 </>
@@ -128,7 +129,7 @@ export default async function ReportDetailPage({ params }: { params: { slug: str
                                 {relatedReports.map((related, index) => (
                                     <Link key={related.slug} href={`/reports/${related.slug}`} className="overflow-hidden rounded-[1.5rem] border border-line bg-mist transition hover:-translate-y-1 hover:shadow-soft">
                                         <div className="relative aspect-[16/10]">
-                                            <Image src={related.image} alt={related.title} fill className="object-cover" />
+                                            <Image src={related.image} alt={related.title} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
                                         </div>
                                         <div className="p-5">
                                             <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">{related.category[0]}</p>
@@ -173,6 +174,7 @@ export default async function ReportDetailPage({ params }: { params: { slug: str
                     </SectionReveal>
                 </section>
             </main>
+            <SiteFooter />
         </>
     );
 }

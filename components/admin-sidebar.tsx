@@ -10,7 +10,11 @@ const items = [
     { href: '/admin/upload', label: 'Uploads', icon: UploadCloud },
 ];
 
-export function AdminSidebar({ pathname }: { pathname: string }) {
+type AdminSidebarProps = {
+    pathname: string;
+};
+
+export function AdminSidebar({ pathname }: AdminSidebarProps) {
     return (
         <aside className="hidden min-h-screen w-72 shrink-0 border-r border-line bg-panel px-5 py-6 lg:block">
             <div className="mb-8 space-y-1 px-3">

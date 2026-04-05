@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 
-import { SiteFooter } from '@/components/site-footer';
 import { ThemeProvider } from '@/components/theme-provider';
 import { cosetSans } from '@/lib/fonts';
 
@@ -44,7 +43,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <body className="bg-mist font-sans text-ink antialiased">
                 <ThemeProvider>
                     {children}
-                    <SiteFooter />
                 </ThemeProvider>
             </body>
         </html>

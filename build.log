@@ -1,0 +1,23 @@
+
+> coset-insights-hub@0.1.0 build
+> next build
+
+  Γû▓ Next.js 14.2.35
+  - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+ Γ£ô Compiled successfully
+   Linting and checking validity of types ...
+Failed to compile.
+
+./components/home-sections.tsx:7:30
+Type error: Module '"@/lib/content"' has no exported member 'ReportCard'.
+
+   5 | import { EmptyBlogPosts, EmptyReports } from '@/components/loading-states';
+   6 | import { SectionReveal } from '@/components/section-reveal';
+>  7 | import { type BlogCard, type ReportCard } from '@/lib/content';
+     |                              ^
+   8 | import { cosetOrgLinks } from '@/lib/site-data';
+   9 |
+  10 | export function HeroSection() {
+Next.js build worker exited with code: 1 and signal: null

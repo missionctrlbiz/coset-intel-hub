@@ -1,7 +1,11 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Bell, LogOut, Search, User } from 'lucide-react';
+import { ChevronDown, LogOut, Search } from 'lucide-react';
 
+import { logout } from '@/app/login/actions';
+
+import { Suspense } from 'react';
+import { SearchForm } from '@/components/search-form';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { createSupabaseServerClient as createClient, isSupabaseConfigured } from '@/lib/supabase/clients';
 import { cn } from '@/lib/utils';
@@ -51,29 +55,32 @@ export async function SiteHeader({ dark = false }: SiteHeaderProps) {
                     </nav>
                 </div>
                 <div className="flex items-center gap-3">
-                    <div className={cn('hidden items-center gap-2 rounded-full px-4 py-2 lg:flex', dark ? 'bg-white/10' : 'bg-mist')}>
-                        <Search className="h-4 w-4" />
-                        <input
-                            aria-label="Search intelligence"
-                            className="w-48 bg-transparent text-sm outline-none placeholder:text-current/50"
-                            placeholder="Search intelligence..."
-                        />
-                    </div>
+                    <Suspense fallback={<div className="h-9 w-48 rounded-full bg-mist lg:block hidden" />}>
+                        <SearchForm dark={dark} />
+                    </Suspense>
 
                     {user ? (
-                        <div className="flex items-center gap-3">
-                            <div className={cn('hidden items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold md:flex', dark ? 'border-white/10 bg-white/5 text-white/70' : 'border-line bg-mist text-muted')}>
-                                <User className="h-3 w-3" />
-                                {user.email?.split('@')[0]}
+                        <details className="group relative">
+                            <summary className="flex cursor-pointer items-center gap-2 rounded-full border border-line bg-panel px-3 py-2 shadow-soft transition hover:bg-panel-alt list-none">
+                                <Image src="/favicon.png" alt="User" width={20} height={20} className="rounded-full" />
+                                <ChevronDown className="h-3.5 w-3.5 text-muted transition group-open:rotate-180" />
+                            </summary>
+                            <div className="absolute right-0 top-full mt-2 w-64 rounded-2xl border border-line bg-panel p-4 shadow-lg">
+                                <div className="mb-3 flex items-center gap-3">
+                                    <Image src="/favicon.png" alt="User" width={32} height={32} className="rounded-full" />
+                                    <div className="min-w-0 flex-1">
+                                        <p className="truncate text-sm font-semibold text-ink">{user.email}</p>
+                                        <p className="text-xs text-muted">Admin</p>
+                                    </div>
+                                </div>
+                                <form action={logout} className="mt-3 pt-3 border-t border-line">
+                                    <button type="submit" className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-muted transition hover:bg-mist hover:text-ink">
+                                        <LogOut className="h-4 w-4" />
+                                        Logout
+                                    </button>
+                                </form>
                             </div>
-                            <Link
-                                href="/login"
-                                className={cn('rounded-full p-2 transition', dark ? 'hover:bg-white/10' : 'hover:bg-mist')}
-                                title="Admin Desk"
-                            >
-                                <Bell className="h-4 w-4" />
-                            </Link>
-                        </div>
+                        </details>
                     ) : (
                         <Link
                             href="/login"

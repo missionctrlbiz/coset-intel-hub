@@ -4,11 +4,22 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight, Fingerprint, Lock, Mail, ShieldCheck, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Suspense, useState } from 'react';
 
 import { login } from './actions';
 
 export default function LoginPage() {
+    return (
+        <Suspense>
+            <LoginPageContent />
+        </Suspense>
+    );
+}
+
+function LoginPageContent() {
+    const searchParams = useSearchParams();
+    const redirectTo = searchParams.get('redirect') || '/admin';
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -34,6 +45,7 @@ export default function LoginPage() {
                     src="/coset-eye-banner.jpg"
                     alt="Background"
                     fill
+                    sizes="100vw"
                     priority
                     className="object-cover opacity-[0.12] mix-blend-screen"
                 />
@@ -64,6 +76,7 @@ export default function LoginPage() {
                     >
                         <div className="rounded-[2.25rem] border border-white/10 bg-white/5 p-8 shadow-inner-white">
                             <form action={handleSubmit} className="space-y-6">
+                                <input type="hidden" name="redirect" value={redirectTo} />
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold uppercase tracking-[0.2em] text-white/50" htmlFor="email">
                                         Executive Email

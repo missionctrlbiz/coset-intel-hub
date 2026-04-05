@@ -1,14 +1,14 @@
 import { Activity, ArrowUpRight, Cpu, Download, FileText } from 'lucide-react';
 
 import { AdminSidebar } from '@/components/admin-sidebar';
-import { adminActivity, adminStats } from '@/lib/site-data';
+import { EmptyAdminActivity } from '@/components/loading-states';
+import { getDashboardData } from '@/lib/admin-stats';
 
-const progressWidthClasses = {
-    compact: 'w-[64%]',
-    broad: 'w-[72%]',
-} as const;
+export const revalidate = 60;
 
-export default function AdminDashboardPage() {
+export default async function AdminDashboardPage() {
+    const { stats, activity, isFallback } = await getDashboardData();
+
     return (
         <div className="mx-auto flex max-w-[1600px]">
             <AdminSidebar pathname="/admin" />
@@ -18,11 +18,16 @@ export default function AdminDashboardPage() {
                         <h1 className="font-display text-5xl font-extrabold tracking-[-0.05em] text-ink">Intelligence Dashboard</h1>
                         <p className="mt-3 text-lg text-muted">Welcome back. Here is your operational overview for the current publication cycle.</p>
                     </div>
-                    <button className="rounded-full border border-line bg-panel px-5 py-3 text-sm font-semibold text-navy shadow-soft">Last 30 Days</button>
+                    <div className="flex items-center gap-3">
+                        {isFallback && (
+                            <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">Sample Data</span>
+                        )}
+                        <button className="rounded-full border border-line bg-panel px-5 py-3 text-sm font-semibold text-navy shadow-soft">Last 30 Days</button>
+                    </div>
                 </div>
 
                 <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-                    {adminStats.map((stat, index) => (
+                    {stats.map((stat, index) => (
                         <div key={stat.label} className={`rounded-[2rem] p-6 shadow-soft ${index === 3 ? 'bg-ember text-white' : 'border border-line bg-panel'}`}>
                             <div className="mb-6 flex items-center justify-between">
                                 <div className={`rounded-2xl p-3 ${index === 3 ? 'bg-white/20' : 'bg-mist'}`}>
@@ -56,7 +61,13 @@ export default function AdminDashboardPage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {adminActivity.map((item) => (
+                                    {activity.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={4}>
+                                                <EmptyAdminActivity />
+                                            </td>
+                                        </tr>
+                                    ) : activity.map((item) => (
                                         <tr key={item.title} className="border-t border-line even:bg-panel-alt/60">
                                             <td className="px-6 py-5">
                                                 <p className="font-semibold text-navy">{item.title}</p>
@@ -80,8 +91,8 @@ export default function AdminDashboardPage() {
                         <div className="rounded-[2rem] bg-ink p-6 text-white shadow-editorial">
                             <p className="font-display text-2xl font-bold">Infrastructure Health</p>
                             <div className="mt-6 space-y-4">
-                                <Progress label="Server Capacity" value="72%" widthClass={progressWidthClasses.broad} />
-                                <Progress label="Daily Ingest" value="12.4 GB" widthClass={progressWidthClasses.compact} />
+                                <Progress label="Server Capacity" value="72%" widthClass="w-[72%]" />
+                                <Progress label="Daily Ingest" value="12.4 GB" widthClass="w-[64%]" />
                             </div>
                         </div>
                         <div className="rounded-[2rem] border border-line bg-panel p-6 shadow-soft">
