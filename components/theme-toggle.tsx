@@ -20,13 +20,24 @@ export function ThemeToggle({ darkSurface = false }: ThemeToggleProps) {
             title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
             onClick={toggleTheme}
             className={cn(
-                'inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold transition',
+                'relative inline-flex h-8 w-14 items-center rounded-full border transition-colors duration-300',
                 darkSurface
-                    ? 'border-white/15 bg-white/10 text-white hover:bg-white/15'
-                    : 'border-line bg-panel text-ink hover:bg-mist'
+                    ? 'border-white/20 bg-white/10'
+                    : isDark
+                      ? 'border-line bg-panel-alt'
+                      : 'border-line bg-mist'
             )}
         >
-            {isDark ? <SunMedium className="h-4 w-4" /> : <MoonStar className="h-4 w-4" />}
+            <span
+                className={cn(
+                    'absolute flex h-6 w-6 items-center justify-center rounded-full shadow-sm transition-all duration-300',
+                    isDark
+                        ? 'left-[calc(100%-28px)] bg-navy text-white'
+                        : 'left-1 bg-white text-amber-500'
+                )}
+            >
+                {isDark ? <MoonStar className="h-3.5 w-3.5" /> : <SunMedium className="h-3.5 w-3.5" />}
+            </span>
         </button>
     );
 }

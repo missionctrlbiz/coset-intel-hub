@@ -1,288 +1,437 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, ArrowUpRight, Sparkles, Download, Eye } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+    ArrowRight, ArrowUpRight, Flame, Users, Map, Download, 
+    Eye, Filter, SortDesc, ChevronRight, ChevronLeft, MapPin, 
+    MessageSquare, HelpCircle, Send, LayoutGrid, List
+} from 'lucide-react';
 
 import { EmptyBlogPosts, EmptyReports } from '@/components/loading-states';
 import { SectionReveal } from '@/components/section-reveal';
 import { type BlogCard } from '@/lib/content';
 import { type Report, cosetOrgLinks } from '@/lib/site-data';
 
-export function HeroSection() {
+// ============================================================================
+// Hero Carousel
+// ============================================================================
+export function HeroCarousel({ featured }: { featured: Report[] }) {
+    const [currentIndex, setCurrentIndex] = useState(0);
+
+    useEffect(() => {
+        if (!featured || featured.length === 0) return;
+        const timer = setInterval(() => {
+            setCurrentIndex((prev) => (prev + 1) % Math.min(featured.length, 5));
+        }, 6000);
+        return () => clearInterval(timer);
+    }, [featured]);
+
+    if (!featured || featured.length === 0) return null;
+
+    const currentSlide = featured[currentIndex];
+
     return (
-        <section className="relative overflow-hidden bg-hero-radial">
-            <div className="absolute inset-0 bg-grid-fade bg-grid opacity-40" />
-            <div className="absolute inset-0 bg-gradient-to-br from-ink/80 via-ink/70 to-teal/30 dark:from-black/20 dark:via-ink/65 dark:to-teal/20" />
-            <div className="absolute inset-0">
-                <Image src="/coset-eye-banner.jpg" alt="CoSET banner" fill priority sizes="100vw" className="object-cover opacity-[0.24] mix-blend-screen dark:opacity-[0.22]" />
-            </div>
-            <div className="relative mx-auto grid max-w-7xl gap-12 px-4 pb-20 pt-20 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8 lg:pb-28 lg:pt-28">
-                <SectionReveal className="max-w-3xl">
-                    <p className="mb-5 text-xs font-bold uppercase tracking-[0.3em] text-ember">CoSET Intelligence Hub</p>
-                    <h1 className="max-w-3xl font-display text-5xl font-extrabold leading-[0.98] tracking-[-0.05em] text-white sm:text-6xl lg:text-7xl">
-                        Uwem Nnyin: empowering transformation through intelligence.
-                    </h1>
-                    <p className="mt-6 max-w-2xl text-lg leading-8 text-white/78">
-                        Driving socio-ecological transformation in Nigeria through evidence-based advocacy, policy research, and community empowerment. Built for researchers, policy makers, and institutional partners challenging the growth-centered economic model.
-                    </p>
-                    <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-                        <Link href="/reports" className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-4 font-semibold text-navy shadow-editorial transition hover:bg-sky-100">
-                            Explore Reports
-                            <ArrowRight className="h-4 w-4" />
-                        </Link>
-                        <Link href="/admin/upload" className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 py-4 font-semibold text-white shadow-soft backdrop-blur transition hover:bg-white/15">
-                            Start Upload Workflow
-                        </Link>
-                    </div>
-                    <div className="mt-10 grid max-w-2xl gap-4 sm:grid-cols-2">
-                        <div className="rounded-[1.5rem] border border-white/10 bg-white/8 p-5 backdrop-blur">
-                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/55">Our Mission</p>
-                            <p className="mt-3 text-sm leading-7 text-white/72">Advocating for sustainable practices, promoting social and environmental justice, and empowering communities across Nigeria.</p>
-                        </div>
-                        <div className="rounded-[1.5rem] border border-white/10 bg-white/8 p-5 backdrop-blur">
-                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/55">Core Philosophy</p>
-                            <p className="mt-3 text-sm leading-7 text-white/72">Reconnecting nature and society through inclusive transition frameworks that prioritize social well-being and environmental integrity.</p>
-                        </div>
-                    </div>
-                </SectionReveal>
+        <section className="relative h-[80vh] min-h-[600px] w-full overflow-hidden bg-[#050B14]">
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key={currentIndex}
+                    initial={{ opacity: 0, scale: 1.05 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 1 }}
+                    className="absolute inset-0"
+                >
+                    <Image 
+                        src={currentSlide.image} 
+                        alt={currentSlide.title} 
+                        fill 
+                        priority 
+                        className="object-cover opacity-60 mix-blend-overlay"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/20" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+                </motion.div>
+            </AnimatePresence>
 
-                <SectionReveal delay={0.12} className="self-end">
-                    <div className="rounded-[2.25rem] border border-white/10 bg-black/20 p-5 shadow-editorial backdrop-blur-xl">
-                        <div className="rounded-[1.75rem] border border-white/10 bg-white/6 p-6">
-                            <div className="flex items-start justify-between gap-4 border-b border-white/10 pb-5">
-                                <div>
-                                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Intelligence Snapshot</p>
-                                    <h2 className="mt-3 font-display text-3xl font-extrabold tracking-[-0.04em] text-white">Operational signal at a glance</h2>
-                                </div>
-                                <div className="rounded-full border border-white/10 bg-white/10 p-3 text-white/75">
-                                    <Sparkles className="h-5 w-5" />
-                                </div>
-                            </div>
-
-                            <div className="mt-6 grid gap-4 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
-                                {[
-                                    ['Gas Flaring Sites', '16,000+', 'Mapped across Nigeria'],
-                                    ['Active Contributors', '45,000+', 'Expert network'],
-                                    ['Communities Reached', '182+', 'Across priority zones'],
-                                ].map(([label, value, note], index) => (
-                                    <div key={label} className={`rounded-[1.6rem] border p-5 shadow-soft ${index === 1 ? 'border-white/20 bg-white text-navy' : 'border-white/10 bg-white/8 text-white backdrop-blur'}`}>
-                                        <p className={`text-[11px] font-bold uppercase tracking-[0.22em] ${index === 1 ? 'text-muted' : 'text-white/55'}`}>{label}</p>
-                                        <p className="mt-3 font-display text-4xl font-extrabold tracking-[-0.05em]">{value}</p>
-                                        <p className={`mt-3 text-sm ${index === 1 ? 'text-muted' : 'text-white/70'}`}>{note}</p>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="mt-6 grid gap-4 rounded-[1.6rem] border border-white/10 bg-gradient-to-r from-white/10 to-white/5 p-5 md:grid-cols-[1fr_auto] md:items-center">
-                                <div>
-                                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/55">Evidence-Based Advocacy</p>
-                                    <p className="mt-2 text-sm leading-7 text-white/75">Monitor climate justice, divestment pathways, and just transition frameworks through rigorous policy analysis.</p>
-                                </div>
-                                <Link href="/blog" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15">
-                                    Open editorial desk
-                                    <ArrowUpRight className="h-4 w-4" />
-                                </Link>
-                            </div>
+            <div className="relative mx-auto flex h-full max-w-7xl flex-col justify-end px-4 pb-24 sm:px-6 lg:px-8">
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={`content-${currentIndex}`}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                        className="max-w-3xl"
+                    >
+                        <span className="mb-4 inline-block rounded-full bg-ember/20 px-3 py-1 text-xs font-bold uppercase tracking-widest text-ember border border-ember/30 backdrop-blur-md">
+                            {currentSlide.category[0] || 'Featured Report'}
+                        </span>
+                        <h1 className="mb-6 font-display text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
+                            {currentSlide.title}
+                        </h1>
+                        <p className="mb-8 max-w-2xl text-lg text-white/80 line-clamp-3">
+                            {currentSlide.description}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-4">
+                            <Link 
+                                href={`/reports/${currentSlide.slug}`} 
+                                className="inline-flex items-center gap-2 rounded-full bg-ember px-6 py-3 font-bold text-white shadow-[0_0_20px_rgba(242,140,40,0.3)] transition hover:brightness-110"
+                            >
+                                Read Post
+                                <ArrowRight className="h-4 w-4" />
+                            </Link>
+                            <button className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 py-3 font-semibold text-white backdrop-blur transition hover:bg-white/20">
+                                <Download className="h-4 w-4" />
+                                Download PDF
+                            </button>
                         </div>
-                    </div>
-                </SectionReveal>
+                    </motion.div>
+                </AnimatePresence>
+
+                {/* Indicators */}
+                <div className="absolute bottom-8 right-8 flex gap-2 sm:right-auto">
+                    {featured.slice(0, 5).map((_, i) => (
+                        <button
+                            key={i}
+                            onClick={() => setCurrentIndex(i)}
+                            className={`h-1.5 rounded-full transition-all ${
+                                i === currentIndex ? 'w-8 bg-ember' : 'w-2 bg-white/30 hover:bg-white/50'
+                            }`}
+                            aria-label={`Go to slide ${i + 1}`}
+                        />
+                    ))}
+                </div>
             </div>
         </section>
     );
 }
 
-export function FeaturedReports({ featured }: { featured: Report[] }) {
+// ============================================================================
+// Intel Snapshot
+// ============================================================================
+export function IntelSnapshot() {
     return (
-        <SectionReveal>
-            <div className="mb-8 flex items-end justify-between gap-4">
-                <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Featured Intelligence</p>
-                    <h2 className="mt-2 font-display text-4xl font-extrabold tracking-[-0.04em] text-ink">Critical insights with institutional depth</h2>
+        <section className="border-b border-line bg-panel shadow-sm">
+            <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+                <div className="flex flex-wrap items-center justify-between gap-6 md:flex-nowrap">
+                    <div className="w-full md:w-auto">
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Intelligence Snapshot</p>
+                        <h2 className="mt-1 font-display text-2xl font-bold text-ink">Operational signal at a glance</h2>
+                    </div>
+                    
+                    <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-3 md:w-auto md:flex-1 md:gap-8 lg:pl-12">
+                        <div className="flex items-center gap-4 border-l-4 border-ember bg-mist p-4 rounded-r-xl">
+                            <div className="rounded-full bg-ember/20 p-2 text-ember"><Flame className="h-5 w-5" /></div>
+                            <div>
+                                <p className="font-display text-2xl font-black text-ink">16,000+</p>
+                                <p className="text-xs font-bold uppercase tracking-wider text-muted">Gas Flaring Sites</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4 border-l-4 border-teal bg-mist p-4 rounded-r-xl">
+                            <div className="rounded-full bg-teal/20 p-2 text-teal"><Users className="h-5 w-5" /></div>
+                            <div>
+                                <p className="font-display text-2xl font-black text-ink">45,000+</p>
+                                <p className="text-xs font-bold uppercase tracking-wider text-muted">Active Contributors</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4 border-l-4 border-navy bg-mist p-4 rounded-r-xl">
+                            <div className="rounded-full bg-navy/20 p-2 text-navy"><Map className="h-5 w-5" /></div>
+                            <div>
+                                <p className="font-display text-2xl font-black text-ink">182+</p>
+                                <p className="text-xs font-bold uppercase tracking-wider text-muted">Communities Reached</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div className="grid gap-6 lg:grid-cols-2">
-                {featured.length === 0 ? (
+        </section>
+    );
+}
+
+// ============================================================================
+// Reports Grid
+// ============================================================================
+export function ReportsGrid({ reports }: { reports: Report[] }) {
+    const [viewMode, setViewMode] = useState<'grid' | 'row'>('grid');
+    const displayReports = reports.slice(0, 6);
+
+    return (
+        <SectionReveal>
+            <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+                <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Intelligence Database</p>
+                    <h2 className="mt-2 font-display text-4xl font-extrabold tracking-[-0.04em] text-ink">Explore Strategic Reports</h2>
+                </div>
+                <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex items-center rounded-xl border border-line bg-panel p-1 shadow-soft">
+                        <button 
+                            onClick={() => setViewMode('grid')}
+                            className={`rounded-lg p-2 transition ${viewMode === 'grid' ? 'bg-mist text-ember' : 'text-muted hover:text-ink'}`}
+                            aria-label="Grid view"
+                        >
+                            <LayoutGrid className="h-4 w-4" />
+                        </button>
+                        <button 
+                            onClick={() => setViewMode('row')}
+                            className={`rounded-lg p-2 transition ${viewMode === 'row' ? 'bg-mist text-ember' : 'text-muted hover:text-ink'}`}
+                            aria-label="List view"
+                        >
+                            <List className="h-4 w-4" />
+                        </button>
+                    </div>
+                    <button className="inline-flex items-center gap-2 rounded-xl border border-line bg-panel px-4 py-2 text-sm font-semibold text-navy shadow-soft transition hover:border-navy">
+                        <Filter className="h-4 w-4" /> Filter
+                    </button>
+                    <button className="inline-flex items-center gap-2 rounded-xl border border-line bg-panel px-4 py-2 text-sm font-semibold text-navy shadow-soft transition hover:border-navy">
+                        <SortDesc className="h-4 w-4" /> Sort
+                    </button>
+                </div>
+            </div>
+
+            <div className={`grid gap-6 ${viewMode === 'grid' ? 'md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+                {displayReports.length === 0 ? (
                     <EmptyReports />
-                ) : featured.map((report, index) => (
+                ) : displayReports.map((report) => (
                     <Link
                         key={report.slug}
                         href={`/reports/${report.slug}`}
-                        className="group relative overflow-hidden rounded-[2rem] border border-line bg-panel shadow-editorial"
+                        className={`group flex overflow-hidden rounded-[2rem] border border-line bg-panel shadow-soft transition hover:-translate-y-1 hover:shadow-editorial dark:bg-gradient-to-b dark:from-panel dark:to-panel-alt/90 ${viewMode === 'grid' ? 'flex-col' : 'flex-col sm:flex-row'}`}
                     >
-                        <div className="relative h-[420px]">
-                            <Image src={index === 0 ? '/coset-eye-banner.jpg' : '/community-engagement.jpg'} alt={report.title} fill sizes="(max-width: 1024px) 100vw, 250px" className="object-cover transition duration-700 group-hover:scale-105" />
-                            <div className={`absolute inset-0 ${index === 0 ? 'bg-gradient-to-t from-ink via-ink/40 to-transparent' : 'bg-gradient-to-t from-ember/90 via-ember/30 to-transparent'}`} />
-                            <div className="absolute inset-x-0 bottom-0 p-8 text-white">
-                                <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] backdrop-blur">{report.category[0]}</span>
-                                <h3 className="mt-4 font-display text-3xl font-bold tracking-[-0.04em]">{report.title}</h3>
-                                <p className="mt-3 max-w-md text-sm text-white/80">{report.description}</p>
-                                <div className="mt-6 flex items-center gap-2 text-sm font-semibold">
-                                    Read analysis <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
-                                </div>
+                        <div className={`relative overflow-hidden ${viewMode === 'row' ? 'w-full sm:w-1/3 min-h-[240px]' : 'h-56 w-full'}`}>
+                            <Image 
+                                src={report.image || '/community-engagement.jpg'} 
+                                alt={report.title} 
+                                fill 
+                                sizes="(max-width: 768px) 100vw, 33vw"
+                                className="object-cover transition duration-700 group-hover:scale-105"
+                            />
+                        </div>
+                        <div className="flex flex-1 flex-col p-6 sm:p-8">
+                            <div className="mb-4 flex items-center justify-between">
+                                <span className="rounded-full bg-mist px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-navy">
+                                    {report.category[0]}
+                                </span>
+                                <span className="text-[11px] font-bold uppercase tracking-widest text-muted">{report.publishedAt}</span>
+                            </div>
+                            <h3 className="font-display text-2xl font-bold tracking-[-0.02em] text-ink">{report.title}</h3>
+                            <p className={`mt-4 flex-1 text-sm leading-relaxed text-muted ${viewMode === 'grid' ? 'line-clamp-3' : 'line-clamp-4'}`}>{report.description}</p>
+                            <div className="mt-8 flex items-center justify-between border-t border-line pt-4 text-sm font-semibold text-ember">
+                                Read full logic <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
                             </div>
                         </div>
                     </Link>
                 ))}
             </div>
-        </SectionReveal>
-    );
-}
 
-export function LatestReports({ latest }: { latest: Report[] }) {
-    return (
-        <SectionReveal>
-            <div className="mb-8 flex items-center justify-between gap-4">
-                <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Latest Intelligence</p>
-                    <h2 className="mt-2 font-display text-4xl font-extrabold tracking-[-0.04em] text-ink">Fresh analysis across ecological and policy domains</h2>
-                </div>
-                <Link href="/reports" className="hidden rounded-full border border-line bg-panel px-5 py-3 text-sm font-semibold text-navy shadow-soft transition hover:border-navy md:inline-flex">
-                    View all reports
+            <div className="mt-12 flex justify-center">
+                <Link href="/reports" className="inline-flex items-center gap-2 rounded-full border-2 border-navy bg-transparent px-8 py-3 text-sm font-bold text-navy transition hover:bg-navy hover:text-white dark:hover:bg-[#112f52]">
+                    Load More Intelligence
                 </Link>
             </div>
-            <div className="grid gap-6 xl:grid-cols-3">
-                {latest.length === 0 ? (
-                    <EmptyReports />
-                ) : latest.map((report) => (
-                    <article key={report.slug} className="flex flex-col rounded-[2rem] border border-line bg-panel p-6 shadow-soft transition hover:-translate-y-1 hover:shadow-editorial dark:bg-gradient-to-b dark:from-panel dark:to-panel-alt/90">
-                        <div className="mb-6 flex items-start justify-between gap-4">
-                            <div className="rounded-2xl bg-mist p-3">
-                                <Sparkles className="h-5 w-5 text-navy" />
-                            </div>
-                            <span className="text-xs font-bold uppercase tracking-[0.18em] text-muted">{report.publishedAt}</span>
-                        </div>
-                        <h3 className="font-display text-2xl font-bold tracking-[-0.04em] text-navy">{report.title}</h3>
-                        <p className="mt-3 text-sm leading-7 text-muted">{report.description}</p>
-                        <div className="mt-8 flex items-center justify-between border-t border-line pt-5 text-sm">
-                            <span className="font-semibold text-ember">{report.category[0]}</span>
-                            <div className="flex items-center gap-3 text-muted">
-                                <Download className="h-4 w-4" />
-                                <Eye className="h-4 w-4" />
-                            </div>
-                        </div>
-                    </article>
-                ))}
-            </div>
         </SectionReveal>
     );
 }
 
-export function PlanetPulse({ blogPosts }: { blogPosts: BlogCard[] }) {
-    return (
-        <SectionReveal>
-            <div className="grid gap-8 rounded-[2rem] border border-white/5 bg-gradient-to-br from-ink via-[#122742] to-[#1e2a3d] px-6 py-8 text-white shadow-editorial lg:grid-cols-[1.1fr_0.9fr] lg:px-10">
-                <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Planet Pulse</p>
-                    <h2 className="mt-3 font-display text-4xl font-extrabold tracking-[-0.04em]">Curated global updates from the editorial desk</h2>
-                    <div className="mt-8 grid gap-4 md:grid-cols-3">
-                        {blogPosts.length === 0 ? (
-                            <EmptyBlogPosts />
-                        ) : blogPosts.map((post) => (
-                            <article key={post.title} className="rounded-[1.5rem] border border-white/8 bg-white/8 p-4 backdrop-blur-sm">
-                                <div className="relative mb-4 aspect-[4/3] overflow-hidden rounded-[1.25rem]">
-                                    <Image src={post.image} alt={post.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover" />
-                                </div>
-                                <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/65">{post.category}</p>
-                                <h3 className="mt-2 font-display text-xl font-bold tracking-[-0.04em]">{post.title}</h3>
-                            </article>
-                        ))}
-                    </div>
-                </div>
-                <div className="rounded-[1.75rem] border border-white/8 bg-white/10 p-6 backdrop-blur-sm">
-                    <p className="font-display text-4xl font-extrabold tracking-[-0.04em]">Stay connected.</p>
-                    <p className="mt-3 text-sm leading-7 text-white/72">Receive weekly briefings on climate justice, just transition, and policy developments across Nigeria&apos;s communities.</p>
-                    <div className="mt-6 space-y-3">
-                        <input className="w-full rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-white outline-none placeholder:text-white/40" placeholder="email@organization.org" />
-                        <button className="w-full rounded-xl bg-ember px-4 py-3 font-semibold text-white transition hover:brightness-110">Subscribe to Hub Briefs</button>
-                    </div>
-                </div>
-            </div>
-        </SectionReveal>
-    );
-}
-
-export function LearnMore() {
-    return (
-        <SectionReveal>
-            <div className="grid gap-6 rounded-[2rem] border border-line bg-panel p-6 shadow-soft lg:grid-cols-[1.15fr_0.85fr] lg:p-8 dark:bg-gradient-to-br dark:from-panel dark:to-panel-alt/80">
-                <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Coalition for Socio-Ecological Transformation</p>
-                    <h2 className="mt-3 font-display text-4xl font-extrabold tracking-[-0.04em] text-ink">Learn more about the coalition</h2>
-                    <p className="mt-4 max-w-2xl text-sm leading-7 text-muted">
-                        CoSET is a network of citizens, NGOs, and journalists established in 2018 to reconnect nature and society through sustainable transformation. Explore our campaigns, position papers, and community initiatives on the main website.
-                    </p>
-                    <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                        <Link href={cosetOrgLinks.mainSite} className="inline-flex items-center justify-center gap-2 rounded-full bg-navy px-5 py-3 font-semibold text-white transition hover:bg-teal">
-                            Visit CoSET Nigeria
-                            <ArrowUpRight className="h-4 w-4" />
-                        </Link>
-                        <Link href={cosetOrgLinks.positionPapers} className="inline-flex items-center justify-center gap-2 rounded-full border border-line bg-panel-alt px-5 py-3 font-semibold text-navy transition hover:border-navy">
-                            View Position Papers
-                            <ArrowUpRight className="h-4 w-4" />
-                        </Link>
-                    </div>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-                    <Link href={cosetOrgLinks.about} className="rounded-[1.5rem] border border-line bg-panel-alt p-5 transition hover:-translate-y-1 hover:shadow-soft dark:bg-panel/80">
-                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">About Uwem Nnyin</p>
-                        <p className="mt-3 text-lg font-semibold text-navy">Our mission, core philosophy, and transformation agenda since 2018.</p>
-                    </Link>
-                    <Link href={cosetOrgLinks.contact} className="rounded-[1.5rem] border border-line bg-panel-alt p-5 transition hover:-translate-y-1 hover:shadow-soft dark:bg-panel/80">
-                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">Contact CoSET</p>
-                        <p className="mt-3 text-lg font-semibold text-navy">Marrakesh Street, Wuse 2, Abuja. Collaborate with our network.</p>
-                    </Link>
-                </div>
-            </div>
-        </SectionReveal>
-    );
-}
-
-export function FilterSidebar() {
-    return (
-        <SectionReveal className="rounded-[2rem] border border-line bg-panel p-6 shadow-soft lg:sticky lg:top-28 lg:h-fit dark:bg-panel/92">
-            <p className="font-display text-2xl font-bold text-navy">Filter Intelligence</p>
-            <p className="mt-1 text-sm text-muted">Refine the hub by topic, region, and report type.</p>
-            <div className="mt-8 space-y-6">
-                <div>
-                    <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-muted">Categories</p>
-                    <div className="space-y-3 text-sm text-muted">
-                        <label className="flex items-center gap-3"><input type="checkbox" defaultChecked className="accent-ember" /> Environment</label>
-                        <label className="flex items-center gap-3"><input type="checkbox" className="accent-ember" /> Social Justice</label>
-                        <label className="flex items-center gap-3"><input type="checkbox" className="accent-ember" /> Policy Reform</label>
-                    </div>
-                </div>
-                <div>
-                    <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-muted">Keywords</p>
-                    <div className="flex flex-wrap gap-2">
-                        {['Gas Flaring', 'Divestment', 'Just Transition', 'Climate Justice'].map((item) => (
-                            <span key={item} className="rounded-full bg-mist px-3 py-1 text-sm font-medium text-navy">
-                                {item}
-                            </span>
-                        ))}
-                    </div>
-                </div>
-                <button className="w-full rounded-xl bg-navy px-4 py-3 font-semibold text-white transition hover:bg-teal">Apply Filters</button>
-            </div>
-        </SectionReveal>
-    );
-}
-
+// ============================================================================
+// Mission & Philosophy
+// ============================================================================
 export function MissionAndPhilosophy() {
     return (
         <SectionReveal>
-            <div className="grid gap-8 rounded-[2rem] border border-line bg-panel p-8 shadow-soft lg:grid-cols-2 dark:bg-gradient-to-br dark:from-panel dark:to-panel-alt/80">
-                <div className="rounded-[1.75rem] border border-line bg-gradient-to-br from-navy to-teal p-8 text-white shadow-editorial">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/70">Our Mission</p>
-                    <h2 className="mt-4 font-display text-3xl font-extrabold tracking-[-0.04em]">Driving Socio-Ecological Transformation</h2>
-                    <p className="mt-6 text-base leading-8 text-white/90">
-                        At CoSET, our mission is to drive socio-ecological transformation in Nigeria by advocating for sustainable practices, promoting social and environmental justice, and empowering communities to create a better future for all.
-                    </p>
+            <div className="relative overflow-hidden rounded-[2rem] bg-ink py-16 text-white shadow-editorial">
+                <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-teal/10 blur-3xl" />
+                <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-ember/10 blur-3xl" />
+                
+                <div className="relative mx-auto grid max-w-5xl gap-12 px-6 md:grid-cols-2 lg:px-12">
+                    <div className="flex flex-col items-start space-y-6">
+                        <div className="rounded-2xl bg-white/5 p-4 backdrop-blur-md">
+                            <MapPin className="h-8 w-8 text-teal" />
+                        </div>
+                        <div>
+                            <p className="text-xs font-bold uppercase tracking-[0.2em] text-teal">Our Mission</p>
+                            <h3 className="mt-2 font-display text-3xl font-bold leading-tight">Driving Socio-Ecological Transformation</h3>
+                        </div>
+                        <p className="text-white/70 leading-relaxed">
+                            At CoSET, our mission is to drive socio-ecological transformation in Nigeria by advocating for sustainable practices, promoting social and environmental justice, and empowering communities to create a better future for all.
+                        </p>
+                    </div>
+
+                    <div className="flex flex-col items-start space-y-6">
+                        <div className="rounded-2xl bg-white/5 p-4 backdrop-blur-md">
+                            <Users className="h-8 w-8 text-ember" />
+                        </div>
+                        <div>
+                            <p className="text-xs font-bold uppercase tracking-[0.2em] text-ember">Core Philosophy</p>
+                            <h3 className="mt-2 font-display text-3xl font-bold leading-tight">Challenging the Growth Model</h3>
+                        </div>
+                        <p className="text-white/70 leading-relaxed">
+                            The coalition challenges the current &quot;growth-centered&quot; economic model in favor of one that prioritizes social well-being, environmental integrity, and sustainability. We argue that the total well-being of people, society, and the environment are inextricably linked.
+                        </p>
+                    </div>
                 </div>
-                <div className="rounded-[1.75rem] border border-line bg-panel-alt p-8 shadow-soft dark:bg-panel/80">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Core Philosophy</p>
-                    <h2 className="mt-4 font-display text-3xl font-extrabold tracking-[-0.04em] text-ink">Challenging the Growth Model</h2>
-                    <p className="mt-6 text-base leading-8 text-muted">
-                        The coalition challenges the current &quot;growth-centered&quot; economic model in favor of one that prioritizes social well-being, environmental integrity, and sustainability. We argue that the total well-being of people, society, and the environment are inextricably linked.
-                    </p>
+            </div>
+        </SectionReveal>
+    );
+}
+
+// ============================================================================
+// Planet Pulse
+// ============================================================================
+export function PlanetPulse({ blogPosts }: { blogPosts: BlogCard[] }) {
+    const displayPosts = blogPosts.slice(0, 3);
+    
+    return (
+        <SectionReveal>
+            <div className="flex flex-col items-center text-center">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Planet Pulse</p>
+                <h2 className="mt-3 font-display text-4xl font-extrabold tracking-[-0.04em] text-ink">Curated Global Updates</h2>
+                <p className="mt-4 max-w-2xl text-muted">Latest insights and editorial briefings from our network.</p>
+            </div>
+            
+            <div className="mt-12 grid gap-6 md:grid-cols-3">
+                {displayPosts.length === 0 ? (
+                    <EmptyBlogPosts />
+                ) : displayPosts.map((post) => (
+                    <a 
+                        key={post.title} 
+                        href={`https://cosetng.org/blog/`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="group flex flex-col rounded-[1.5rem] border border-line bg-panel p-4 shadow-soft transition hover:-translate-y-1 hover:shadow-editorial dark:bg-panel-alt/80"
+                    >
+                        <div className="relative mb-6 aspect-video w-full overflow-hidden rounded-[1rem]">
+                            <Image 
+                                src={post.image} 
+                                alt={post.title} 
+                                fill 
+                                sizes="(max-width: 768px) 100vw, 33vw" 
+                                className="object-cover transition duration-700 group-hover:scale-105" 
+                            />
+                            <div className="absolute inset-0 bg-ink/10 opacity-0 transition group-hover:opacity-100" />
+                        </div>
+                        <div className="flex flex-1 flex-col px-2 pb-2">
+                            <span className="w-fit rounded-full bg-mist px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-navy">
+                                {post.category}
+                            </span>
+                            <h3 className="mt-4 font-display text-xl font-bold tracking-tight text-ink group-hover:text-ember">{post.title}</h3>
+                            <p className="mt-3 mt-auto text-xs font-semibold text-muted">{post.publishedAt}</p>
+                        </div>
+                    </a>
+                ))}
+            </div>
+            
+            <div className="mt-8 flex justify-center">
+                <a href="https://cosetng.org/blog/" target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-navy hover:text-ember flex items-center gap-1">
+                    Read more on our main site <ArrowUpRight className="h-4 w-4" />
+                </a>
+            </div>
+        </SectionReveal>
+    );
+}
+
+// ============================================================================
+// Learn More Carousel
+// ============================================================================
+export function LearnMoreCarousel() {
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const images = [
+        '/coset-eye-banner.jpg',
+        '/community-engagement.jpg',
+        '/CoSET-5-600x540.png'
+    ];
+
+    const next = () => setCurrentIndex((p) => (p + 1) % images.length);
+    const prev = () => setCurrentIndex((p) => (p === 0 ? images.length - 1 : p - 1));
+
+    return (
+        <SectionReveal>
+            <div className="rounded-[2rem] border border-line bg-panel p-8 shadow-soft lg:p-12 dark:bg-gradient-to-br dark:from-panel dark:to-panel-alt/80">
+                <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+                    <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Learn More</p>
+                        <h2 className="mt-3 font-display text-4xl font-extrabold tracking-[-0.04em] text-ink lg:text-5xl">
+                            Discover the Coalition
+                        </h2>
+                        <p className="mt-6 text-lg leading-relaxed text-muted">
+                            CoSET is a network of citizens, NGOs, and journalists established in 2018 to reconnect nature and society through sustainable transformation. Explore our campaigns, position papers, and community initiatives.
+                        </p>
+                        <div className="mt-8">
+                            <Link href={cosetOrgLinks.mainSite} className="inline-flex items-center justify-center gap-2 rounded-full bg-navy px-8 py-4 font-bold text-white shadow-soft transition hover:brightness-110">
+                                Visit Uwem Nnyin
+                                <ArrowUpRight className="h-5 w-5" />
+                            </Link>
+                        </div>
+                    </div>
+                    
+                    <div className="relative">
+                        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[2rem] shadow-editorial bg-mist">
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={currentIndex}
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                    transition={{ duration: 0.4 }}
+                                    className="absolute inset-0"
+                                >
+                                    <Image 
+                                        src={images[currentIndex]} 
+                                        alt={`Slide ${currentIndex + 1}`} 
+                                        fill 
+                                        className="object-cover"
+                                    />
+                                </motion.div>
+                            </AnimatePresence>
+                        </div>
+                        <div className="absolute -bottom-5 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-panel p-2 shadow-soft dark:bg-panel-alt">
+                            <button onClick={prev} className="rounded-full p-2 text-ink hover:bg-mist hover:text-ember">
+                                <ChevronLeft className="h-5 w-5" />
+                            </button>
+                            <div className="flex gap-1 px-2">
+                                {images.map((_, i) => (
+                                    <span key={i} className={`h-1.5 rounded-full transition-all ${i === currentIndex ? 'w-4 bg-navy' : 'w-1.5 bg-line'}`} />
+                                ))}
+                            </div>
+                            <button onClick={next} className="rounded-full p-2 text-ink hover:bg-mist hover:text-ember">
+                                <ChevronRight className="h-5 w-5" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </SectionReveal>
+    );
+}
+
+// ============================================================================
+// Hub Services (Newsletter Only on Home)
+// ============================================================================
+export function HubServices() {
+    return (
+        <SectionReveal>
+            {/* Newsletter Standalone Block */}
+            <div className="relative mx-auto max-w-4xl rounded-[2rem] border border-line bg-panel p-8 shadow-editorial dark:bg-panel-alt/80 overflow-hidden text-center" id="subscribe">
+                <div className="absolute -top-10 -right-10 p-6 opacity-[0.03]"><Send className="h-64 w-64 text-navy" /></div>
+                <div className="relative z-10 flex flex-col items-center">
+                    <span className="inline-block rounded-full bg-navy/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-navy">Newsletter</span>
+                    <h3 className="mt-4 font-display text-4xl font-extrabold text-ink">Subscribe to Hub Briefs</h3>
+                    <p className="mt-4 max-w-lg text-lg text-muted">Receive weekly intelligence briefings on climate justice and transformative policies straight to your inbox.</p>
+                    
+                    <form className="mt-8 flex w-full max-w-md flex-col gap-3 sm:flex-row">
+                        <input 
+                            type="email" 
+                            placeholder="Enter your email address..." 
+                            required
+                            className="w-full rounded-xl border border-line bg-mist px-4 py-4 text-sm text-ink outline-none transition focus:border-navy dark:bg-panel"
+                        />
+                        <button type="submit" className="shrink-0 rounded-xl bg-navy px-8 py-4 font-bold text-white transition hover:brightness-110">
+                            Subscribe
+                        </button>
+                    </form>
+                    <p className="mt-4 text-xs font-medium text-muted">We respect your privacy. Unsubscribe at any time.</p>
                 </div>
             </div>
         </SectionReveal>

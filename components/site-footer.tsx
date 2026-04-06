@@ -1,19 +1,21 @@
-import Image from 'next/image';
 import Link from 'next/link';
-import { Facebook, Instagram, Twitter, Mail, ArrowRight } from 'lucide-react';
+import { Facebook, Instagram, Twitter, MapPin, Phone, Mail, FileText, ChevronRight, Hash, Compass, AlertCircle } from 'lucide-react';
+import { ThemeLogo } from '@/components/theme-logo';
 
 const footerGroups = [
     {
         heading: 'Explore',
+        icon: Compass,
         links: [
             { href: '/', label: 'Home' },
-            { href: '/reports', label: 'Reports' },
+            { href: '/reports', label: 'Intelligence Reports' },
             { href: '/blog', label: 'Planet Pulse' },
             { href: '/admin', label: 'Admin Suite' },
         ],
     },
     {
-        heading: 'Research',
+        heading: 'Research Hub',
+        icon: FileText,
         links: [
             { href: '/reports', label: 'Regional Analysis' },
             { href: '/reports', label: 'Policy Briefs' },
@@ -22,21 +24,13 @@ const footerGroups = [
         ],
     },
     {
-        heading: 'Institutional',
+        heading: 'Quick Links',
+        icon: Hash,
         links: [
-            { href: '/admin/upload', label: 'Upload Workflow' },
-            { href: '/admin/content', label: 'Content Operations' },
-            { href: '/admin/analytics', label: 'Analytics' },
-            { href: '/manifest.webmanifest', label: 'Manifest' },
-        ],
-    },
-    {
-        heading: 'Contact',
-        links: [
-            { href: 'mailto:cosetng@gmail.com', label: 'cosetng@gmail.com' },
-            { href: 'https://cosetng.org', label: 'cosetng.org' },
-            { href: '#', label: 'Privacy Policy' },
-            { href: '#', label: 'Methodology' },
+            { href: 'https://cosetng.org/about/', label: 'About Uwem Nnyin' },
+            { href: 'https://cosetng.org/position-papers/', label: 'Position Papers' },
+            { href: 'https://cosetng.org/cosetng-donation/', label: 'Donate' },
+            { href: '/manifest.webmanifest', label: 'App Manifest' },
         ],
     },
 ];
@@ -49,124 +43,105 @@ const socialLinks = [
 
 export function SiteFooter() {
     return (
-        <>
-            {/* Newsletter CTA Section */}
-            <section className="mt-20 border-y border-line bg-gradient-to-br from-ink via-[#122742] to-[#1e2a3d] py-16">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-                        <div className="text-white">
-                            <p className="text-xs font-bold uppercase tracking-[0.3em] text-ember">Stay Informed</p>
-                            <h2 className="mt-3 font-display text-4xl font-extrabold tracking-[-0.04em] lg:text-5xl">
-                                Fresh intelligence delivered to your inbox
-                            </h2>
-                            <p className="mt-4 max-w-xl text-lg leading-8 text-white/75">
-                                Subscribe to receive weekly editorial briefings on climate justice, governance, and transformation signals across Nigeria.
+        <footer className="border-t border-line bg-panel/95 text-ink backdrop-blur">
+            <div className="mx-auto flex max-w-7xl flex-col gap-12 px-4 py-16 sm:px-6 lg:px-8">
+                
+                {/* Main Footer Grid */}
+                <div className="grid gap-12 border-b border-line pb-12 lg:grid-cols-[1fr_2fr]">
+                    
+                    {/* Brand & Social */}
+                    <div className="space-y-8">
+                        <Link href="/" aria-label="Go to CoSET homepage" className="inline-flex w-max items-center">
+                            <ThemeLogo className="w-[124px] h-auto sm:w-[148px]" />
+                        </Link>
+                        <div className="max-w-md space-y-3">
+                            <p className="text-sm font-bold uppercase tracking-[0.22em] text-ember">Uwem Nnyin — Our Lives</p>
+                            <p className="text-base leading-relaxed text-muted">
+                                Advocating for sustainable practices, promoting social and environmental justice, and empowering communities across Nigeria.
                             </p>
                         </div>
-                        <div className="rounded-[2rem] border border-white/10 bg-white/8 p-6 backdrop-blur-sm lg:p-8">
-                            <form className="space-y-4">
-                                <div>
-                                    <label htmlFor="newsletter-email" className="sr-only">
-                                        Email address
-                                    </label>
-                                    <div className="relative">
-                                        <Mail className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/40" />
-                                        <input
-                                            id="newsletter-email"
-                                            type="email"
-                                            required
-                                            placeholder="Enter your email address"
-                                            className="w-full rounded-full border border-white/20 bg-white/10 py-4 pl-12 pr-4 text-white placeholder-white/50 backdrop-blur transition focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20"
-                                        />
-                                    </div>
-                                </div>
-                                <button
-                                    type="submit"
-                                    className="flex w-full items-center justify-center gap-2 rounded-full bg-white px-6 py-4 font-semibold text-navy shadow-editorial transition hover:bg-sky-100"
-                                >
-                                    Subscribe to Newsletter
-                                    <ArrowRight className="h-4 w-4" />
-                                </button>
-                                <p className="text-center text-xs text-white/60">
-                                    We respect your privacy. Unsubscribe anytime.
-                                </p>
-                            </form>
+                        <div className="flex flex-wrap gap-3">
+                            {socialLinks.map((item) => {
+                                const Icon = item.icon;
+                                return (
+                                    <Link
+                                        key={item.label}
+                                        href={item.href}
+                                        aria-label={item.label}
+                                        className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-line bg-panel-alt text-navy transition hover:border-ember hover:text-ember"
+                                    >
+                                        <Icon className="h-5 w-5" />
+                                    </Link>
+                                );
+                            })}
                         </div>
                     </div>
-                </div>
-            </section>
 
-            {/* Footer */}
-            <footer className="border-t border-line bg-panel/95 text-ink backdrop-blur">
-                <div className="mx-auto flex max-w-7xl flex-col gap-10 px-4 py-12 sm:px-6 lg:px-8">
-                    <div className="grid gap-8 border-b border-line pb-10 lg:grid-cols-[1.2fr_1fr]">
-                        <div className="space-y-6">
-                            <Link href="/" aria-label="Go to CoSET homepage" className="inline-flex w-max items-center">
-                                <Image src="/logo.png" alt="CoSET" width={640} height={256} className="w-[124px] h-auto sm:w-[148px]" />
-                            </Link>
-                            <div className="max-w-xl space-y-3">
-                                <p className="text-sm font-bold uppercase tracking-[0.22em] text-ember">Uwem Nnyin — Our Lives</p>
-                                <p className="text-base leading-8 text-muted">At CoSET, our mission is to drive socio-ecological transformation in Nigeria by advocating for sustainable practices, promoting social and environmental justice, and empowering communities to create a better future for all.</p>
-                            </div>
-                            <div className="flex flex-wrap gap-3">
-                                {socialLinks.map((item) => {
-                                    const Icon = item.icon;
-
-                                    return (
-                                        <Link
-                                            key={item.label}
-                                            href={item.href}
-                                            aria-label={item.label}
-                                            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-line bg-panel-alt text-muted transition hover:border-ember hover:text-ember"
-                                        >
-                                            <Icon className="h-4 w-4" />
-                                        </Link>
-                                    );
-                                })}
-                            </div>
-                        </div>
-
-                        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-                            {footerGroups.map((group) => (
-                                <div key={group.heading} className="space-y-4">
-                                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">{group.heading}</p>
-                                    <div className="space-y-3 text-sm text-muted">
+                    {/* Navigation Columns */}
+                    <div className="grid gap-8 sm:grid-cols-3">
+                        {footerGroups.map((group) => {
+                            const GroupIcon = group.icon;
+                            return (
+                                <div key={group.heading} className="space-y-6">
+                                    <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-muted">
+                                        <GroupIcon className="h-4 w-4" />
+                                        {group.heading}
+                                    </h3>
+                                    <ul className="space-y-4 text-sm font-medium text-navy">
                                         {group.links.map((link) => (
-                                            <Link key={link.label} href={link.href} className="block transition hover:text-ember">
-                                                {link.label}
-                                            </Link>
+                                            <li key={link.label}>
+                                                <Link href={link.href} className="group flex items-center gap-2 transition hover:text-ember">
+                                                    <ChevronRight className="h-3 w-3 text-muted/50 transition-transform group-hover:translate-x-1 group-hover:text-ember" />
+                                                    {link.label}
+                                                </Link>
+                                            </li>
                                         ))}
-                                    </div>
+                                    </ul>
                                 </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="grid gap-6 rounded-[2rem] border border-line bg-panel-alt/70 p-6 lg:grid-cols-[1.1fr_0.9fr]">
-                        <div>
-                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">About CoSET</p>
-                            <p className="mt-3 max-w-2xl text-sm leading-7 text-muted">The Coalition for Socio-Ecological Transformation challenges the growth-centered economic model in favor of one that prioritizes social well-being, environmental integrity, and sustainability across Nigeria&apos;s communities.</p>
-                        </div>
-                        <div className="grid gap-4 sm:grid-cols-2">
-                            <div className="rounded-[1.25rem] border border-line bg-panel p-4">
-                                <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">Email</p>
-                                <p className="mt-2 text-sm font-semibold text-navy">cosetng@gmail.com</p>
-                            </div>
-                            <div className="rounded-[1.25rem] border border-line bg-panel p-4">
-                                <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">Phone</p>
-                                <p className="mt-2 text-sm font-semibold text-navy">+234 805 445 7460</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col gap-3 text-sm text-muted md:flex-row md:items-center md:justify-between">
-                        <p>© 2026 CoSET Intelligence Hub. All rights reserved.</p>
-                        <p>
-                            Made with ❤️ by <Link href="https://missionctrl.com.ng" className="font-semibold text-navy transition hover:text-ember">MissionCTRL</Link>
-                        </p>
+                            );
+                        })}
                     </div>
                 </div>
-            </footer>
-        </>
+
+                {/* Structured Contact Row */}
+                <div className="grid gap-6 sm:grid-cols-3 lg:gap-8">
+                    <div className="flex items-start gap-4 rounded-[1.5rem] border border-line bg-mist p-6 dark:bg-panel-alt">
+                        <div className="rounded-full bg-navy/10 p-3 text-navy"><MapPin className="h-6 w-6" /></div>
+                        <div>
+                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">Headquarters</p>
+                            <p className="mt-2 text-sm font-semibold text-ink">Marrakesh Street, Wuse 2<br />Abuja, Nigeria</p>
+                        </div>
+                    </div>
+                    <div className="flex items-start gap-4 rounded-[1.5rem] border border-line bg-mist p-6 dark:bg-panel-alt">
+                        <div className="rounded-full bg-ember/10 p-3 text-ember"><Mail className="h-6 w-6" /></div>
+                        <div>
+                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">Email Us</p>
+                            <a href="mailto:cosetng@gmail.com" className="mt-2 block text-sm font-semibold text-ink hover:text-ember transition">cosetng@gmail.com</a>
+                        </div>
+                    </div>
+                    <div className="flex items-start gap-4 rounded-[1.5rem] border border-line bg-mist p-6 dark:bg-panel-alt">
+                        <div className="rounded-full bg-teal/10 p-3 text-teal"><Phone className="h-6 w-6" /></div>
+                        <div>
+                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">Call Us</p>
+                            <a href="tel:+2348054457460" className="mt-2 block text-sm font-semibold text-ink hover:text-teal transition">+234 805 445 7460</a>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Bottom Bar */}
+                <div className="flex flex-col gap-4 border-t border-line pt-8 text-sm text-muted md:flex-row md:items-center md:justify-between">
+                    <p>© {new Date().getFullYear()} CoSET Intelligence Hub. All rights reserved.</p>
+                    <div className="flex items-center gap-6">
+                        <Link href="https://missionctrl.com.ng" className="flex items-center gap-2 font-semibold text-navy transition hover:text-ember">
+                            Made with ❤️ by MissionCTRL
+                        </Link>
+                        <span className="hidden h-4 w-px bg-line md:block" />
+                        <Link href="#" className="flex items-center gap-1 font-semibold text-navy transition hover:text-ember">
+                            <AlertCircle className="h-4 w-4" /> Legal
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        </footer>
     );
 }
