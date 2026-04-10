@@ -82,7 +82,7 @@ export function UploadStep({
                             <Presentation className="h-5 w-5 text-teal" />
                         </div>
                         <UploadCloud className="mx-auto mb-4 h-12 w-12 text-navy" />
-                        <h3 className="font-display text-2xl font-bold text-navy">Drag & Drop Intel Assets</h3>
+                        <h3 className="font-display text-2xl font-bold text-navy">Drag &amp; Drop Intel Assets</h3>
                         <p className="mt-2 text-muted">Support for PDF, CSV, DOCX, and PPT up to 50MB.</p>
                         <button type="button" onClick={onBrowse} className="mt-8 rounded-full bg-navy px-6 py-3 font-semibold text-white transition hover:bg-teal">
                             Browse Files
@@ -129,12 +129,12 @@ export function UploadStep({
                             <p className="mt-3 rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{urlError}</p>
                         ) : null}
                         <p className="mt-4 text-sm leading-6 text-muted">
-                            We'll fetch the page and extract the main article content. Pages that require a login or are fully JavaScript-rendered may not work — use Paste Content instead.
+                            We&apos;ll fetch the page and extract the main article content. Pages that require a login or are fully JavaScript-rendered may not work — use Paste Content instead.
                         </p>
                         {isExtractingUrl ? (
                             <div className="mt-4 flex items-center gap-3 text-sm text-muted">
                                 <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-ember border-t-transparent" />
-                                Importing content from URL…
+                                Importing content from URL&hellip;
                             </div>
                         ) : null}
                     </div>
@@ -150,7 +150,7 @@ export function UploadStep({
                             value={pastedContent}
                             onChange={(e) => setPastedContent(e.target.value)}
                             rows={14}
-                            placeholder="Paste your report text or HTML here…"
+                            placeholder="Paste your report text or HTML here&hellip;"
                             className="w-full rounded-2xl border border-line bg-panel px-4 py-4 font-mono text-sm text-navy shadow-soft outline-none transition focus:border-ember focus:ring-2 focus:ring-ember/30"
                         />
                     </label>
@@ -194,7 +194,7 @@ export function MetadataStep({ title, summary, categories, tags, setTitle, setSu
                             className="flex items-center gap-2 rounded-full border border-ember/30 bg-ember/5 px-4 py-2 text-sm font-semibold text-ember transition hover:bg-ember/10 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             <Sparkles className="h-4 w-4" />
-                            {isAnalyzing ? 'Analyzing…' : 'Auto-fill details'}
+                            {isAnalyzing ? 'Analyzing\u2026' : 'Auto-fill details'}
                         </button>
                     ) : null}
                     {onBeautify ? (
@@ -205,7 +205,7 @@ export function MetadataStep({ title, summary, categories, tags, setTitle, setSu
                             className="flex items-center gap-2 rounded-full border border-teal/30 bg-teal/5 px-4 py-2 text-sm font-semibold text-teal transition hover:bg-teal/10 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             <Wand2 className="h-4 w-4" />
-                            {isBeautifying ? 'Enhancing…' : 'Enhance formatting'}
+                            {isBeautifying ? 'Enhancing\u2026' : 'Enhance formatting'}
                         </button>
                     ) : null}
                 </div>
