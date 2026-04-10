@@ -1,0 +1,5 @@
+app/admin/content/page.tsx(18,21): error TS2322: Type '{ pathname: string; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'pathname' does not exist on type 'IntrinsicAttributes'.
+app/admin/layout.tsx(1,29): error TS2307: Cannot find module '@/components/admin-header' or its corresponding type declarations.
+app/admin/upload/page.tsx(7,27): error TS2322: Type '{ pathname: string; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'pathname' does not exist on type 'IntrinsicAttributes'.

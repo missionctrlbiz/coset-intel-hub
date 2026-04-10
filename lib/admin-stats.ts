@@ -114,32 +114,33 @@ export async function getDashboardData(): Promise<DashboardData> {
             pipelineHealth = `${successRate.toFixed(1)}%`;
         }
 
+        const draftReportsResult = await supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'draft');
+        const draftReports = draftReportsResult.count ?? 0;
+
         const stats: DashboardStat[] = [
             {
                 label: 'Total Reports',
                 value: formatCompactNumber(totalReports),
-                delta: `${publishedReports} published`,
+                delta: 'Overall',
                 tone: 'navy',
             },
             {
-                label: 'Total Views',
-                value: formatCompactNumber(totalViews),
-                delta: 'All time',
-                tone: 'teal',
+                label: 'Published',
+                value: formatCompactNumber(publishedReports),
+                delta:
+                    totalReports === 0
+                        ? 'No reports yet'
+                        : `${((publishedReports / totalReports) * 100).toFixed(0)}% of total`,
+                tone: 'emerald',
             },
             {
-                label: 'Total Downloads',
-                value: formatCompactNumber(totalDownloads),
-                delta: 'All time',
-                tone: 'slate',
-            },
-            {
-                label: 'Pipeline Health',
-                value: pipelineHealth,
-                delta: 'Last 30 days',
-                tone: 'ember',
+                label: 'Drafts',
+                value: formatCompactNumber(draftReports),
+                delta: 'Pending review',
+                tone: 'amber',
             },
         ];
+
 
         const activity: DashboardActivity[] = (recentActivityResult.data ?? []).map((row) => ({
             title: row.title,

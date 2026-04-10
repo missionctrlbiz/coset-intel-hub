@@ -62,12 +62,12 @@ function formatCompactNumber(value: number) {
     return String(value);
 }
 
-function resolveImagePath(candidate: string | null | undefined, fallback: string) {
-    if (!candidate || candidate.startsWith('http')) {
-        return fallback;
-    }
-
-    return candidate;
+export function resolveImagePath(candidate: string | null | undefined, fallback: string) {
+    if (!candidate) return fallback;
+    if (candidate.startsWith('http') || candidate.startsWith('/')) return candidate;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (supabaseUrl) return `${supabaseUrl}/storage/v1/object/public/report-images/${candidate}`;
+    return fallback;
 }
 
 function parseMetrics(input: Json): SeedReport['metrics'] {
@@ -117,7 +117,7 @@ function normalizeMetrics(metrics: SeedReport['metrics']) {
     ];
 }
 
-function defaultReportImage(slug: string) {
+export function defaultReportImage(slug: string) {
     if (slug.includes('gas') || slug.includes('flaring')) {
         return '/community-engagement.jpg';
     }
@@ -260,7 +260,7 @@ export async function getRelatedReports(slug: string, categories: string[]) {
             .eq('status', 'published')
             .neq('slug', slug)
             .limit(3);
-            
+
         if (categories && categories.length > 0) {
             query = query.overlaps('category', categories);
         }
@@ -310,9 +310,9 @@ export async function getPublishedBlogPostBySlug(slug: string) {
             // Find in fallback
             const fallbackIndex = parseInt(slug.replace('seed-blog-', ''), 10) - 1;
             const fallback = mapFallbackBlogPosts()[fallbackIndex];
-            
-            return fallback 
-                ? { ...fallback, htmlContent: `<p>${fallback.excerpt}</p><p>This is a placeholder for the seed blog post content. In a production environment, this would be replaced with the full HTML content from the Supabase database.</p>` } 
+
+            return fallback
+                ? { ...fallback, htmlContent: `<p>${fallback.excerpt}</p><p>This is a placeholder for the seed blog post content. In a production environment, this would be replaced with the full HTML content from the Supabase database.</p>` }
                 : null;
         }
 
@@ -324,16 +324,27 @@ export async function getPublishedBlogPostBySlug(slug: string) {
     } catch {
         const fallbackIndex = parseInt(slug.replace('seed-blog-', ''), 10) - 1;
         const fallback = mapFallbackBlogPosts()[fallbackIndex];
-        return fallback 
-            ? { ...fallback, htmlContent: `<p>${fallback.excerpt}</p><p>This is a placeholder for the seed blog post content. In a production environment, this would be replaced with the full HTML content from the Supabase database.</p>` } 
+        return fallback
+            ? { ...fallback, htmlContent: `<p>${fallback.excerpt}</p><p>This is a placeholder for the seed blog post content. In a production environment, this would be replaced with the full HTML content from the Supabase database.</p>` }
             : null;
     }
 }
 
-export async function getAdminContentReports(): Promise<AdminContentResult> {
+export async function getAdminContentReports(options?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    category?: string;
+}): Promise<AdminContentResult & { totalCount: number }> {
+    const page = options?.page ?? 1;
+    const limit = options?.limit ?? 10;
+    const offset = (page - 1) * limit;
+
     if (!isSupabaseConfigured()) {
+        const fallbacks = mapFallbackAdminReports();
         return {
-            reports: mapFallbackAdminReports(),
+            reports: fallbacks.slice(offset, offset + limit),
+            totalCount: fallbacks.length,
             canManage: false,
             isFallback: true,
             profile: null,
@@ -342,14 +353,16 @@ export async function getAdminContentReports(): Promise<AdminContentResult> {
     }
 
     try {
-        const supabase = createSupabaseServerClient();
+        const supabase = await createSupabaseServerClient();
         const {
             data: { user },
         } = await supabase.auth.getUser();
 
         if (!user) {
+            const fallbacks = mapFallbackAdminReports();
             return {
-                reports: mapFallbackAdminReports(),
+                reports: fallbacks.slice(offset, offset + limit),
+                totalCount: fallbacks.length,
                 canManage: false,
                 isFallback: true,
                 profile: null,
@@ -364,18 +377,29 @@ export async function getAdminContentReports(): Promise<AdminContentResult> {
 
         let query = supabase
             .from('reports')
-            .select('id, slug, title, category, author, published_at, updated_at, status')
-            .order('updated_at', { ascending: false });
+            .select('id, slug, title, category, author, published_at, updated_at, status', { count: 'exact' });
+
+        if (options?.status && options.status !== 'All Status') {
+            query = query.eq('status', options.status.toLowerCase());
+        }
+
+        if (options?.category && options.category !== 'All Categories') {
+            query = query.contains('category', [options.category]);
+        }
 
         if (!canManage) {
             query = query.eq('status', 'published');
         }
 
-        const { data, error } = await query;
+        const { data, error, count } = await query
+            .order('updated_at', { ascending: false })
+            .range(offset, offset + limit - 1);
 
-        if (error || !data || data.length === 0) {
+        if (error || !data) {
+            const fallbacks = mapFallbackAdminReports();
             return {
-                reports: mapFallbackAdminReports(),
+                reports: fallbacks.slice(offset, offset + limit),
+                totalCount: fallbacks.length,
                 canManage,
                 isFallback: true,
                 profile: profile ?? null,
@@ -385,14 +409,17 @@ export async function getAdminContentReports(): Promise<AdminContentResult> {
 
         return {
             reports: data.map(mapAdminReportRow),
+            totalCount: count ?? data.length,
             canManage,
             isFallback: false,
             profile: profile ?? null,
             user,
         };
     } catch {
+        const fallbacks = mapFallbackAdminReports();
         return {
-            reports: mapFallbackAdminReports(),
+            reports: fallbacks.slice(offset, offset + limit),
+            totalCount: fallbacks.length,
             canManage: false,
             isFallback: true,
             profile: null,

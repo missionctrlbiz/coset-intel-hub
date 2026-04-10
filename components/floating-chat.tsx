@@ -127,6 +127,7 @@ export function FloatingChatWidget({ slug }: { slug: string }) {
                                 <button
                                     type="submit"
                                     disabled={!input.trim() || isLoading}
+                                    aria-label="Send message"
                                     className="rounded-lg bg-ember p-1.5 text-white transition hover:brightness-110 disabled:opacity-50"
                                 >
                                     <Send className="h-4 w-4" />

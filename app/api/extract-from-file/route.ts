@@ -63,16 +63,16 @@ export async function POST(request: Request) {
     try {
         const formData = await request.formData();
         const file = formData.get('file');
-
-        if (!(file instanceof File)) {
-            return NextResponse.json({ error: 'Expected a file upload under the "file" field.' }, { status: 400 });
-        }
+        const id = String(formData.get('id') ?? '').trim() || null;
+        const textContent = String(formData.get('textContent') ?? '').trim();
+        const downloadFile = formData.get('downloadFile');
+        const existingCoverImagePath = String(formData.get('coverImagePath') ?? '').trim() || null;
 
         let supabase;
         let adminSupabase;
 
         try {
-            supabase = createSupabaseServerClient();
+            supabase = await createSupabaseServerClient();
             adminSupabase = createSupabaseAdminClient();
         } catch (error) {
             return NextResponse.json(
@@ -103,8 +103,142 @@ export async function POST(request: Request) {
         const categoriesInput = formData.getAll('categories').map(String);
         const tagsInput = formData.getAll('tags').map(String);
         const previewOnly = formData.get('previewOnly') === 'true';
+        const requestedStatus = (formData.get('status') as Database['public']['Enums']['content_status']) || 'draft';
+        const coverImageFile = formData.get('coverImage') as File | null;
+        const downloadFileFile = downloadFile instanceof File ? downloadFile : null;
 
-        // ── Document parsing pipeline (PDF, DOCX, PPTX, TXT, etc.) ──
+        // Guard: new reports require a file or pasted/URL text content
+        if (!id && !(file instanceof File) && !textContent) {
+            return NextResponse.json({ error: 'Expected a file upload under the "file" field.' }, { status: 400 });
+        }
+
+        // ── UPDATE EXISTING REPORT ──────────────────────────────────────────────
+        if (id && !previewOnly) {
+            const updateData: Record<string, unknown> = {
+                updated_at: new Date().toISOString(),
+            };
+            if (titleInput) updateData.title = titleInput;
+            if (summaryInput) updateData.description = summaryInput;
+            if (categoriesInput.length > 0) updateData.category = uniqueStrings(categoriesInput, 3);
+            if (tagsInput.length > 0) updateData.tags = uniqueStrings(tagsInput, 5);
+
+            if (file instanceof File) {
+                const parseResult = await parseDocument(file);
+                if (parseResult.text) {
+                    updateData.html_content = parseResult.text;
+                    updateData.read_time_minutes = estimateReadTimeMinutes(parseResult.text);
+                    const storagePath = `${user.id}/${Date.now()}-${sanitizeStorageName(file.name)}`;
+                    const fileBuffer = Buffer.from(await file.arrayBuffer());
+                    await adminSupabase.storage.from('report-uploads').upload(storagePath, fileBuffer, {
+                        contentType: file.type || 'application/octet-stream',
+                        upsert: false,
+                    });
+                    processAndEmbedReport(id, parseResult.text);
+                }
+            } else if (textContent) {
+                updateData.html_content = textContent;
+                updateData.read_time_minutes = estimateReadTimeMinutes(textContent);
+            }
+
+            if (coverImageFile instanceof File) {
+                const coverExt = coverImageFile.name.split('.').pop() ?? 'jpg';
+                const coverImagePath = `${user.id}/covers/${Date.now()}-${id}.${coverExt}`;
+                const coverBuffer = Buffer.from(await coverImageFile.arrayBuffer());
+                await adminSupabase.storage.from('report-images').upload(coverImagePath, coverBuffer, {
+                    contentType: coverImageFile.type,
+                    upsert: false,
+                });
+                updateData.cover_image_path = coverImagePath;
+            } else if (existingCoverImagePath) {
+                updateData.cover_image_path = existingCoverImagePath;
+            }
+
+            if (downloadFileFile) {
+                const dlExt = downloadFileFile.name.split('.').pop() ?? 'bin';
+                const dlPath = `${user.id}/downloads/${Date.now()}-${id}.${dlExt}`;
+                const dlBuffer = Buffer.from(await downloadFileFile.arrayBuffer());
+                await adminSupabase.storage.from('report-uploads').upload(dlPath, dlBuffer, {
+                    contentType: downloadFileFile.type || 'application/octet-stream',
+                    upsert: false,
+                });
+                updateData.download_file_path = dlPath;
+            }
+
+            const { data: report, error: updateError } = await adminSupabase
+                .from('reports')
+                .update(updateData)
+                .eq('id', id)
+                .select('id, slug, title, status')
+                .single();
+
+            if (updateError || !report) {
+                return NextResponse.json({ error: updateError?.message ?? 'Could not update the report.' }, { status: 500 });
+            }
+
+            return NextResponse.json({ message: 'Report updated.', report }, { status: 200 });
+        }
+
+        // ── TEXT-ONLY CREATE (Paste / URL content, no source file) ─────────────
+        if (!(file instanceof File)) {
+            const categories = uniqueStrings(categoriesInput, 3);
+            const tags = uniqueStrings(tagsInput, 5);
+            const title = titleInput || 'Intelligence Report';
+            const description = summaryInput || '';
+            const slug = await createUniqueSlug(adminSupabase, title);
+
+            let coverImagePath: string | null = null;
+            if (coverImageFile instanceof File) {
+                const coverExt = coverImageFile.name.split('.').pop() ?? 'jpg';
+                coverImagePath = `${user.id}/covers/${Date.now()}-${slug}.${coverExt}`;
+                const coverBuffer = Buffer.from(await coverImageFile.arrayBuffer());
+                await adminSupabase.storage.from('report-images').upload(coverImagePath, coverBuffer, {
+                    contentType: coverImageFile.type,
+                    upsert: false,
+                });
+            }
+
+            let downloadFilePath: string | null = null;
+            if (downloadFileFile) {
+                const dlExt = downloadFileFile.name.split('.').pop() ?? 'bin';
+                downloadFilePath = `${user.id}/downloads/${Date.now()}-${slug}.${dlExt}`;
+                const dlBuffer = Buffer.from(await downloadFileFile.arrayBuffer());
+                await adminSupabase.storage.from('report-uploads').upload(downloadFilePath, dlBuffer, {
+                    contentType: downloadFileFile.type || 'application/octet-stream',
+                    upsert: false,
+                });
+            }
+
+            const { data: report, error: reportError } = await adminSupabase
+                .from('reports')
+                .insert({
+                    author: profile.full_name || profile.email || user.email || 'CoSET Research Lab',
+                    category: categories,
+                    created_by: user.id,
+                    description,
+                    highlight: [],
+                    metrics: [],
+                    quote: null,
+                    read_time_minutes: estimateReadTimeMinutes(textContent),
+                    slug,
+                    source_type: 'link',
+                    status: requestedStatus,
+                    tags,
+                    title,
+                    html_content: textContent,
+                    cover_image_path: coverImagePath,
+                    download_file_path: downloadFilePath,
+                })
+                .select('id, slug, title, status')
+                .single();
+
+            if (reportError || !report) {
+                return NextResponse.json({ error: reportError?.message ?? 'Could not create the report.' }, { status: 500 });
+            }
+
+            return NextResponse.json({ message: 'Report created from content.', report }, { status: 201 });
+        }
+
+        // ── DOCUMENT PARSING PIPELINE (PDF, DOCX, PPTX, TXT, etc.) ────────────
         const parseResult = await parseDocument(file);
         const textPreview = parseResult.text.slice(0, 12000);
 
@@ -132,6 +266,7 @@ export async function POST(request: Request) {
                 parserUsed: parseResult.parserUsed,
                 pageCount: parseResult.pageCount,
                 truncated: parseResult.truncated,
+                fullText: parseResult.text // Pass the full text for the editor
             });
         }
 
@@ -140,6 +275,29 @@ export async function POST(request: Request) {
         const title = titleInput || aiDraft?.title || getFileStem(file.name);
         const description = summaryInput || aiDraft?.summary || 'Uploaded source is awaiting editorial review and enrichment.';
         const slug = await createUniqueSlug(adminSupabase, aiDraft?.recommendedSlug || title);
+
+        let coverImagePath: string | null = null;
+        if (coverImageFile && coverImageFile instanceof File) {
+            const coverExt = coverImageFile.name.split('.').pop() ?? 'jpg';
+            coverImagePath = `${user.id}/covers/${Date.now()}-${slug}.${coverExt}`;
+            const coverBuffer = Buffer.from(await coverImageFile.arrayBuffer());
+            await adminSupabase.storage.from('report-images').upload(coverImagePath, coverBuffer, {
+                contentType: coverImageFile.type,
+                upsert: false
+            });
+        }
+
+        let downloadFilePath: string | null = null;
+        if (downloadFileFile) {
+            const dlExt = downloadFileFile.name.split('.').pop() ?? 'bin';
+            downloadFilePath = `${user.id}/downloads/${Date.now()}-${slug}.${dlExt}`;
+            const dlBuffer = Buffer.from(await downloadFileFile.arrayBuffer());
+            await adminSupabase.storage.from('report-uploads').upload(downloadFilePath, dlBuffer, {
+                contentType: downloadFileFile.type || 'application/octet-stream',
+                upsert: false,
+            });
+        }
+
         const storagePath = `${user.id}/${Date.now()}-${sanitizeStorageName(file.name)}`;
 
         const fileBuffer = Buffer.from(await file.arrayBuffer());
@@ -165,12 +323,15 @@ export async function POST(request: Request) {
                 read_time_minutes: estimateReadTimeMinutes(parseResult.text || description),
                 slug,
                 source_type: 'upload',
-                status: 'draft',
+                status: requestedStatus,
                 tags,
                 title,
+                cover_image_path: coverImagePath,
+                download_file_path: downloadFilePath,
             })
             .select('id, slug, title, status')
             .single();
+
 
         if (reportError || !report) {
             await adminSupabase.storage.from('report-uploads').remove([storagePath]);

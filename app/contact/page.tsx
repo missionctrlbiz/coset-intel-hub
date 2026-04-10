@@ -89,8 +89,8 @@ export default function ContactPage() {
                                             </div>
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-xs font-bold uppercase tracking-wider text-muted ml-2">Topic</label>
-                                            <select className="w-full rounded-xl border border-line bg-mist px-4 py-3 text-sm outline-none transition focus:border-ember dark:bg-panel appearance-none">
+                                            <label htmlFor="contact-topic" className="text-xs font-bold uppercase tracking-wider text-muted ml-2">Topic</label>
+                                            <select id="contact-topic" className="w-full rounded-xl border border-line bg-mist px-4 py-3 text-sm outline-none transition focus:border-ember dark:bg-panel appearance-none">
                                                 <option>General Inquiry</option>
                                                 <option>Submit Intelligence / Tip</option>
                                                 <option>Data Access Request</option>
@@ -99,8 +99,8 @@ export default function ContactPage() {
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-xs font-bold uppercase tracking-wider text-muted ml-2">Message</label>
-                                            <textarea 
-                                                placeholder="How can we help?" 
+                                            <textarea
+                                                placeholder="How can we help?"
                                                 rows={5}
                                                 className="w-full rounded-xl border border-line bg-mist px-4 py-3 text-sm outline-none transition focus:border-ember dark:bg-panel resize-none"
                                             ></textarea>

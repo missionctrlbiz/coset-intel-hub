@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-    ArrowRight, ArrowUpRight, Flame, Users, Map, Download, 
-    Eye, Filter, SortDesc, ChevronRight, ChevronLeft, MapPin, 
+import {
+    ArrowRight, ArrowUpRight, Flame, Users, Map, Download,
+    Eye, Filter, SortDesc, ChevronRight, ChevronLeft, MapPin,
     MessageSquare, HelpCircle, Send, LayoutGrid, List
 } from 'lucide-react';
 
@@ -34,7 +34,7 @@ export function HeroCarousel({ featured }: { featured: Report[] }) {
     const currentSlide = featured[currentIndex];
 
     return (
-        <section className="relative h-[80vh] min-h-[600px] w-full overflow-hidden bg-[#050B14]">
+        <section className="relative h-[80vh] min-h-[600px] w-full overflow-hidden bg-ink">
             <AnimatePresence mode="wait">
                 <motion.div
                     key={currentIndex}
@@ -44,11 +44,11 @@ export function HeroCarousel({ featured }: { featured: Report[] }) {
                     transition={{ duration: 1 }}
                     className="absolute inset-0"
                 >
-                    <Image 
-                        src={currentSlide.image} 
-                        alt={currentSlide.title} 
-                        fill 
-                        priority 
+                    <Image
+                        src={currentSlide.image}
+                        alt={currentSlide.title}
+                        fill
+                        priority
                         className="object-cover opacity-60 mix-blend-overlay"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/20" />
@@ -76,8 +76,8 @@ export function HeroCarousel({ featured }: { featured: Report[] }) {
                             {currentSlide.description}
                         </p>
                         <div className="flex flex-wrap items-center gap-4">
-                            <Link 
-                                href={`/reports/${currentSlide.slug}`} 
+                            <Link
+                                href={`/reports/${currentSlide.slug}`}
                                 className="inline-flex items-center gap-2 rounded-full bg-ember px-6 py-3 font-bold text-white shadow-[0_0_20px_rgba(242,140,40,0.3)] transition hover:brightness-110"
                             >
                                 Read Post
@@ -97,9 +97,8 @@ export function HeroCarousel({ featured }: { featured: Report[] }) {
                         <button
                             key={i}
                             onClick={() => setCurrentIndex(i)}
-                            className={`h-1.5 rounded-full transition-all ${
-                                i === currentIndex ? 'w-8 bg-ember' : 'w-2 bg-white/30 hover:bg-white/50'
-                            }`}
+                            className={`h-1.5 rounded-full transition-all ${i === currentIndex ? 'w-8 bg-ember' : 'w-2 bg-white/30 hover:bg-white/50'
+                                }`}
                             aria-label={`Go to slide ${i + 1}`}
                         />
                     ))}
@@ -121,7 +120,7 @@ export function IntelSnapshot() {
                         <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Intelligence Snapshot</p>
                         <h2 className="mt-1 font-display text-2xl font-bold text-ink">Operational signal at a glance</h2>
                     </div>
-                    
+
                     <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-3 md:w-auto md:flex-1 md:gap-8 lg:pl-12">
                         <div className="flex items-center gap-4 border-l-4 border-ember bg-mist p-4 rounded-r-xl">
                             <div className="rounded-full bg-ember/20 p-2 text-ember"><Flame className="h-5 w-5" /></div>
@@ -152,6 +151,23 @@ export function IntelSnapshot() {
 }
 
 // ============================================================================
+// Report Card Image with error fallback
+// ============================================================================
+function ReportCardImage({ src, alt }: { src: string; alt: string }) {
+    const [imgSrc, setImgSrc] = useState(src || '/community-engagement.jpg');
+    return (
+        <Image
+            src={imgSrc}
+            alt={alt}
+            fill
+            sizes="(max-width: 768px) 100vw, 33vw"
+            className="object-cover transition duration-700 group-hover:scale-105"
+            onError={() => setImgSrc('/community-engagement.jpg')}
+        />
+    );
+}
+
+// ============================================================================
 // Reports Grid
 // ============================================================================
 export function ReportsGrid({ reports }: { reports: Report[] }) {
@@ -167,14 +183,14 @@ export function ReportsGrid({ reports }: { reports: Report[] }) {
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
                     <div className="flex items-center rounded-xl border border-line bg-panel p-1 shadow-soft">
-                        <button 
+                        <button
                             onClick={() => setViewMode('grid')}
                             className={`rounded-lg p-2 transition ${viewMode === 'grid' ? 'bg-mist text-ember' : 'text-muted hover:text-ink'}`}
                             aria-label="Grid view"
                         >
                             <LayoutGrid className="h-4 w-4" />
                         </button>
-                        <button 
+                        <button
                             onClick={() => setViewMode('row')}
                             className={`rounded-lg p-2 transition ${viewMode === 'row' ? 'bg-mist text-ember' : 'text-muted hover:text-ink'}`}
                             aria-label="List view"
@@ -201,13 +217,7 @@ export function ReportsGrid({ reports }: { reports: Report[] }) {
                         className={`group flex overflow-hidden rounded-[2rem] border border-line bg-panel shadow-soft transition hover:-translate-y-1 hover:shadow-editorial dark:bg-gradient-to-b dark:from-panel dark:to-panel-alt/90 ${viewMode === 'grid' ? 'flex-col' : 'flex-col sm:flex-row'}`}
                     >
                         <div className={`relative overflow-hidden ${viewMode === 'row' ? 'w-full sm:w-1/3 min-h-[240px]' : 'h-56 w-full'}`}>
-                            <Image 
-                                src={report.image || '/community-engagement.jpg'} 
-                                alt={report.title} 
-                                fill 
-                                sizes="(max-width: 768px) 100vw, 33vw"
-                                className="object-cover transition duration-700 group-hover:scale-105"
-                            />
+                            <ReportCardImage src={report.image || '/community-engagement.jpg'} alt={report.title} />
                         </div>
                         <div className="flex flex-1 flex-col p-6 sm:p-8">
                             <div className="mb-4 flex items-center justify-between">
@@ -219,7 +229,7 @@ export function ReportsGrid({ reports }: { reports: Report[] }) {
                             <h3 className="font-display text-2xl font-bold tracking-[-0.02em] text-ink">{report.title}</h3>
                             <p className={`mt-4 flex-1 text-sm leading-relaxed text-muted ${viewMode === 'grid' ? 'line-clamp-3' : 'line-clamp-4'}`}>{report.description}</p>
                             <div className="mt-8 flex items-center justify-between border-t border-line pt-4 text-sm font-semibold text-ember">
-                                Read full logic <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                                Read Report <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
                             </div>
                         </div>
                     </Link>
@@ -227,7 +237,7 @@ export function ReportsGrid({ reports }: { reports: Report[] }) {
             </div>
 
             <div className="mt-12 flex justify-center">
-                <Link href="/reports" className="inline-flex items-center gap-2 rounded-full border-2 border-navy bg-transparent px-8 py-3 text-sm font-bold text-navy transition hover:bg-navy hover:text-white dark:hover:bg-[#112f52]">
+                <Link href="/reports" className="inline-flex items-center gap-2 rounded-full border-2 border-navy bg-transparent px-8 py-3 text-sm font-bold text-navy transition hover:bg-navy hover:text-white dark:hover:bg-navy">
                     Load More Intelligence
                 </Link>
             </div>
@@ -244,7 +254,7 @@ export function MissionAndPhilosophy() {
             <div className="relative overflow-hidden rounded-[2rem] bg-ink py-16 text-white shadow-editorial">
                 <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-teal/10 blur-3xl" />
                 <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-ember/10 blur-3xl" />
-                
+
                 <div className="relative mx-auto grid max-w-5xl gap-12 px-6 md:grid-cols-2 lg:px-12">
                     <div className="flex flex-col items-start space-y-6">
                         <div className="rounded-2xl bg-white/5 p-4 backdrop-blur-md">
@@ -282,7 +292,7 @@ export function MissionAndPhilosophy() {
 // ============================================================================
 export function PlanetPulse({ blogPosts }: { blogPosts: BlogCard[] }) {
     const displayPosts = blogPosts.slice(0, 3);
-    
+
     return (
         <SectionReveal>
             <div className="flex flex-col items-center text-center">
@@ -290,25 +300,25 @@ export function PlanetPulse({ blogPosts }: { blogPosts: BlogCard[] }) {
                 <h2 className="mt-3 font-display text-4xl font-extrabold tracking-[-0.04em] text-ink">Curated Global Updates</h2>
                 <p className="mt-4 max-w-2xl text-muted">Latest insights and editorial briefings from our network.</p>
             </div>
-            
+
             <div className="mt-12 grid gap-6 md:grid-cols-3">
                 {displayPosts.length === 0 ? (
                     <EmptyBlogPosts />
                 ) : displayPosts.map((post) => (
-                    <a 
-                        key={post.title} 
-                        href={`https://cosetng.org/blog/`} 
-                        target="_blank" 
+                    <a
+                        key={post.title}
+                        href={`https://cosetng.org/blog/`}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="group flex flex-col rounded-[1.5rem] border border-line bg-panel p-4 shadow-soft transition hover:-translate-y-1 hover:shadow-editorial dark:bg-panel-alt/80"
                     >
                         <div className="relative mb-6 aspect-video w-full overflow-hidden rounded-[1rem]">
-                            <Image 
-                                src={post.image} 
-                                alt={post.title} 
-                                fill 
-                                sizes="(max-width: 768px) 100vw, 33vw" 
-                                className="object-cover transition duration-700 group-hover:scale-105" 
+                            <Image
+                                src={post.image}
+                                alt={post.title}
+                                fill
+                                sizes="(max-width: 768px) 100vw, 33vw"
+                                className="object-cover transition duration-700 group-hover:scale-105"
                             />
                             <div className="absolute inset-0 bg-ink/10 opacity-0 transition group-hover:opacity-100" />
                         </div>
@@ -317,12 +327,12 @@ export function PlanetPulse({ blogPosts }: { blogPosts: BlogCard[] }) {
                                 {post.category}
                             </span>
                             <h3 className="mt-4 font-display text-xl font-bold tracking-tight text-ink group-hover:text-ember">{post.title}</h3>
-                            <p className="mt-3 mt-auto text-xs font-semibold text-muted">{post.publishedAt}</p>
+                            <p className="mt-auto text-xs font-semibold text-muted">{post.publishedAt}</p>
                         </div>
                     </a>
                 ))}
             </div>
-            
+
             <div className="mt-8 flex justify-center">
                 <a href="https://cosetng.org/blog/" target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-navy hover:text-ember flex items-center gap-1">
                     Read more on our main site <ArrowUpRight className="h-4 w-4" />
@@ -365,7 +375,7 @@ export function LearnMoreCarousel() {
                             </Link>
                         </div>
                     </div>
-                    
+
                     <div className="relative">
                         <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[2rem] shadow-editorial bg-mist">
                             <AnimatePresence mode="wait">
@@ -377,17 +387,17 @@ export function LearnMoreCarousel() {
                                     transition={{ duration: 0.4 }}
                                     className="absolute inset-0"
                                 >
-                                    <Image 
-                                        src={images[currentIndex]} 
-                                        alt={`Slide ${currentIndex + 1}`} 
-                                        fill 
+                                    <Image
+                                        src={images[currentIndex]}
+                                        alt={`Slide ${currentIndex + 1}`}
+                                        fill
                                         className="object-cover"
                                     />
                                 </motion.div>
                             </AnimatePresence>
                         </div>
                         <div className="absolute -bottom-5 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-panel p-2 shadow-soft dark:bg-panel-alt">
-                            <button onClick={prev} className="rounded-full p-2 text-ink hover:bg-mist hover:text-ember">
+                            <button onClick={prev} aria-label="Previous slide" className="rounded-full p-2 text-ink hover:bg-mist hover:text-ember">
                                 <ChevronLeft className="h-5 w-5" />
                             </button>
                             <div className="flex gap-1 px-2">
@@ -395,7 +405,7 @@ export function LearnMoreCarousel() {
                                     <span key={i} className={`h-1.5 rounded-full transition-all ${i === currentIndex ? 'w-4 bg-navy' : 'w-1.5 bg-line'}`} />
                                 ))}
                             </div>
-                            <button onClick={next} className="rounded-full p-2 text-ink hover:bg-mist hover:text-ember">
+                            <button onClick={next} aria-label="Next slide" className="rounded-full p-2 text-ink hover:bg-mist hover:text-ember">
                                 <ChevronRight className="h-5 w-5" />
                             </button>
                         </div>
@@ -419,11 +429,11 @@ export function HubServices() {
                     <span className="inline-block rounded-full bg-navy/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-navy">Newsletter</span>
                     <h3 className="mt-4 font-display text-4xl font-extrabold text-ink">Subscribe to Hub Briefs</h3>
                     <p className="mt-4 max-w-lg text-lg text-muted">Receive weekly intelligence briefings on climate justice and transformative policies straight to your inbox.</p>
-                    
+
                     <form className="mt-8 flex w-full max-w-md flex-col gap-3 sm:flex-row">
-                        <input 
-                            type="email" 
-                            placeholder="Enter your email address..." 
+                        <input
+                            type="email"
+                            placeholder="Enter your email address..."
                             required
                             className="w-full rounded-xl border border-line bg-mist px-4 py-4 text-sm text-ink outline-none transition focus:border-navy dark:bg-panel"
                         />

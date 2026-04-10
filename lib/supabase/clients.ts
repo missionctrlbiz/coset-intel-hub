@@ -1,6 +1,6 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { createServerClient } from '@supabase/ssr';
+import type { CookieOptions } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
 
 import type { Database } from '@/lib/database.types';
 
@@ -52,9 +52,9 @@ export function createSupabaseAdminClient() {
     });
 }
 
-export function createSupabaseServerClient() {
-    const cookieStore = cookies();
-
+export async function createSupabaseServerClient() {
+    const { cookies } = await import('next/headers');
+    const cookieStore = await cookies();
     return createServerClient<Database>(getSupabaseUrl(), getSupabaseAnonKey(), {
         cookies: {
             getAll() {
@@ -62,15 +62,11 @@ export function createSupabaseServerClient() {
             },
             setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
                 try {
-                    const writableCookieStore = cookieStore as unknown as {
-                        set: (name: string, value: string, options: CookieOptions) => void;
-                    };
-
-                    cookiesToSet.forEach(({ name, value, options }) => {
-                        writableCookieStore.set(name, value, options);
-                    });
+                    cookiesToSet.forEach(({ name, value, options }) =>
+                        cookieStore.set(name, value, options)
+                    );
                 } catch {
-                    // Cookie writes are ignored when called from server components.
+                    // Called from a Server Component — middleware handles session refresh
                 }
             },
         },

@@ -97,7 +97,7 @@ export function SearchForm({ dark }: { dark?: boolean }) {
                 />
                 {isLoading && <Loader2 className="h-4 w-4 animate-spin text-muted" />}
                 {query && !isLoading && (
-                    <button type="button" onClick={() => { setQuery(''); setResults([]); setShowDropdown(false); }} className="text-muted hover:text-ink transition">
+                    <button type="button" onClick={() => { setQuery(''); setResults([]); setShowDropdown(false); }} aria-label="Clear search" className="text-muted hover:text-ink transition">
                         <X className="h-3.5 w-3.5" />
                     </button>
                 )}
@@ -137,7 +137,7 @@ export function SearchForm({ dark }: { dark?: boolean }) {
                             onClick={() => { setShowDropdown(false); router.push(`/reports?q=${encodeURIComponent(query)}`); }}
                             className="w-full rounded-xl px-3 py-2 text-center text-sm font-semibold text-navy transition hover:bg-mist"
                         >
-                            View all results →
+                            View all results ΓåÆ
                         </button>
                     </div>
                 </div>

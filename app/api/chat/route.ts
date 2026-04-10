@@ -12,7 +12,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Message and slug are required' }, { status: 400 });
         }
 
-        const supabase = createSupabaseServerClient();
+        const supabase = await createSupabaseServerClient();
 
         const { data: reportData, error: reportError } = await supabase
             .from('reports')
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
         if (!apiKey) {
             return NextResponse.json({ error: 'Generative AI is not configured' }, { status: 500 });
         }
-        
+
         const client = new GoogleGenAI({ apiKey });
 
         // 2. Generate embedding for user message

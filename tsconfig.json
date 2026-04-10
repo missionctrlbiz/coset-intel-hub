@@ -19,6 +19,7 @@
         "incremental": true,
         "forceConsistentCasingInFileNames": true,
         "ignoreDeprecations": "5.0",
+        "disableReferencedProjectLoad": true,
         "plugins": [
             {
                 "name": "next"
