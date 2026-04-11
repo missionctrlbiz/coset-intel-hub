@@ -1,5 +1,7 @@
-import { Plus, Pencil, Eye, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Pencil, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+
+import { DeleteReportButton } from '@/components/delete-report-button';
 
 import { ContentFilters } from '@/components/content-filters';
 import { getAdminContentReports } from '@/lib/content';
@@ -132,15 +134,7 @@ export default async function AdminContentPage({
                                             >
                                                 <Eye className="h-4 w-4" />
                                             </Link>
-                                            <button
-                                                type="button"
-                                                disabled
-                                                aria-disabled="true"
-                                                title="Delete (coming soon)"
-                                                className="flex items-center justify-center h-8 w-8 rounded-lg text-muted/30 cursor-not-allowed"
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </button>
+                                            <DeleteReportButton id={report.id} title={report.title} />
                                         </div>
                                     </td>
                                 </tr>

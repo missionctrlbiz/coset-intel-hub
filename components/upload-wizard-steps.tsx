@@ -56,8 +56,8 @@ export function UploadStep({
                         type="button"
                         onClick={() => setSourceMode(key)}
                         className={`flex-1 rounded-xl py-2.5 text-sm font-semibold transition ${sourceMode === key
-                                ? 'bg-panel text-navy shadow-soft'
-                                : 'text-muted hover:text-navy'
+                            ? 'bg-panel text-navy shadow-soft'
+                            : 'text-muted hover:text-navy'
                             }`}
                     >
                         {label}
