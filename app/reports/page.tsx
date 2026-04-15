@@ -102,10 +102,17 @@ export default async function ReportsPage() {
                                                 <Link href={`/reports/${report.slug}`} className="inline-flex items-center rounded-xl border border-line px-4 py-3 text-sm font-semibold text-navy transition hover:border-navy">
                                                     Read Report
                                                 </Link>
-                                                <button className="inline-flex items-center gap-2 rounded-xl bg-ember px-4 py-3 text-sm font-semibold text-white transition hover:brightness-110">
-                                                    <Download className="h-4 w-4" />
-                                                    Download PDF
-                                                </button>
+                                                {report.downloadHref ? (
+                                                    <Link href={report.downloadHref} className="inline-flex items-center gap-2 rounded-xl bg-ember px-4 py-3 text-sm font-semibold text-white transition hover:brightness-110">
+                                                        <Download className="h-4 w-4" />
+                                                        Download PDF
+                                                    </Link>
+                                                ) : (
+                                                    <button type="button" disabled className="inline-flex items-center gap-2 rounded-xl bg-ember/50 px-4 py-3 text-sm font-semibold text-white/70">
+                                                        <Download className="h-4 w-4" />
+                                                        Download PDF
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
                                     </article>

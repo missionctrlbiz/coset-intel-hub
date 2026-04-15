@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 import type { Database } from '@/lib/database.types';
 import { parseDocument } from '@/lib/document-parser';
-import { generateExtractionDraft } from '@/lib/genai';
+import { generateExtractionDraft, beautifyHtmlContent } from '@/lib/genai';
 import { processAndEmbedReport } from '@/lib/embeddings';
 import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/supabase/clients';
 
@@ -125,7 +125,15 @@ export async function POST(request: Request) {
             if (file instanceof File) {
                 const parseResult = await parseDocument(file);
                 if (parseResult.text) {
-                    updateData.html_content = parseResult.text;
+                    // Beautify the parsed content
+                    let beautifiedHtml: string | null = null;
+                    try {
+                        beautifiedHtml = await beautifyHtmlContent(parseResult.text);
+                    } catch (error) {
+                        console.error('Failed to beautify HTML during update:', error);
+                    }
+
+                    updateData.html_content = beautifiedHtml || parseResult.text;
                     updateData.read_time_minutes = estimateReadTimeMinutes(parseResult.text);
                     const storagePath = `${user.id}/${Date.now()}-${sanitizeStorageName(file.name)}`;
                     const fileBuffer = Buffer.from(await file.arrayBuffer());
@@ -136,7 +144,15 @@ export async function POST(request: Request) {
                     processAndEmbedReport(id, parseResult.text);
                 }
             } else if (textContent) {
-                updateData.html_content = textContent;
+                // Beautify pasted/URL content
+                let beautifiedHtml: string | null = null;
+                try {
+                    beautifiedHtml = await beautifyHtmlContent(textContent);
+                } catch (error) {
+                    console.error('Failed to beautify pasted content during update:', error);
+                }
+
+                updateData.html_content = beautifiedHtml || textContent;
                 updateData.read_time_minutes = estimateReadTimeMinutes(textContent);
             }
 
@@ -186,6 +202,14 @@ export async function POST(request: Request) {
             const description = summaryInput || '';
             const slug = await createUniqueSlug(adminSupabase, title);
 
+            // Beautify pasted or URL content
+            let beautifiedHtml: string | null = null;
+            try {
+                beautifiedHtml = await beautifyHtmlContent(textContent);
+            } catch (error) {
+                console.error('Failed to beautify text content:', error);
+            }
+
             let coverImagePath: string | null = null;
             if (coverImageFile instanceof File) {
                 const coverExt = coverImageFile.name.split('.').pop() ?? 'jpg';
@@ -224,7 +248,7 @@ export async function POST(request: Request) {
                     status: requestedStatus,
                     tags,
                     title,
-                    html_content: textContent,
+                    html_content: beautifiedHtml || textContent,
                     cover_image_path: coverImagePath,
                     download_file_path: downloadFilePath,
                 })
@@ -244,6 +268,7 @@ export async function POST(request: Request) {
 
         let aiDraft = null;
         let aiError: string | null = null;
+        let beautifiedHtml: string | null = null;
 
         if (textPreview) {
             try {
@@ -254,6 +279,16 @@ export async function POST(request: Request) {
                 });
             } catch (error) {
                 aiError = error instanceof Error ? error.message : 'Unknown extraction error.';
+            }
+
+            // Beautify the extracted content into premium HTML layout
+            if (parseResult.text) {
+                try {
+                    beautifiedHtml = await beautifyHtmlContent(parseResult.text);
+                } catch (error) {
+                    console.error('Failed to beautify HTML:', error);
+                    // Continue without beautification - we'll save the raw text
+                }
             }
         }
 
@@ -266,7 +301,8 @@ export async function POST(request: Request) {
                 parserUsed: parseResult.parserUsed,
                 pageCount: parseResult.pageCount,
                 truncated: parseResult.truncated,
-                fullText: parseResult.text // Pass the full text for the editor
+                fullText: parseResult.text, // Pass the full text for the editor
+                beautifiedHtml // Include the beautified HTML in preview
             });
         }
 
@@ -314,6 +350,7 @@ export async function POST(request: Request) {
             .from('reports')
             .insert({
                 author: profile.full_name || profile.email || user.email || 'CoSET Research Lab',
+                html_content: beautifiedHtml || parseResult.text || null, // Use beautified HTML if available, fallback to raw text
                 category: categories,
                 created_by: user.id,
                 description,

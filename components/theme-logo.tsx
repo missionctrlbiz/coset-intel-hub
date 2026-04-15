@@ -7,11 +7,12 @@ type ThemeLogoProps = {
     width?: number;
     height?: number;
     className?: string;
+    forceDark?: boolean;
 };
 
-export function ThemeLogo({ width = 640, height = 256, className = 'w-[98px] h-auto sm:w-[118px]' }: ThemeLogoProps) {
+export function ThemeLogo({ width = 640, height = 256, className = 'w-[98px] h-auto sm:w-[118px]', forceDark }: ThemeLogoProps) {
     const { theme } = useTheme();
-    const isDark = theme === 'dark';
+    const isDark = forceDark || theme === 'dark';
 
     return (
         <Image

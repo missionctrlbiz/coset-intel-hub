@@ -19,11 +19,11 @@ type ReportsExplorerProps = {
 export function ReportsExplorer({ initialReports, categoryFilters, tagFilters }: ReportsExplorerProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
-    
+
     const initialQuery = searchParams.get('q') || '';
     const initialCategory = searchParams.get('category') || '';
     const initialTag = searchParams.get('tag') || '';
-    
+
     // We can do real-time filtering if they are loaded, or rely on URL changes.
     // The instructions say "filter state with URL search params"
     const displayReports = initialReports.filter(report => {
@@ -48,15 +48,15 @@ export function ReportsExplorer({ initialReports, categoryFilters, tagFilters }:
                 <p className="font-display text-2xl font-bold text-navy">Research Filters</p>
                 <p className="mt-1 text-sm text-muted">Climate justice, divestment, and just transition research.</p>
                 <div className="mt-8 space-y-8">
-                    <FilterSection 
-                        title="Categories" 
-                        items={categoryFilters.length > 0 ? categoryFilters : filterGroups.categories} 
+                    <FilterSection
+                        title="Categories"
+                        items={categoryFilters.length > 0 ? categoryFilters : filterGroups.categories}
                         selectedValue={initialCategory}
                         onChange={(val) => updateFilter('category', val)}
                     />
-                    <FilterSection 
-                        title="Tags" 
-                        items={tagFilters.length > 0 ? tagFilters : filterGroups.tags} 
+                    <FilterSection
+                        title="Tags"
+                        items={tagFilters.length > 0 ? tagFilters : filterGroups.tags}
                         selectedValue={initialTag}
                         onChange={(val) => updateFilter('tag', val)}
                     />
@@ -86,9 +86,9 @@ export function ReportsExplorer({ initialReports, categoryFilters, tagFilters }:
                     <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
                         <div className="flex flex-wrap gap-2">
                             {(categoryFilters.length > 0 ? categoryFilters : filterGroups.categories).map((item, index) => (
-                                <button 
+                                <button
                                     key={item}
-                                    onClick={() => updateFilter('category', item)} 
+                                    onClick={() => updateFilter('category', item)}
                                     className={`rounded-full px-4 py-2 text-sm font-medium transition ${initialCategory === item ? 'bg-blue-100 text-navy' : 'bg-panel text-muted shadow-soft hover:bg-mist'}`}>
                                     {item}
                                 </button>
@@ -146,10 +146,17 @@ export function ReportsExplorer({ initialReports, categoryFilters, tagFilters }:
                                             <Link href={`/reports/${report.slug}`} className="inline-flex items-center rounded-xl border border-line px-4 py-3 text-sm font-semibold text-navy transition hover:border-navy">
                                                 Save
                                             </Link>
-                                            <button className="inline-flex items-center gap-2 rounded-xl bg-ember px-4 py-3 text-sm font-semibold text-white transition hover:brightness-110">
-                                                <Download className="h-4 w-4" />
-                                                Download PDF
-                                            </button>
+                                            {report.downloadHref ? (
+                                                <Link href={report.downloadHref} className="inline-flex items-center gap-2 rounded-xl bg-ember px-4 py-3 text-sm font-semibold text-white transition hover:brightness-110">
+                                                    <Download className="h-4 w-4" />
+                                                    Download PDF
+                                                </Link>
+                                            ) : (
+                                                <button type="button" disabled className="inline-flex items-center gap-2 rounded-xl bg-ember/50 px-4 py-3 text-sm font-semibold text-white/70">
+                                                    <Download className="h-4 w-4" />
+                                                    Download PDF
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 </article>
@@ -237,11 +244,11 @@ function FilterSection({ title, items, selectedValue, onChange }: { title: strin
             <div className="space-y-3 text-sm text-muted">
                 {items.map((item) => (
                     <label key={item} className="flex items-center gap-3">
-                        <input 
-                            type="checkbox" 
-                            checked={selectedValue === item} 
+                        <input
+                            type="checkbox"
+                            checked={selectedValue === item}
                             onChange={() => onChange(item)}
-                            className="accent-ember border-line/50" 
+                            className="accent-ember border-line/50"
                         />
                         {item}
                     </label>

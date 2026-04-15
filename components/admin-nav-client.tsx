@@ -99,7 +99,7 @@ export function AdminNavClient({ fullName, email, dark = false }: AdminNavClient
             </nav>
 
             {/* Right side: theme toggle + avatar dropdown + hamburger */}
-            <div className="flex items-center gap-2">
+            <div className="ml-auto flex items-center gap-2">
                 {/* Theme toggle */}
                 <ThemeToggle darkSurface={dark} />
 
@@ -129,7 +129,7 @@ export function AdminNavClient({ fullName, email, dark = false }: AdminNavClient
                     {avatarOpen && (
                         <div className={cn(
                             'absolute right-0 top-full z-50 mt-2 min-w-[200px] overflow-hidden rounded-2xl border shadow-editorial',
-                            dark ? 'border-white/10 bg-ink' : 'border-line bg-panel'
+                            dark ? 'border-white/10 bg-[#0A1421]' : 'border-line bg-panel'
                         )}>
                             <div className={cn('border-b px-4 py-3', dark ? 'border-white/10' : 'border-line')}>
                                 <p className={cn('text-xs font-bold uppercase tracking-[0.15em]', dark ? 'text-white/40' : 'text-muted')}>Signed in as</p>
@@ -161,7 +161,7 @@ export function AdminNavClient({ fullName, email, dark = false }: AdminNavClient
                         dark ? 'text-white hover:bg-white/10' : 'text-navy hover:bg-mist'
                     )}
                     aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-                    aria-expanded={mobileOpen}
+                    aria-expanded={mobileOpen ? 'true' : 'false'}
                 >
                     {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                 </button>
@@ -171,7 +171,7 @@ export function AdminNavClient({ fullName, email, dark = false }: AdminNavClient
             {mobileOpen && (
                 <div className={cn(
                     'absolute inset-x-0 top-full z-40 border-b shadow-editorial lg:hidden',
-                    dark ? 'border-white/10 bg-ink/95 backdrop-blur-xl' : 'border-line bg-white/95 backdrop-blur-xl'
+                    dark ? 'border-white/10 bg-[#0A1421]/95 backdrop-blur-xl' : 'border-line bg-white/95 backdrop-blur-xl'
                 )}>
                     <nav className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
                         <div className="space-y-1">

@@ -2,9 +2,11 @@
 
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Calendar, ImagePlus } from 'lucide-react';
+import { Calendar, ChevronDown, Eye, ImagePlus } from 'lucide-react';
 import { useMemo, useRef, useState, useTransition } from 'react';
 
+import { ChipInput } from '@/components/chip-input';
+import { cn } from '@/lib/utils';
 import { MetadataStep, ReviewStep, UploadStep } from './upload-wizard-steps';
 
 const steps = ['Upload File', 'Add Details', 'Review'];
@@ -26,12 +28,10 @@ export type UploadWizardProps = {
 
 export function UploadWizard({ initialData }: UploadWizardProps = {}) {
     const [step, setStep] = useState(initialData ? 1 : 0);
-    const [categories, setCategories] = useState<string[]>(initialData?.categories || ['Sustainability', '2024']);
-    const [tags, setTags] = useState<string[]>(initialData?.tags || ['Climate Resilience', 'Policy']);
-    const [title, setTitle] = useState(initialData?.title || 'Quarterly Sustainability Impact Report');
-    const [summary, setSummary] = useState(
-        initialData?.summary || 'A premium intelligence brief mapping the socio-ecological patterns shaping climate adaptation, community resilience, and policy response.'
-    );
+    const [categories, setCategories] = useState<string[]>(initialData?.categories ?? []);
+    const [tags, setTags] = useState<string[]>(initialData?.tags ?? []);
+    const [title, setTitle] = useState(initialData?.title ?? '');
+    const [summary, setSummary] = useState(initialData?.summary ?? '');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
     const [result, setResult] = useState<{ tone: 'error' | 'success'; message: string; reportSlug?: string } | null>(null);
@@ -53,6 +53,7 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
     const [urlError, setUrlError] = useState<string | null>(null);
     const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
     const attachmentFileRef = useRef<HTMLInputElement>(null);
+    const [previewOpen, setPreviewOpen] = useState(false);
 
     const canAdvance = useMemo(() => {
         if (step === 0) {
@@ -405,13 +406,13 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
                         >
                             {index + 1}
                         </div>
-                        <span className={`text-xs font-bold uppercase tracking-[0.18em] ${index <= step ? 'text-navy' : 'text-muted'}`}>{label}</span>
+                        <span className={`text-xs font-bold uppercase tracking-[0.18em] ${index <= step ? 'text-ink dark:text-white' : 'text-muted'}`}>{label}</span>
                     </div>
                 ))}
             </div>
 
-            <div className="grid gap-8 lg:grid-cols-[1.5fr_0.8fr]">
-                <div className="rounded-[2rem] border border-line bg-panel p-6 shadow-editorial sm:p-8">
+            <div className="items-start gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1.1fr)_320px]">
+                <div className="self-start rounded-[2rem] border border-line bg-panel p-6 shadow-editorial dark:bg-gradient-to-b dark:from-panel dark:to-panel-alt/70 sm:p-8">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={step}
@@ -464,6 +465,32 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
                         onChange={(event) => handleFileSelection(event.target.files?.[0] ?? null)}
                     />
 
+                    {/* HTML content preview */}
+                    {step >= 1 && extractedContent ? (
+                        <div className="mt-6 overflow-hidden rounded-[1.5rem] border border-line bg-mist dark:bg-panel-alt/70">
+                            <button
+                                type="button"
+                                onClick={() => setPreviewOpen((o) => !o)}
+                                className="flex w-full items-center justify-between px-5 py-3.5 text-sm font-semibold text-ink dark:text-white"
+                            >
+                                <span className="flex items-center gap-2">
+                                    <Eye className="h-4 w-4 text-ember" />
+                                    Preview Extracted Content
+                                </span>
+                                <ChevronDown className={cn('h-4 w-4 text-muted transition-transform', previewOpen && 'rotate-180')} />
+                            </button>
+                            {previewOpen ? (
+                                <div className="max-h-[520px] overflow-y-auto border-t border-line bg-panel px-6 py-5">
+                                    <div
+                                        className="prose prose-sm max-w-none text-ink"
+                                        // eslint-disable-next-line react/no-danger
+                                        dangerouslySetInnerHTML={{ __html: extractedContent }}
+                                    />
+                                </div>
+                            ) : null}
+                        </div>
+                    ) : null}
+
                     {result ? (
                         <div className={`mt-6 rounded-2xl border px-4 py-4 text-sm ${result.tone === 'success' ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : 'border-rose-200 bg-rose-50 text-rose-900'}`}>
                             <p>{result.message}</p>
@@ -490,12 +517,12 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
 
                     {/* Step navigation */}
                     {step < 2 ? (
-                        <div className="mt-8 flex items-center justify-between gap-4">
+                        <div className="mt-6 flex items-center justify-between gap-4">
                             <button
                                 type="button"
                                 onClick={() => setStep((current) => Math.max(current - 1, 0))}
                                 disabled={isPending}
-                                className="rounded-full border border-line px-5 py-3 text-sm font-semibold text-muted transition hover:border-navy hover:text-navy"
+                                className="rounded-full border border-line px-5 py-3 text-sm font-semibold text-muted transition hover:border-navy hover:text-ink dark:hover:text-white"
                             >
                                 Back
                             </button>
@@ -516,7 +543,7 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
                             {showSchedulePicker && (
                                 <div className="rounded-2xl border border-line bg-mist p-4">
                                     <label className="block space-y-2">
-                                        <span className="flex items-center gap-2 text-sm font-semibold text-navy">
+                                        <span className="flex items-center gap-2 text-sm font-semibold text-ink dark:text-white">
                                             <Calendar className="h-4 w-4 text-ember" />
                                             Schedule publish date &amp; time
                                         </span>
@@ -525,7 +552,7 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
                                             value={scheduledAt}
                                             min={new Date(Date.now() + 60_000).toISOString().slice(0, 16)}
                                             onChange={(e) => setScheduledAt(e.target.value)}
-                                            className="w-full rounded-xl border border-line bg-panel px-4 py-3 text-sm font-medium text-navy outline-none transition focus:border-ember focus:ring-2 focus:ring-ember/30"
+                                            className="w-full rounded-xl border border-line bg-panel px-4 py-3 text-sm font-medium text-ink outline-none transition focus:border-ember focus:ring-2 focus:ring-ember/30"
                                         />
                                     </label>
                                 </div>
@@ -536,7 +563,7 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
                                     type="button"
                                     onClick={() => setStep((current) => Math.max(current - 1, 0))}
                                     disabled={isPending}
-                                    className="rounded-full border border-line px-5 py-3 text-sm font-semibold text-muted transition hover:border-navy hover:text-navy"
+                                    className="rounded-full border border-line px-5 py-3 text-sm font-semibold text-muted transition hover:border-navy hover:text-ink dark:hover:text-white"
                                 >
                                     Back
                                 </button>
@@ -545,7 +572,7 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
                                         type="button"
                                         disabled={isPending}
                                         onClick={() => executeSave('draft')}
-                                        className="rounded-full border border-line px-5 py-3 text-sm font-semibold text-navy transition hover:border-navy/60 hover:bg-mist disabled:opacity-40"
+                                        className="rounded-full border border-line px-5 py-3 text-sm font-semibold text-ink transition hover:border-navy/60 hover:bg-mist dark:hover:bg-white/5 disabled:opacity-40"
                                     >
                                         {pendingIntent === 'draft' ? 'Saving...' : 'Save as Draft'}
                                     </button>
@@ -577,22 +604,31 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
                     )}
                 </div>
 
-                <aside className="space-y-6">
-                    <div className="rounded-[2rem] border border-line bg-panel p-6 shadow-soft">
-                        <p className="mb-4 font-display text-lg font-bold text-navy">Metadata</p>
-                        <div className="flex flex-wrap gap-2">
-                            {categories.map((item) => (
-                                <span key={item} className="rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-navy">
-                                    {item}
-                                </span>
-                            ))}
+                <aside className="self-start space-y-5 lg:sticky lg:top-24">
+                    <div className="rounded-[2rem] border border-line bg-panel p-5 shadow-soft dark:bg-gradient-to-b dark:from-panel dark:to-panel-alt/70">
+                        <p className="mb-1 text-xs font-bold uppercase tracking-[0.18em] text-ember">Classification</p>
+                        <p className="mb-4 font-display text-lg font-bold text-ink">Categories &amp; Tags</p>
+                        <div className="space-y-4">
+                            <ChipInput
+                                label="Categories"
+                                placeholder="Add category and press Enter"
+                                value={categories}
+                                onChange={setCategories}
+                            />
+                            <ChipInput
+                                label="Tags"
+                                placeholder="Add tag and press Enter"
+                                value={tags}
+                                onChange={setTags}
+                                limit={10}
+                            />
                         </div>
                     </div>
 
-                    <div className="rounded-[2rem] border border-line bg-panel p-6 shadow-soft">
+                    <div className="rounded-[2rem] border border-line bg-panel p-5 shadow-soft dark:bg-gradient-to-b dark:from-panel dark:to-panel-alt/70">
                         <div className="mb-4 flex items-start justify-between gap-3">
                             <div>
-                                <p className="font-display text-lg font-bold text-navy">Cover Image</p>
+                                <p className="font-display text-lg font-bold text-ink">Cover Image</p>
                                 <p className="mt-1 text-sm text-muted">Optional. This image becomes the report&apos;s thumbnail.</p>
                             </div>
                             <span className="rounded-full bg-mist px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-muted">
@@ -602,17 +638,17 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
                         <button
                             type="button"
                             onClick={() => coverImageInputRef.current?.click()}
-                            className="flex w-full aspect-[4/3] flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-line bg-mist px-5 text-center text-muted transition hover:border-ember hover:bg-ember/5"
+                            className="flex w-full min-h-[150px] flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-line bg-mist px-5 text-center text-muted transition hover:border-ember hover:bg-ember/5 dark:bg-panel-alt/70"
                         >
                             <ImagePlus className="h-8 w-8" />
                             {coverImageFile ? (
                                 <>
-                                    <p className="mt-4 text-sm font-semibold text-navy">{coverImageFile.name}</p>
+                                    <p className="mt-4 text-sm font-semibold text-ink">{coverImageFile.name}</p>
                                     <p className="mt-1 text-xs text-muted">{(coverImageFile.size / 1024).toFixed(0)} KB &middot; Click to change</p>
                                 </>
                             ) : (
                                 <>
-                                    <p className="mt-4 text-sm font-medium text-navy">Click to choose a cover image</p>
+                                    <p className="mt-4 text-sm font-medium text-ink">Click to choose a cover image</p>
                                     <p className="mt-2 max-w-xs text-xs leading-6 text-muted">
                                         JPG, PNG, or WebP. Shown as the report&apos;s cover thumbnail.
                                     </p>
@@ -629,10 +665,10 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
                     </div>
 
                     {step >= 1 ? (
-                        <div className="rounded-[2rem] border border-line bg-panel p-6 shadow-soft">
+                        <div className="rounded-[2rem] border border-line bg-panel p-5 shadow-soft dark:bg-gradient-to-b dark:from-panel dark:to-panel-alt/70">
                             <div className="mb-4 flex items-start justify-between gap-3">
                                 <div>
-                                    <p className="font-display text-lg font-bold text-navy">Downloadable File</p>
+                                    <p className="font-display text-lg font-bold text-ink">Downloadable File</p>
                                     <p className="mt-1 text-sm text-muted">Optional. Readers can download this direct from the report page.</p>
                                 </div>
                                 <span className="rounded-full bg-mist px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-muted">
@@ -642,16 +678,16 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
                             <button
                                 type="button"
                                 onClick={() => attachmentFileRef.current?.click()}
-                                className="flex w-full flex-col items-center justify-center gap-3 rounded-[1.5rem] border border-dashed border-line bg-mist px-5 py-8 text-center text-muted transition hover:border-ember hover:bg-ember/5"
+                                className="flex w-full flex-col items-center justify-center gap-3 rounded-[1.5rem] border border-dashed border-line bg-mist px-5 py-8 text-center text-muted transition hover:border-ember hover:bg-ember/5 dark:bg-panel-alt/70"
                             >
                                 {attachmentFile ? (
                                     <>
-                                        <p className="text-sm font-semibold text-navy">{attachmentFile.name}</p>
+                                        <p className="text-sm font-semibold text-ink">{attachmentFile.name}</p>
                                         <p className="text-xs text-muted">{(attachmentFile.size / 1024).toFixed(0)} KB &middot; Click to change</p>
                                     </>
                                 ) : (
                                     <>
-                                        <p className="text-sm font-medium text-navy">Click to attach a file</p>
+                                        <p className="text-sm font-medium text-ink">Click to attach a file</p>
                                         <p className="max-w-xs text-xs leading-6 text-muted">
                                             PDF, DOCX, PPTX, XLSX, or CSV. Shown as a download button on the report page.
                                         </p>

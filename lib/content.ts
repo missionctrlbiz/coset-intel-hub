@@ -132,6 +132,7 @@ export function defaultReportImage(slug: string) {
 function mapReportRow(row: ReportRow): SeedReport {
     const parsedMetrics = normalizeMetrics(parseMetrics(row.metrics));
     const image = resolveImagePath(row.image_path ?? row.cover_image_path, defaultReportImage(row.slug));
+    const downloadHref = row.download_file_path ? `/api/reports/${row.id}?download=1` : null;
 
     return {
         id: row.id,
@@ -149,6 +150,7 @@ function mapReportRow(row: ReportRow): SeedReport {
         highlight: normalizeHighlights(row.highlight),
         quote: row.quote ?? 'This report has been added to the CoSET intelligence pipeline and is ready for editorial expansion.',
         metrics: parsedMetrics,
+        downloadHref,
     };
 }
 

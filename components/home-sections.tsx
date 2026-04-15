@@ -7,11 +7,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     ArrowRight, ArrowUpRight, Flame, Users, Map, Download,
     Eye, Filter, SortDesc, ChevronRight, ChevronLeft, MapPin,
-    MessageSquare, HelpCircle, Send, LayoutGrid, List
+    MessageSquare, HelpCircle, Send, LayoutGrid, List, Mail
 } from 'lucide-react';
 
 import { EmptyBlogPosts, EmptyReports } from '@/components/loading-states';
-import { SectionReveal } from '@/components/section-reveal';
+import { SectionReveal, StaggerReveal, FadeIn } from '@/components/section-reveal';
 import { type BlogCard } from '@/lib/content';
 import { type Report, cosetOrgLinks } from '@/lib/site-data';
 
@@ -34,7 +34,7 @@ export function HeroCarousel({ featured }: { featured: Report[] }) {
     const currentSlide = featured[currentIndex];
 
     return (
-        <section className="relative h-[80vh] min-h-[600px] w-full overflow-hidden bg-ink">
+        <section className="relative h-[80vh] min-h-[600px] w-full overflow-hidden bg-[#0A1421]">
             <AnimatePresence mode="wait">
                 <motion.div
                     key={currentIndex}
@@ -60,34 +60,60 @@ export function HeroCarousel({ featured }: { featured: Report[] }) {
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={`content-${currentIndex}`}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        variants={{
+                            visible: { transition: { staggerChildren: 0.1, delayChildren: 0.2 } },
+                            hidden: {},
+                            exit: { transition: { staggerChildren: 0.05, staggerDirection: -1 } }
+                        }}
                         className="max-w-3xl"
                     >
-                        <span className="mb-4 inline-block rounded-full bg-ember/20 px-3 py-1 text-xs font-bold uppercase tracking-widest text-ember border border-ember/30 backdrop-blur-md">
-                            {currentSlide.category[0] || 'Featured Report'}
-                        </span>
-                        <h1 className="mb-6 font-display text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
-                            {currentSlide.title}
-                        </h1>
-                        <p className="mb-8 max-w-2xl text-lg text-white/80 line-clamp-3">
-                            {currentSlide.description}
-                        </p>
-                        <div className="flex flex-wrap items-center gap-4">
-                            <Link
-                                href={`/reports/${currentSlide.slug}`}
-                                className="inline-flex items-center gap-2 rounded-full bg-ember px-6 py-3 font-bold text-white shadow-[0_0_20px_rgba(242,140,40,0.3)] transition hover:brightness-110"
-                            >
-                                Read Post
-                                <ArrowRight className="h-4 w-4" />
-                            </Link>
-                            <button className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 py-3 font-semibold text-white backdrop-blur transition hover:bg-white/20">
-                                <Download className="h-4 w-4" />
-                                Download PDF
-                            </button>
-                        </div>
+                        <FadeIn>
+                            <span className="mb-4 inline-block rounded-full bg-ember/20 px-3 py-1 text-xs font-bold uppercase tracking-widest text-ember border border-ember/30 backdrop-blur-md">
+                                {currentSlide.category[0] || 'Featured Report'}
+                            </span>
+                        </FadeIn>
+                        <FadeIn>
+                            <h1 className="mb-6 font-display text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
+                                {currentSlide.title}
+                            </h1>
+                        </FadeIn>
+                        <FadeIn>
+                            <p className="mb-8 max-w-2xl text-lg text-white/80 line-clamp-3">
+                                {currentSlide.description}
+                            </p>
+                        </FadeIn>
+                        <FadeIn>
+                            <div className="flex flex-wrap items-center gap-4">
+                                <Link
+                                    href={`/reports/${currentSlide.slug}`}
+                                    className="inline-flex items-center gap-2 rounded-full bg-ember px-6 py-3 font-bold text-white shadow-[0_0_20px_rgba(242,140,40,0.3)] transition hover:brightness-110"
+                                >
+                                    Read Post
+                                    <ArrowRight className="h-4 w-4" />
+                                </Link>
+                                {currentSlide.downloadHref ? (
+                                    <Link
+                                        href={currentSlide.downloadHref}
+                                        className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 py-3 font-semibold text-white backdrop-blur transition hover:bg-white/20"
+                                    >
+                                        <Download className="h-4 w-4" />
+                                        Download PDF
+                                    </Link>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        disabled
+                                        className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3 font-semibold text-white/50 backdrop-blur"
+                                    >
+                                        <Download className="h-4 w-4" />
+                                        Download PDF
+                                    </button>
+                                )}
+                            </div>
+                        </FadeIn>
                     </motion.div>
                 </AnimatePresence>
 
@@ -175,73 +201,79 @@ export function ReportsGrid({ reports }: { reports: Report[] }) {
     const displayReports = reports.slice(0, 6);
 
     return (
-        <SectionReveal>
-            <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-                <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Intelligence Database</p>
-                    <h2 className="mt-2 font-display text-4xl font-extrabold tracking-[-0.04em] text-ink">Explore Strategic Reports</h2>
-                </div>
-                <div className="flex flex-wrap items-center gap-3">
-                    <div className="flex items-center rounded-xl border border-line bg-panel p-1 shadow-soft">
-                        <button
-                            onClick={() => setViewMode('grid')}
-                            className={`rounded-lg p-2 transition ${viewMode === 'grid' ? 'bg-mist text-ember' : 'text-muted hover:text-ink'}`}
-                            aria-label="Grid view"
-                        >
-                            <LayoutGrid className="h-4 w-4" />
+        <StaggerReveal>
+            <FadeIn>
+                <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+                    <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Intelligence Database</p>
+                        <h2 className="mt-2 font-display text-4xl font-extrabold tracking-[-0.04em] text-ink">Explore Strategic Reports</h2>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3">
+                        <div className="flex items-center rounded-xl border border-line bg-panel p-1 shadow-soft">
+                            <button
+                                onClick={() => setViewMode('grid')}
+                                className={`rounded-lg p-2 transition ${viewMode === 'grid' ? 'bg-mist text-ember' : 'text-muted hover:text-ink'}`}
+                                aria-label="Grid view"
+                            >
+                                <LayoutGrid className="h-4 w-4" />
+                            </button>
+                            <button
+                                onClick={() => setViewMode('row')}
+                                className={`rounded-lg p-2 transition ${viewMode === 'row' ? 'bg-mist text-ember' : 'text-muted hover:text-ink'}`}
+                                aria-label="List view"
+                            >
+                                <List className="h-4 w-4" />
+                            </button>
+                        </div>
+                        <button className="inline-flex items-center gap-2 rounded-xl border border-line bg-panel px-4 py-2 text-sm font-semibold text-navy shadow-soft transition hover:border-navy">
+                            <Filter className="h-4 w-4" /> Filter
                         </button>
-                        <button
-                            onClick={() => setViewMode('row')}
-                            className={`rounded-lg p-2 transition ${viewMode === 'row' ? 'bg-mist text-ember' : 'text-muted hover:text-ink'}`}
-                            aria-label="List view"
-                        >
-                            <List className="h-4 w-4" />
+                        <button className="inline-flex items-center gap-2 rounded-xl border border-line bg-panel px-4 py-2 text-sm font-semibold text-navy shadow-soft transition hover:border-navy">
+                            <SortDesc className="h-4 w-4" /> Sort
                         </button>
                     </div>
-                    <button className="inline-flex items-center gap-2 rounded-xl border border-line bg-panel px-4 py-2 text-sm font-semibold text-navy shadow-soft transition hover:border-navy">
-                        <Filter className="h-4 w-4" /> Filter
-                    </button>
-                    <button className="inline-flex items-center gap-2 rounded-xl border border-line bg-panel px-4 py-2 text-sm font-semibold text-navy shadow-soft transition hover:border-navy">
-                        <SortDesc className="h-4 w-4" /> Sort
-                    </button>
                 </div>
-            </div>
+            </FadeIn>
 
-            <div className={`grid gap-6 ${viewMode === 'grid' ? 'md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
-                {displayReports.length === 0 ? (
-                    <EmptyReports />
-                ) : displayReports.map((report) => (
-                    <Link
-                        key={report.slug}
-                        href={`/reports/${report.slug}`}
-                        className={`group flex overflow-hidden rounded-[2rem] border border-line bg-panel shadow-soft transition hover:-translate-y-1 hover:shadow-editorial dark:bg-gradient-to-b dark:from-panel dark:to-panel-alt/90 ${viewMode === 'grid' ? 'flex-col' : 'flex-col sm:flex-row'}`}
-                    >
-                        <div className={`relative overflow-hidden ${viewMode === 'row' ? 'w-full sm:w-1/3 min-h-[240px]' : 'h-56 w-full'}`}>
-                            <ReportCardImage src={report.image || '/community-engagement.jpg'} alt={report.title} />
-                        </div>
-                        <div className="flex flex-1 flex-col p-6 sm:p-8">
-                            <div className="mb-4 flex items-center justify-between">
-                                <span className="rounded-full bg-mist px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-navy">
-                                    {report.category[0]}
-                                </span>
-                                <span className="text-[11px] font-bold uppercase tracking-widest text-muted">{report.publishedAt}</span>
+            <FadeIn>
+                <div className={`grid gap-6 ${viewMode === 'grid' ? 'md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+                    {displayReports.length === 0 ? (
+                        <EmptyReports />
+                    ) : displayReports.map((report) => (
+                        <Link
+                            key={report.slug}
+                            href={`/reports/${report.slug}`}
+                            className={`group flex overflow-hidden rounded-[2rem] border border-line bg-panel shadow-soft transition hover:-translate-y-1 hover:shadow-editorial dark:bg-gradient-to-b dark:from-panel dark:to-panel-alt/90 ${viewMode === 'grid' ? 'flex-col' : 'flex-col sm:flex-row'}`}
+                        >
+                            <div className={`relative overflow-hidden ${viewMode === 'row' ? 'w-full sm:w-1/3 min-h-[240px]' : 'h-56 w-full'}`}>
+                                <ReportCardImage src={report.image || '/community-engagement.jpg'} alt={report.title} />
                             </div>
-                            <h3 className="font-display text-2xl font-bold tracking-[-0.02em] text-ink">{report.title}</h3>
-                            <p className={`mt-4 flex-1 text-sm leading-relaxed text-muted ${viewMode === 'grid' ? 'line-clamp-3' : 'line-clamp-4'}`}>{report.description}</p>
-                            <div className="mt-8 flex items-center justify-between border-t border-line pt-4 text-sm font-semibold text-ember">
-                                Read Report <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                            <div className="flex flex-1 flex-col p-6 sm:p-8">
+                                <div className="mb-4 flex items-center justify-between">
+                                    <span className="rounded-full bg-mist px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-navy">
+                                        {report.category[0]}
+                                    </span>
+                                    <span className="text-[11px] font-bold uppercase tracking-widest text-muted">{report.publishedAt}</span>
+                                </div>
+                                <h3 className="font-display text-2xl font-bold tracking-[-0.02em] text-ink">{report.title}</h3>
+                                <p className={`mt-4 flex-1 text-sm leading-relaxed text-muted ${viewMode === 'grid' ? 'line-clamp-3' : 'line-clamp-4'}`}>{report.description}</p>
+                                <div className="mt-8 flex items-center justify-between border-t border-line pt-4 text-sm font-semibold text-ember">
+                                    Read Report <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                                </div>
                             </div>
-                        </div>
+                        </Link>
+                    ))}
+                </div>
+            </FadeIn>
+
+            <FadeIn>
+                <div className="mt-12 flex justify-center">
+                    <Link href="/reports" className="inline-flex items-center gap-2 rounded-full border-2 border-navy bg-transparent px-8 py-3 text-sm font-bold text-navy transition hover:bg-navy hover:text-white dark:hover:bg-navy">
+                        Load More Intelligence
                     </Link>
-                ))}
-            </div>
-
-            <div className="mt-12 flex justify-center">
-                <Link href="/reports" className="inline-flex items-center gap-2 rounded-full border-2 border-navy bg-transparent px-8 py-3 text-sm font-bold text-navy transition hover:bg-navy hover:text-white dark:hover:bg-navy">
-                    Load More Intelligence
-                </Link>
-            </div>
-        </SectionReveal>
+                </div>
+            </FadeIn>
+        </StaggerReveal>
     );
 }
 
@@ -250,40 +282,44 @@ export function ReportsGrid({ reports }: { reports: Report[] }) {
 // ============================================================================
 export function MissionAndPhilosophy() {
     return (
-        <SectionReveal>
-            <div className="relative overflow-hidden rounded-[2rem] bg-ink py-16 text-white shadow-editorial">
-                <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-teal/10 blur-3xl" />
-                <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-ember/10 blur-3xl" />
+        <StaggerReveal>
+            <div className="relative overflow-hidden rounded-[2rem] border border-line bg-panel py-16 text-ink shadow-editorial dark:border-white/10 dark:bg-[#0A1421] dark:text-white">
+                <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-teal/10 blur-3xl pointer-events-none" />
+                <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-ember/10 blur-3xl pointer-events-none" />
 
                 <div className="relative mx-auto grid max-w-5xl gap-12 px-6 md:grid-cols-2 lg:px-12">
                     <div className="flex flex-col items-start space-y-6">
-                        <div className="rounded-2xl bg-white/5 p-4 backdrop-blur-md">
+                        <FadeIn className="rounded-2xl bg-navy/5 p-4 backdrop-blur-md dark:bg-white/5">
                             <MapPin className="h-8 w-8 text-teal" />
-                        </div>
-                        <div>
+                        </FadeIn>
+                        <FadeIn>
                             <p className="text-xs font-bold uppercase tracking-[0.2em] text-teal">Our Mission</p>
-                            <h3 className="mt-2 font-display text-3xl font-bold leading-tight">Driving Socio-Ecological Transformation</h3>
-                        </div>
-                        <p className="text-white/70 leading-relaxed">
-                            At CoSET, our mission is to drive socio-ecological transformation in Nigeria by advocating for sustainable practices, promoting social and environmental justice, and empowering communities to create a better future for all.
-                        </p>
+                            <h3 className="mt-2 font-display text-3xl font-bold leading-tight text-ink dark:text-white">Driving Socio-Ecological Transformation</h3>
+                        </FadeIn>
+                        <FadeIn>
+                            <p className="leading-relaxed text-muted dark:text-white/70">
+                                At CoSET, our mission is to drive socio-ecological transformation in Nigeria by advocating for sustainable practices, promoting social and environmental justice, and empowering communities to create a better future for all.
+                            </p>
+                        </FadeIn>
                     </div>
 
                     <div className="flex flex-col items-start space-y-6">
-                        <div className="rounded-2xl bg-white/5 p-4 backdrop-blur-md">
+                        <FadeIn className="rounded-2xl bg-navy/5 p-4 backdrop-blur-md dark:bg-white/5">
                             <Users className="h-8 w-8 text-ember" />
-                        </div>
-                        <div>
+                        </FadeIn>
+                        <FadeIn>
                             <p className="text-xs font-bold uppercase tracking-[0.2em] text-ember">Core Philosophy</p>
-                            <h3 className="mt-2 font-display text-3xl font-bold leading-tight">Challenging the Growth Model</h3>
-                        </div>
-                        <p className="text-white/70 leading-relaxed">
-                            The coalition challenges the current &quot;growth-centered&quot; economic model in favor of one that prioritizes social well-being, environmental integrity, and sustainability. We argue that the total well-being of people, society, and the environment are inextricably linked.
-                        </p>
+                            <h3 className="mt-2 font-display text-3xl font-bold leading-tight text-ink dark:text-white">Challenging the Growth Model</h3>
+                        </FadeIn>
+                        <FadeIn>
+                            <p className="leading-relaxed text-muted dark:text-white/70">
+                                The coalition challenges the current &quot;growth-centered&quot; economic model in favor of one that prioritizes social well-being, environmental integrity, and sustainability. We argue that the total well-being of people, society, and the environment are inextricably linked.
+                            </p>
+                        </FadeIn>
                     </div>
                 </div>
             </div>
-        </SectionReveal>
+        </StaggerReveal>
     );
 }
 
@@ -294,14 +330,14 @@ export function PlanetPulse({ blogPosts }: { blogPosts: BlogCard[] }) {
     const displayPosts = blogPosts.slice(0, 3);
 
     return (
-        <SectionReveal>
-            <div className="flex flex-col items-center text-center">
+        <StaggerReveal>
+            <FadeIn className="flex flex-col items-center text-center">
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Planet Pulse</p>
                 <h2 className="mt-3 font-display text-4xl font-extrabold tracking-[-0.04em] text-ink">Curated Global Updates</h2>
                 <p className="mt-4 max-w-2xl text-muted">Latest insights and editorial briefings from our network.</p>
-            </div>
+            </FadeIn>
 
-            <div className="mt-12 grid gap-6 md:grid-cols-3">
+            <FadeIn className="mt-12 grid gap-6 md:grid-cols-3">
                 {displayPosts.length === 0 ? (
                     <EmptyBlogPosts />
                 ) : displayPosts.map((post) => (
@@ -331,14 +367,14 @@ export function PlanetPulse({ blogPosts }: { blogPosts: BlogCard[] }) {
                         </div>
                     </a>
                 ))}
-            </div>
+            </FadeIn>
 
-            <div className="mt-8 flex justify-center">
+            <FadeIn className="mt-8 flex justify-center">
                 <a href="https://cosetng.org/blog/" target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-navy hover:text-ember flex items-center gap-1">
                     Read more on our main site <ArrowUpRight className="h-4 w-4" />
                 </a>
-            </div>
-        </SectionReveal>
+            </FadeIn>
+        </StaggerReveal>
     );
 }
 
@@ -357,26 +393,30 @@ export function LearnMoreCarousel() {
     const prev = () => setCurrentIndex((p) => (p === 0 ? images.length - 1 : p - 1));
 
     return (
-        <SectionReveal>
+        <StaggerReveal>
             <div className="rounded-[2rem] border border-line bg-panel p-8 shadow-soft lg:p-12 dark:bg-gradient-to-br dark:from-panel dark:to-panel-alt/80">
                 <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
                     <div>
-                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Learn More</p>
-                        <h2 className="mt-3 font-display text-4xl font-extrabold tracking-[-0.04em] text-ink lg:text-5xl">
-                            Discover the Coalition
-                        </h2>
-                        <p className="mt-6 text-lg leading-relaxed text-muted">
-                            CoSET is a network of citizens, NGOs, and journalists established in 2018 to reconnect nature and society through sustainable transformation. Explore our campaigns, position papers, and community initiatives.
-                        </p>
-                        <div className="mt-8">
+                        <FadeIn>
+                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Learn More</p>
+                            <h2 className="mt-3 font-display text-4xl font-extrabold tracking-[-0.04em] text-ink lg:text-5xl">
+                                Discover the Coalition
+                            </h2>
+                        </FadeIn>
+                        <FadeIn>
+                            <p className="mt-6 text-lg leading-relaxed text-muted">
+                                CoSET is a network of citizens, NGOs, and journalists established in 2018 to reconnect nature and society through sustainable transformation. Explore our campaigns, position papers, and community initiatives.
+                            </p>
+                        </FadeIn>
+                        <FadeIn className="mt-8">
                             <Link href={cosetOrgLinks.mainSite} className="inline-flex items-center justify-center gap-2 rounded-full bg-navy px-8 py-4 font-bold text-white shadow-soft transition hover:brightness-110">
                                 Visit Uwem Nnyin
                                 <ArrowUpRight className="h-5 w-5" />
                             </Link>
-                        </div>
+                        </FadeIn>
                     </div>
 
-                    <div className="relative">
+                    <FadeIn className="relative">
                         <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[2rem] shadow-editorial bg-mist">
                             <AnimatePresence mode="wait">
                                 <motion.div
@@ -409,10 +449,10 @@ export function LearnMoreCarousel() {
                                 <ChevronRight className="h-5 w-5" />
                             </button>
                         </div>
-                    </div>
+                    </FadeIn>
                 </div>
             </div>
-        </SectionReveal>
+        </StaggerReveal>
     );
 }
 
@@ -421,29 +461,42 @@ export function LearnMoreCarousel() {
 // ============================================================================
 export function HubServices() {
     return (
-        <SectionReveal>
-            {/* Newsletter Standalone Block */}
-            <div className="relative mx-auto max-w-4xl rounded-[2rem] border border-line bg-panel p-8 shadow-editorial dark:bg-panel-alt/80 overflow-hidden text-center" id="subscribe">
-                <div className="absolute -top-10 -right-10 p-6 opacity-[0.03]"><Send className="h-64 w-64 text-navy" /></div>
-                <div className="relative z-10 flex flex-col items-center">
-                    <span className="inline-block rounded-full bg-navy/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-navy">Newsletter</span>
-                    <h3 className="mt-4 font-display text-4xl font-extrabold text-ink">Subscribe to Hub Briefs</h3>
-                    <p className="mt-4 max-w-lg text-lg text-muted">Receive weekly intelligence briefings on climate justice and transformative policies straight to your inbox.</p>
+        <StaggerReveal>
+            {/* Newsletter CTA Block */}
+            <div className="relative w-full rounded-[2rem] border border-line bg-panel p-8 shadow-editorial dark:bg-gradient-to-br dark:from-panel dark:to-panel-alt/80 overflow-hidden lg:p-12" id="subscribe">
+                <div className="absolute -bottom-16 -right-16 p-6 opacity-[0.04] dark:opacity-[0.08] pointer-events-none">
+                    <Mail className="h-80 w-80 text-navy dark:text-white" />
+                </div>
+                <div className="absolute -top-24 -left-24 h-64 w-64 rounded-full bg-teal/10 blur-3xl pointer-events-none" />
+                <div className="absolute -bottom-24 -right-24 h-64 w-64 rounded-full bg-navy/10 blur-3xl pointer-events-none" />
 
-                    <form className="mt-8 flex w-full max-w-md flex-col gap-3 sm:flex-row">
-                        <input
-                            type="email"
-                            placeholder="Enter your email address..."
-                            required
-                            className="w-full rounded-xl border border-line bg-mist px-4 py-4 text-sm text-ink outline-none transition focus:border-navy dark:bg-panel"
-                        />
-                        <button type="submit" className="shrink-0 rounded-xl bg-navy px-8 py-4 font-bold text-white transition hover:brightness-110">
-                            Subscribe
-                        </button>
-                    </form>
-                    <p className="mt-4 text-xs font-medium text-muted">We respect your privacy. Unsubscribe at any time.</p>
+                <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
+                    <div className="flex-1 text-left">
+                        <FadeIn>
+                            <span className="inline-block rounded-full bg-navy/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-navy dark:bg-white/10 dark:text-white/80">Newsletter</span>
+                            <h3 className="mt-4 font-display text-4xl font-extrabold text-ink lg:text-5xl">Subscribe to Hub Briefs</h3>
+                        </FadeIn>
+                        <FadeIn>
+                            <p className="mt-4 max-w-lg text-lg text-muted">Receive weekly intelligence briefings on climate justice and transformative policies straight to your inbox.</p>
+                        </FadeIn>
+                    </div>
+
+                    <FadeIn className="flex-1 w-full max-w-md lg:max-w-xl">
+                        <form className="flex w-full flex-col gap-3 sm:flex-row">
+                            <input
+                                type="email"
+                                placeholder="Enter your email address..."
+                                required
+                                className="w-full rounded-xl border border-line bg-mist px-4 py-4 text-sm text-ink outline-none transition focus:border-navy dark:bg-panel"
+                            />
+                            <button type="submit" className="shrink-0 rounded-xl bg-navy px-8 py-4 font-bold text-white transition hover:brightness-110">
+                                Subscribe
+                            </button>
+                        </form>
+                        <p className="mt-4 text-xs font-medium text-muted">We respect your privacy. Unsubscribe at any time.</p>
+                    </FadeIn>
                 </div>
             </div>
-        </SectionReveal>
+        </StaggerReveal>
     );
 }

@@ -42,17 +42,17 @@ export async function SiteHeader({ dark = false, isAdmin = false }: SiteHeaderPr
         <header
             className={cn(
                 'sticky top-0 z-50 border-b backdrop-blur-xl transition-colors',
-                dark ? 'border-white/10 bg-ink/70 text-white' : 'border-line/70 bg-white/95 text-ink'
+                dark ? 'border-white/10 bg-[#0A1421]/80 text-white' : 'border-line/70 bg-white/95 text-ink dark:border-white/10 dark:bg-panel/90 dark:text-white'
             )}
         >
             <div className={cn(
                 'relative mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8',
-                'max-w-7xl'
+                isAdmin ? 'w-full max-w-[1600px]' : 'max-w-7xl'
             )}>
                 {/* Logo + Nav */}
                 <div className="flex min-w-0 flex-1 items-center">
                     <Link href={isAdmin ? '/admin' : '/'} aria-label="Go to CoSET homepage" className="shrink-0 inline-flex items-center">
-                        <ThemeLogo className="w-[98px] h-auto sm:w-[118px]" />
+                        <ThemeLogo className="w-[98px] h-auto sm:w-[118px]" forceDark={dark} />
                     </Link>
 
                     {isAdmin ? (
