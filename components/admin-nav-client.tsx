@@ -8,6 +8,7 @@ import {
     FilePlus,
     FolderOpen,
     Users,
+    MessageSquare,
     LogOut,
     Menu,
     X,
@@ -22,6 +23,7 @@ const adminLinks = [
     { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
     { href: '/admin/upload', label: 'Add Reports', icon: FilePlus, exact: false },
     { href: '/admin/content', label: 'Manage Reports', icon: FolderOpen, exact: false },
+    { href: '/admin/feedback', label: 'Feedback', icon: MessageSquare, exact: false },
     { href: '/admin/subscribers', label: 'Subscribers', icon: Users, exact: false },
 ];
 
@@ -56,7 +58,7 @@ export function AdminNavClient({ fullName, email, dark = false }: AdminNavClient
 
     function isActiveLink(href: string, exact: boolean) {
         if (exact) return pathname === href;
-        return pathname.startsWith(href);
+        return pathname?.startsWith(href) ?? false;
     }
 
     async function handleLogout() {

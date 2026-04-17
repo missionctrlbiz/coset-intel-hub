@@ -19,7 +19,7 @@ type SearchResult = {
 export function SearchForm({ dark }: { dark?: boolean }) {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const [query, setQuery] = useState(searchParams.get('q') || '');
+    const [query, setQuery] = useState(searchParams?.get('q') || '');
     const [results, setResults] = useState<SearchResult[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
@@ -27,7 +27,7 @@ export function SearchForm({ dark }: { dark?: boolean }) {
     const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
-        setQuery(searchParams.get('q') || '');
+        setQuery(searchParams?.get('q') || '');
     }, [searchParams]);
 
     const fetchResults = useCallback(async (q: string) => {

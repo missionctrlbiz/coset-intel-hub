@@ -14,7 +14,7 @@ export function ContentFilters({ categories, currentStatus, currentCategory }: C
     const searchParams = useSearchParams();
 
     function applyFilter(key: string, value: string) {
-        const params = new URLSearchParams(searchParams.toString());
+        const params = new URLSearchParams(searchParams?.toString() ?? '');
         if (!value) {
             params.delete(key);
         } else {

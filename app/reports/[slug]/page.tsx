@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { ArrowRight, CalendarDays, Clock3, Download, Link2, Share2, UserRound } from 'lucide-react';
 import { notFound } from 'next/navigation';
 
+import { ReportViewTracker } from '@/components/report-view-tracker';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { getPublishedReportBySlug, getPublishedReportSlugs, getPublishedReports } from '@/lib/content';
@@ -40,6 +41,7 @@ export default async function ReportDetailPage({ params }: { params: { slug: str
     }, []);
     return (
         <>
+            <ReportViewTracker reportId={report.id} />
             <SiteHeader dark />
             <main>
                 <section className="relative overflow-hidden bg-ink dark:bg-panel text-white">

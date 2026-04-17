@@ -5,7 +5,7 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { ThemeLogo } from '@/components/theme-logo';
 import { AdminNavClient } from '@/components/admin-nav-client';
 import { cn } from '@/lib/utils';
-import { FileText, Info, Mail } from 'lucide-react';
+import { FileText, Info, Mail, Menu } from 'lucide-react';
 import { cosetOrgLinks } from '@/lib/site-data';
 import { createSupabaseServerClient } from '@/lib/supabase/clients';
 
@@ -91,6 +91,72 @@ export async function SiteHeader({ dark = false, isAdmin = false }: SiteHeaderPr
                                     Subscribe Now
                                 </Link>
                             </div>
+                            <details className="relative lg:hidden">
+                                <summary
+                                    aria-label="Open navigation menu"
+                                    className={cn(
+                                        'flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-full border transition [&::-webkit-details-marker]:hidden',
+                                        dark
+                                            ? 'border-white/15 bg-white/10 text-white hover:bg-white/15'
+                                            : 'border-line bg-mist text-navy hover:bg-panel'
+                                    )}
+                                >
+                                    <Menu className="h-5 w-5" />
+                                </summary>
+
+                                <div
+                                    className={cn(
+                                        'absolute right-0 top-full mt-3 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-[1.75rem] border p-3 shadow-editorial',
+                                        dark
+                                            ? 'border-white/10 bg-[#0A1421]/95 text-white backdrop-blur-2xl'
+                                            : 'border-line bg-white/95 text-ink backdrop-blur-2xl dark:border-white/10 dark:bg-panel/95 dark:text-white'
+                                    )}
+                                >
+                                    <nav className="flex flex-col gap-1">
+                                        <Link
+                                            href="/reports"
+                                            className={cn(
+                                                'flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition hover:text-ember',
+                                                dark ? 'text-white/85 hover:bg-white/5' : 'text-navy hover:bg-mist'
+                                            )}
+                                        >
+                                            <FileText className="h-4 w-4" />
+                                            Reports
+                                        </Link>
+                                        <Link
+                                            href={cosetOrgLinks.about}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className={cn(
+                                                'flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition hover:text-ember',
+                                                dark ? 'text-white/85 hover:bg-white/5' : 'text-navy hover:bg-mist'
+                                            )}
+                                        >
+                                            <Info className="h-4 w-4" />
+                                            About Us
+                                        </Link>
+                                        <Link
+                                            href="/contact"
+                                            className={cn(
+                                                'flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition hover:text-ember',
+                                                dark ? 'text-white/85 hover:bg-white/5' : 'text-navy hover:bg-mist'
+                                            )}
+                                        >
+                                            <Mail className="h-4 w-4" />
+                                            Contact Us
+                                        </Link>
+                                    </nav>
+
+                                    <div className={cn('mt-3 border-t pt-3', dark ? 'border-white/10' : 'border-line')}>
+                                        <Link
+                                            href="#subscribe"
+                                            className="flex items-center justify-center rounded-full bg-ember px-4 py-3 text-sm font-bold text-white shadow-soft transition hover:brightness-110"
+                                        >
+                                            Subscribe Now
+                                        </Link>
+                                    </div>
+                                </div>
+                            </details>
                         </>
                     )}
 

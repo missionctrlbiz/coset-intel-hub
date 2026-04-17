@@ -20,41 +20,48 @@ import { type Report, cosetOrgLinks } from '@/lib/site-data';
 // ============================================================================
 export function HeroCarousel({ featured }: { featured: Report[] }) {
     const [currentIndex, setCurrentIndex] = useState(0);
+    const featuredSlides = featured.slice(0, 5);
 
     useEffect(() => {
-        if (!featured || featured.length === 0) return;
+        if (featuredSlides.length === 0) return;
         const timer = setInterval(() => {
-            setCurrentIndex((prev) => (prev + 1) % Math.min(featured.length, 5));
+            setCurrentIndex((prev) => (prev + 1) % featuredSlides.length);
         }, 6000);
         return () => clearInterval(timer);
-    }, [featured]);
+    }, [featuredSlides.length]);
 
     if (!featured || featured.length === 0) return null;
 
-    const currentSlide = featured[currentIndex];
+    const currentSlide = featuredSlides[currentIndex];
 
     return (
         <section className="relative h-[80vh] min-h-[600px] w-full overflow-hidden bg-[#0A1421]">
-            <AnimatePresence mode="wait">
-                <motion.div
-                    key={currentIndex}
-                    initial={{ opacity: 0, scale: 1.05 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 1 }}
-                    className="absolute inset-0"
-                >
-                    <Image
-                        src={currentSlide.image}
-                        alt={currentSlide.title}
-                        fill
-                        priority
-                        className="object-cover opacity-60 mix-blend-overlay"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/20" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
-                </motion.div>
-            </AnimatePresence>
+            <div className="absolute inset-0">
+                {featuredSlides.map((slide, index) => (
+                    <motion.div
+                        key={slide.slug}
+                        initial={false}
+                        animate={{
+                            opacity: index === currentIndex ? 1 : 0,
+                            scale: index === currentIndex ? 1 : 1.03,
+                            pointerEvents: index === currentIndex ? 'auto' : 'none'
+                        }}
+                        transition={{ duration: 0.9, ease: 'easeInOut' }}
+                        className="absolute inset-0"
+                        aria-hidden={index !== currentIndex}
+                    >
+                        <Image
+                            src={slide.image}
+                            alt={slide.title}
+                            fill
+                            priority={index === 0}
+                            className="object-cover opacity-60 mix-blend-overlay"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/20" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+                    </motion.div>
+                ))}
+            </div>
 
             <div className="relative mx-auto flex h-full max-w-7xl flex-col justify-end px-4 pb-24 sm:px-6 lg:px-8">
                 <AnimatePresence mode="wait">
@@ -119,7 +126,7 @@ export function HeroCarousel({ featured }: { featured: Report[] }) {
 
                 {/* Indicators */}
                 <div className="absolute bottom-8 right-8 flex gap-2 sm:right-auto">
-                    {featured.slice(0, 5).map((_, i) => (
+                    {featuredSlides.map((_, i) => (
                         <button
                             key={i}
                             onClick={() => setCurrentIndex(i)}
@@ -255,7 +262,7 @@ export function ReportsGrid({ reports }: { reports: Report[] }) {
                                     </span>
                                     <span className="text-[11px] font-bold uppercase tracking-widest text-muted">{report.publishedAt}</span>
                                 </div>
-                                <h3 className="font-display text-2xl font-bold tracking-[-0.02em] text-ink">{report.title}</h3>
+                                <h3 className="font-display text-2xl font-bold tracking-[-0.02em] text-ink group-hover:text-ember dark:text-ember dark:group-hover:text-white transition-colors">{report.title}</h3>
                                 <p className={`mt-4 flex-1 text-sm leading-relaxed text-muted ${viewMode === 'grid' ? 'line-clamp-3' : 'line-clamp-4'}`}>{report.description}</p>
                                 <div className="mt-8 flex items-center justify-between border-t border-line pt-4 text-sm font-semibold text-ember">
                                     Read Report <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />

@@ -1,7 +1,7 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowRight, Fingerprint, Lock, Mail, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowRight, Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -19,9 +19,10 @@ export default function LoginPage() {
 
 function LoginPageContent() {
     const searchParams = useSearchParams();
-    const redirectTo = searchParams.get('redirect') || '/admin';
+    const redirectTo = searchParams?.get('redirect') || '/admin';
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showPassword, setShowPassword] = useState(false);
 
     async function handleSubmit(formData: FormData) {
         setIsLoading(true);
@@ -36,9 +37,8 @@ function LoginPageContent() {
     }
 
     return (
-        <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-hero-radial p-4">
-            <div className="absolute inset-0 bg-grid-fade bg-grid opacity-30" />
-            <div className="absolute inset-0 bg-gradient-to-br from-ink/90 via-ink/80 to-teal/40" />
+        <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-hero-radial p-4 sm:p-6">
+            <div className="absolute inset-0 bg-gradient-to-br from-ink/88 via-ink/82 to-ink/70" />
 
             <div className="absolute inset-0">
                 <Image
@@ -47,39 +47,38 @@ function LoginPageContent() {
                     fill
                     sizes="100vw"
                     priority
-                    className="object-cover opacity-[0.12] mix-blend-screen"
+                    className="object-cover opacity-[0.08] mix-blend-screen"
                 />
             </div>
 
             <SectionWrapper>
-                <div className="relative w-full max-w-lg">
-                    <div className="mb-10 text-center">
-                        <Link href="/" className="mb-12 inline-block">
+                <div className="relative w-full max-w-md">
+                    <div className="mb-8 text-center">
+                        <Link href="/" className="inline-block">
                             <Image
                                 src="/logo.png"
                                 alt="CoSET"
                                 width={512}
                                 height={256}
-                                className="mx-auto w-[160px] invert grayscale brightness-200"
+                                className="mx-auto w-[144px] invert brightness-200"
                             />
                         </Link>
-                        <p className="mt-8 text-xs font-bold uppercase tracking-[0.4em] text-ember">Intelligence Hub Authority</p>
-                        <h1 className="mt-4 font-display text-4xl font-extrabold tracking-[-0.04em] text-white">Administrator Portal</h1>
-                        <p className="mt-4 text-white/55">Enter your executive credentials to manage socio-ecological signals.</p>
+                        <h1 className="mt-6 font-display text-4xl font-extrabold tracking-[-0.04em] text-white">Sign in</h1>
+                        <p className="mt-3 text-sm leading-7 text-white/65">Use your email and password to access the admin dashboard.</p>
                     </div>
 
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="rounded-[2.5rem] border border-white/10 bg-black/30 p-1 shadow-editorial backdrop-blur-2xl"
+                        className="rounded-[2rem] border border-white/12 bg-white/8 p-1 shadow-editorial backdrop-blur-xl"
                     >
-                        <div className="rounded-[2.25rem] border border-white/10 bg-white/5 p-8 shadow-inner-white">
+                        <div className="rounded-[1.8rem] border border-white/10 bg-white/5 p-6 sm:p-8">
                             <form action={handleSubmit} className="space-y-6">
                                 <input type="hidden" name="redirect" value={redirectTo} />
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold uppercase tracking-[0.2em] text-white/50" htmlFor="email">
-                                        Executive Email
+                                    <label className="text-sm font-semibold text-white/75" htmlFor="email">
+                                        Email
                                     </label>
                                     <div className="relative">
                                         <Mail className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/30" />
@@ -88,26 +87,39 @@ function LoginPageContent() {
                                             name="email"
                                             type="email"
                                             required
-                                            placeholder="name@organization.org"
-                                            className="w-full rounded-2xl border border-white/10 bg-white/5 py-4 pl-12 pr-4 text-white outline-none transition focus:border-ember/50 focus:ring-1 focus:ring-ember/30"
+                                            placeholder="name@example.com"
+                                            className="w-full rounded-2xl border border-white/10 bg-white/5 py-4 pl-12 pr-4 text-white outline-none transition placeholder:text-white/25 focus:border-white/25 focus:ring-1 focus:ring-white/15"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold uppercase tracking-[0.2em] text-white/50" htmlFor="password">
-                                        Authentication Key
-                                    </label>
+                                    <div className="flex items-center justify-between gap-3">
+                                        <label className="text-sm font-semibold text-white/75" htmlFor="password">
+                                            Password
+                                        </label>
+                                        <Link href="/contact" className="text-sm font-medium text-white/60 transition hover:text-white">
+                                            Forgot password?
+                                        </Link>
+                                    </div>
                                     <div className="relative">
                                         <Lock className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/30" />
                                         <input
                                             id="password"
                                             name="password"
-                                            type="password"
+                                            type={showPassword ? 'text' : 'password'}
                                             required
-                                            placeholder="••••••••••••"
-                                            className="w-full rounded-2xl border border-white/10 bg-white/5 py-4 pl-12 pr-4 text-white outline-none transition focus:border-ember/50 focus:ring-1 focus:ring-ember/30"
+                                            placeholder="Enter your password"
+                                            className="w-full rounded-2xl border border-white/10 bg-white/5 py-4 pl-12 pr-16 text-white outline-none transition placeholder:text-white/25 focus:border-white/25 focus:ring-1 focus:ring-white/15"
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword((current) => !current)}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-white/45 transition hover:text-white"
+                                            aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                        >
+                                            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                        </button>
                                     </div>
                                 </div>
 
@@ -117,7 +129,7 @@ function LoginPageContent() {
                                             initial={{ opacity: 0, height: 0 }}
                                             animate={{ opacity: 1, height: 'auto' }}
                                             exit={{ opacity: 0, height: 0 }}
-                                            className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300"
+                                            className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200"
                                         >
                                             {error}
                                         </motion.div>
@@ -127,51 +139,24 @@ function LoginPageContent() {
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl bg-ember py-4 font-bold text-white shadow-soft transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+                                    className="group flex w-full items-center justify-center gap-3 rounded-2xl bg-ember py-4 font-semibold text-white shadow-soft transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
                                 >
                                     {isLoading ? (
-                                        <Sparkles className="h-5 w-5 animate-pulse" />
+                                        <Loader2 className="h-5 w-5 animate-spin" />
                                     ) : (
                                         <>
-                                            Secure Sign In
+                                            Sign in
                                             <ArrowRight className="h-5 w-5 transition group-hover:translate-x-1" />
                                         </>
                                     )}
                                 </button>
                             </form>
 
-                            <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-6">
-                                <div className="flex items-center gap-2 text-xs text-white/40">
-                                    <ShieldCheck className="h-4 w-4" />
-                                    <span>Encrypted connection active</span>
-                                </div>
-                                <button type="button" className="text-xs font-semibold text-white/60 hover:text-white">
-                                    Forgot credentials?
-                                </button>
-                            </div>
+                            <p className="mt-6 text-center text-sm text-white/45">
+                                Need access? Contact the CoSET admin team.
+                            </p>
                         </div>
                     </motion.div>
-
-                    <div className="mt-12 grid gap-4 sm:grid-cols-2">
-                        <div className="rounded-2xl border border-white/5 bg-white/5 p-4 backdrop-blur-sm">
-                            <div className="flex items-center gap-3">
-                                <div className="rounded-lg bg-teal/20 p-2 text-teal-400">
-                                    <Fingerprint className="h-4 w-4" />
-                                </div>
-                                <p className="text-xs font-bold uppercase tracking-[0.1em] text-white/70">Role-Based Access</p>
-                            </div>
-                            <p className="mt-3 text-xs leading-5 text-white/40">Only editor and admin roles can manage hub content through the administrative desk.</p>
-                        </div>
-                        <div className="rounded-2xl border border-white/5 bg-white/5 p-4 backdrop-blur-sm">
-                            <div className="flex items-center gap-3">
-                                <div className="rounded-lg bg-ember/20 p-2 text-ember-400">
-                                    <Sparkles className="h-4 w-4" />
-                                </div>
-                                <p className="text-xs font-bold uppercase tracking-[0.1em] text-white/70">Editorial Policy</p>
-                            </div>
-                            <p className="mt-3 text-xs leading-5 text-white/40">Generated draft content must be manually reviewed and approved by staff before publication.</p>
-                        </div>
-                    </div>
                 </div>
             </SectionWrapper>
         </main>

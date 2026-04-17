@@ -4,6 +4,10 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 const protectedPrefixes = ['/admin'];
 
 function isProtectedRoute(pathname: string) {
+    if (pathname === '/admin/login') {
+        return false;
+    }
+
     return protectedPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 }
 

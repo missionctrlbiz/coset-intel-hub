@@ -9,7 +9,9 @@ export type Report = {
     publishedAt: string;
     author: string;
     views: string;
+    viewsCount: number;
     downloads: string;
+    downloadsCount: number;
     image: string;
     highlight: string[];
     quote: string;
@@ -31,7 +33,9 @@ export const reports: Report[] = [
         publishedAt: 'Oct 24, 2024',
         author: 'Dr. Amara Okafor',
         views: '12.8k',
+        viewsCount: 12800,
         downloads: '4.3k',
+        downloadsCount: 4300,
         image: '/coset-eye-banner.jpg',
         highlight: [
             '34% increase in coastal erosion rates',
@@ -65,7 +69,9 @@ export const reports: Report[] = [
         publishedAt: 'Oct 24, 2024',
         author: 'CoSET Research Lab',
         views: '9.6k',
+        viewsCount: 9600,
         downloads: '5.1k',
+        downloadsCount: 5100,
         image: '/community-engagement.jpg',
         highlight: [
             '16,000 active sites identified',
@@ -99,7 +105,9 @@ export const reports: Report[] = [
         publishedAt: 'Feb 12, 2024',
         author: 'Ijeoma Bello',
         views: '7.4k',
+        viewsCount: 7400,
         downloads: '2.6k',
+        downloadsCount: 2600,
         image: '/CoSET-5-600x540.png',
         highlight: ['Regional adoption signals rising', 'Financing gaps narrowing', 'Grid reliability remains the main risk'],
         quote:

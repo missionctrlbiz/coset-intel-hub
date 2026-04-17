@@ -103,7 +103,7 @@ export default async function AdminContentPage({
                                 <tr key={report.id} className="border-t border-line even:bg-panel-alt/60">
                                     <td className="px-6 py-5">
                                         <div>
-                                            <p className="font-semibold text-navy">{report.title}</p>
+                                            <p className="font-semibold text-navy dark:text-ember dark:hover:text-white transition-colors">{report.title}</p>
                                             <p className="mt-1 text-xs text-muted">{report.slug}</p>
                                         </div>
                                     </td>

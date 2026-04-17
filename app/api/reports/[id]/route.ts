@@ -4,6 +4,8 @@ import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/sup
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+export const runtime = 'nodejs';
+
 export async function GET(
     req: NextRequest,
     { params }: { params: { id: string } },
@@ -77,4 +79,42 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: true });
+}
+
+export async function POST(
+    req: NextRequest,
+    { params }: { params: { id: string } },
+) {
+    const { id } = params;
+
+    if (!id || !UUID_RE.test(id)) {
+        return NextResponse.json({ error: 'Invalid report id.' }, { status: 400 });
+    }
+
+    if (req.nextUrl.searchParams.get('view') !== '1') {
+        return NextResponse.json({ error: 'Unsupported operation.' }, { status: 400 });
+    }
+
+    const admin = createSupabaseAdminClient();
+    const { data: report, error: reportError } = await admin
+        .from('reports')
+        .select('views, status')
+        .eq('id', id)
+        .maybeSingle();
+
+    if (reportError || !report || report.status !== 'published') {
+        return NextResponse.json({ error: 'Report not found.' }, { status: 404 });
+    }
+
+    const nextViews = (report.views ?? 0) + 1;
+    const { error: updateError } = await admin
+        .from('reports')
+        .update({ views: nextViews })
+        .eq('id', id);
+
+    if (updateError) {
+        return NextResponse.json({ error: 'Could not update report views.' }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, views: nextViews });
 }
