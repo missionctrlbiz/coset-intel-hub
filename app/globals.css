@@ -91,3 +91,12 @@ textarea::placeholder {
   font-family: var(--font-coset-sans), sans-serif;
   letter-spacing: -0.03em;
 }
+
+html.dark .text-navy {
+  color: rgb(var(--color-ember) / var(--tw-text-opacity, 1));
+}
+
+html.dark a.text-navy:is(:hover, :focus-visible),
+html.dark a:is(:hover, :focus-visible) .text-navy {
+  color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+}

@@ -98,7 +98,7 @@ export async function SiteHeader({ dark = false, isAdmin = false }: SiteHeaderPr
                                         'flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-full border transition [&::-webkit-details-marker]:hidden',
                                         dark
                                             ? 'border-white/15 bg-white/10 text-white hover:bg-white/15'
-                                            : 'border-line bg-mist text-navy hover:bg-panel'
+                                            : 'border-line bg-mist text-navy hover:border-ember/30 hover:bg-panel'
                                     )}
                                 >
                                     <Menu className="h-5 w-5" />
@@ -106,7 +106,7 @@ export async function SiteHeader({ dark = false, isAdmin = false }: SiteHeaderPr
 
                                 <div
                                     className={cn(
-                                        'absolute right-0 top-full mt-3 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-[1.75rem] border p-3 shadow-editorial',
+                                        'absolute right-0 top-full mt-3 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-b-[1.75rem] rounded-t-none border p-3 shadow-editorial',
                                         dark
                                             ? 'border-white/10 bg-[#0A1421]/95 text-white backdrop-blur-2xl'
                                             : 'border-line bg-white/95 text-ink backdrop-blur-2xl dark:border-white/10 dark:bg-panel/95 dark:text-white'
@@ -116,8 +116,8 @@ export async function SiteHeader({ dark = false, isAdmin = false }: SiteHeaderPr
                                         <Link
                                             href="/reports"
                                             className={cn(
-                                                'flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition hover:text-ember',
-                                                dark ? 'text-white/85 hover:bg-white/5' : 'text-navy hover:bg-mist'
+                                                'flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition',
+                                                dark ? 'text-white/85 hover:bg-white/5 hover:text-white' : 'text-navy hover:bg-mist'
                                             )}
                                         >
                                             <FileText className="h-4 w-4" />
@@ -128,8 +128,8 @@ export async function SiteHeader({ dark = false, isAdmin = false }: SiteHeaderPr
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className={cn(
-                                                'flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition hover:text-ember',
-                                                dark ? 'text-white/85 hover:bg-white/5' : 'text-navy hover:bg-mist'
+                                                'flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition',
+                                                dark ? 'text-white/85 hover:bg-white/5 hover:text-white' : 'text-navy hover:bg-mist'
                                             )}
                                         >
                                             <Info className="h-4 w-4" />
@@ -138,8 +138,8 @@ export async function SiteHeader({ dark = false, isAdmin = false }: SiteHeaderPr
                                         <Link
                                             href="/contact"
                                             className={cn(
-                                                'flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition hover:text-ember',
-                                                dark ? 'text-white/85 hover:bg-white/5' : 'text-navy hover:bg-mist'
+                                                'flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition',
+                                                dark ? 'text-white/85 hover:bg-white/5 hover:text-white' : 'text-navy hover:bg-mist'
                                             )}
                                         >
                                             <Mail className="h-4 w-4" />

@@ -331,7 +331,7 @@ export function MissionAndPhilosophy() {
 }
 
 // ============================================================================
-// Planet Pulse
+// Featured Perspectives
 // ============================================================================
 export function PlanetPulse({ blogPosts }: { blogPosts: BlogCard[] }) {
     const displayPosts = blogPosts.slice(0, 3);
@@ -339,20 +339,17 @@ export function PlanetPulse({ blogPosts }: { blogPosts: BlogCard[] }) {
     return (
         <StaggerReveal>
             <FadeIn className="flex flex-col items-center text-center">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Planet Pulse</p>
-                <h2 className="mt-3 font-display text-4xl font-extrabold tracking-[-0.04em] text-ink">Curated Global Updates</h2>
-                <p className="mt-4 max-w-2xl text-muted">Latest insights and editorial briefings from our network.</p>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Featured Perspectives</p>
+                <h2 className="mt-3 font-display text-4xl font-extrabold tracking-[-0.04em] text-ink">Selected Insights From Our Network</h2>
+                <p className="mt-4 max-w-2xl text-muted">A rotating snapshot of recent ideas, commentary, and context shaping our research conversations.</p>
             </FadeIn>
 
             <FadeIn className="mt-12 grid gap-6 md:grid-cols-3">
                 {displayPosts.length === 0 ? (
                     <EmptyBlogPosts />
                 ) : displayPosts.map((post) => (
-                    <a
+                    <div
                         key={post.title}
-                        href={`https://cosetng.org/blog/`}
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="group flex flex-col rounded-[1.5rem] border border-line bg-panel p-4 shadow-soft transition hover:-translate-y-1 hover:shadow-editorial dark:bg-panel-alt/80"
                     >
                         <div className="relative mb-6 aspect-video w-full overflow-hidden rounded-[1rem]">
@@ -372,14 +369,8 @@ export function PlanetPulse({ blogPosts }: { blogPosts: BlogCard[] }) {
                             <h3 className="mt-4 font-display text-xl font-bold tracking-tight text-ink group-hover:text-ember">{post.title}</h3>
                             <p className="mt-auto text-xs font-semibold text-muted">{post.publishedAt}</p>
                         </div>
-                    </a>
+                    </div>
                 ))}
-            </FadeIn>
-
-            <FadeIn className="mt-8 flex justify-center">
-                <a href="https://cosetng.org/blog/" target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-navy hover:text-ember flex items-center gap-1">
-                    Read more on our main site <ArrowUpRight className="h-4 w-4" />
-                </a>
             </FadeIn>
         </StaggerReveal>
     );

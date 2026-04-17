@@ -175,26 +175,26 @@ export function AdminDashboardSkeleton() {
             <div className="grid gap-6 md:grid-cols-3">
                 {[1, 2, 3].map((i) => (
                     <div key={i} className={`overflow-hidden rounded-[2.5rem] border p-8 shadow-soft ${i === 1 ? 'border-line bg-panel dark:bg-panel/90' :
-                            i === 2 ? 'border-emerald-100 bg-emerald-50/30 dark:border-emerald-900/50 dark:bg-emerald-900/20' :
-                                'border-amber-100 bg-amber-50/30 dark:border-amber-900/50 dark:bg-amber-900/20'
+                        i === 2 ? 'border-emerald-100 bg-emerald-50/30 dark:border-emerald-900/50 dark:bg-emerald-900/20' :
+                            'border-amber-100 bg-amber-50/30 dark:border-amber-900/50 dark:bg-amber-900/20'
                         }`}>
                         <div className="mb-8 flex items-center justify-between">
                             <div className={`h-14 w-14 rounded-2xl ${i === 1 ? 'bg-mist dark:bg-slate-700' :
-                                    i === 2 ? 'bg-emerald-100 dark:bg-emerald-800/50' :
-                                        'bg-amber-100 dark:bg-amber-800/50'
+                                i === 2 ? 'bg-emerald-100 dark:bg-emerald-800/50' :
+                                    'bg-amber-100 dark:bg-amber-800/50'
                                 }`} />
                             <div className={`h-6 w-16 rounded-full ${i === 1 ? 'bg-mist dark:bg-slate-700' :
-                                    i === 2 ? 'bg-emerald-100/50 dark:bg-emerald-800/30' :
-                                        'bg-amber-100/50 dark:bg-amber-800/30'
+                                i === 2 ? 'bg-emerald-100/50 dark:bg-emerald-800/30' :
+                                    'bg-amber-100/50 dark:bg-amber-800/30'
                                 }`} />
                         </div>
                         <div className={`h-3 w-32 rounded-full ${i === 1 ? 'bg-mist dark:bg-slate-700' :
-                                i === 2 ? 'bg-emerald-200 dark:bg-emerald-800/50' :
-                                    'bg-amber-200 dark:bg-amber-800/50'
+                            i === 2 ? 'bg-emerald-200 dark:bg-emerald-800/50' :
+                                'bg-amber-200 dark:bg-amber-800/50'
                             }`} />
                         <div className={`mt-4 h-12 w-28 rounded-xl ${i === 1 ? 'bg-mist dark:bg-slate-700' :
-                                i === 2 ? 'bg-emerald-200 dark:bg-emerald-800/50' :
-                                    'bg-amber-200 dark:bg-amber-800/50'
+                            i === 2 ? 'bg-emerald-200 dark:bg-emerald-800/50' :
+                                'bg-amber-200 dark:bg-amber-800/50'
                             }`} />
                     </div>
                 ))}
@@ -258,9 +258,9 @@ export function EmptyBlogPosts() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5" />
                 </svg>
             </div>
-            <p className="font-display text-xl font-bold text-navy">No editorial posts yet</p>
+            <p className="font-display text-xl font-bold text-navy">No featured insights yet</p>
             <p className="mt-2 max-w-sm text-sm leading-7 text-muted">
-                Blog posts from the editorial desk will appear as they are published.
+                Selected perspectives will appear here as new material is prepared.
             </p>
         </div>
     );
