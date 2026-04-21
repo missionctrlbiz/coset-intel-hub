@@ -12,6 +12,7 @@ import {
 
 import { EmptyBlogPosts, EmptyReports } from '@/components/loading-states';
 import { SectionReveal, StaggerReveal, FadeIn } from '@/components/section-reveal';
+import { SubscribeModalTrigger } from '@/components/subscribe-modal-trigger';
 import { type BlogCard } from '@/lib/content';
 import { type Report, cosetOrgLinks } from '@/lib/site-data';
 
@@ -480,17 +481,17 @@ export function HubServices() {
                     </div>
 
                     <FadeIn className="flex-1 w-full max-w-md lg:max-w-xl">
-                        <form className="flex w-full flex-col gap-3 sm:flex-row">
-                            <input
-                                type="email"
-                                placeholder="Enter your email address..."
-                                required
-                                className="w-full rounded-xl border border-line bg-mist px-4 py-4 text-sm text-ink outline-none transition focus:border-navy dark:bg-panel"
-                            />
-                            <button type="submit" className="shrink-0 rounded-xl bg-navy px-8 py-4 font-bold text-white transition hover:brightness-110">
-                                Subscribe
-                            </button>
-                        </form>
+                        <div className="rounded-[1.5rem] border border-line bg-mist p-5 dark:bg-panel-alt/70 sm:p-6">
+                            <p className="text-sm leading-7 text-muted">
+                                Join the CoSET publication list and receive new research, position papers, and briefings as soon as they are released.
+                            </p>
+                            <div className="mt-5">
+                                <SubscribeModalTrigger
+                                    label="Save My Email"
+                                    className="inline-flex w-full items-center justify-center rounded-xl bg-navy px-8 py-4 text-sm font-bold text-white transition hover:brightness-110 sm:w-auto"
+                                />
+                            </div>
+                        </div>
                         <p className="mt-4 text-xs font-medium text-muted">We respect your privacy. Unsubscribe at any time.</p>
                     </FadeIn>
                 </div>

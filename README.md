@@ -4,6 +4,8 @@ Premium intelligence hub and administrative suite for the Coalition for Socio-Ec
 
 A Next.js App Router application for publishing climate justice research, policy briefs, and editorial content, with an AI-powered admin workflow for intelligent content ingestion, semantic search, and audience management.
 
+See [HANDOVER_REVIEW.md](HANDOVER_REVIEW.md) for the current implementation status, remaining work, and handover recommendations.
+
 ## Overview
 
 The hub serves three primary audiences:
@@ -21,6 +23,7 @@ The hub serves three primary audiences:
 - 📄 **Report Detail Pages** – Full-text report viewer with executive findings, highlights, and related content
 - 📝 **Blog & Editorial Desk** – "Planet Pulse" updates on climate justice and policy developments
 - 💬 **Contact Page** – Direct engagement channel
+- 📬 **Subscriber Capture Modal** – Public subscribe CTA with email capture, welcome email, and success confirmation
 - 🎨 **Light/Dark Theme** – System-aware theme toggle with localStorage persistence
 - 🔍 **Semantic Search** – Hybrid vector + full-text search powered by Gemini embeddings
 
@@ -30,7 +33,7 @@ The hub serves three primary audiences:
 - 📤 **Intelligent Upload Wizard** – Multi-source ingestion (file upload, URL scraping, HTML paste, clipboard capture)
 - 🤖 **AI-Powered Processing** – Auto-extraction via Google Gemini (title, summary, categories, tags, semantic HTML formatting)
 - 📋 **Content Management** – Paginated report table with status/category filtering, inline edit/delete controls
-- 👥 **Subscriber Management** – Audience tracking, tier management, automation controls
+- 👥 **Platform Users View** – Current `/admin/subscribers` page lists authenticated platform users and roles
 - 📈 **Analytics Dashboard** – Performance metrics and engagement tracking
 - 🔐 **Role-Based Access** – Admin, Editor, Viewer roles with granular permissions
 
@@ -51,7 +54,8 @@ The hub serves three primary audiences:
 - **Supabase Auth** – Email/password authentication with role-based access
 - **Supabase Storage** – File storage for report images and uploads
 - **pgvector Extension** – Vector embeddings for semantic search
-- **Google Gemini 1.5 Pro** – AI-powered metadata extraction and content formatting
+- **Google Gemini 1.5 Pro / 1.5 Flash** – AI-powered metadata extraction, analysis, and content formatting
+- **Resend** – Subscriber audience capture and welcome emails
 - **text-embedding-004** – Vector embeddings for semantic similarity
 
 ### Document Processing
@@ -67,15 +71,18 @@ app/
   ├── admin/                      # Admin portal
   │   ├── analytics/             # Performance metrics
   │   ├── content/               # Content management
-  │   ├── subscribers/           # Audience management
+  │   ├── subscribers/           # Platform users and roles
   │   └── upload/                # Upload wizard
   ├── api/                       # API routes
+  │   ├── analyze-content/       # Metadata analysis from extracted content
+  │   ├── beautify-content/      # AI formatting for preview/report HTML
   │   ├── chat/                  # Report Q&A endpoint
   │   ├── extract-from-file/     # File upload processing
   │   ├── extract-from-url/      # URL scraping
+  │   ├── subscribe/             # Public subscriber capture via Resend
   │   ├── reports/deploy/        # Report publishing
   │   ├── search/                # Hybrid search
-  │   └── smart-format/          # AI content formatting
+  │   └── feedback/              # Public feedback/contact handling
   ├── blog/                      # Editorial content
   │   └── [slug]/               # Individual blog post
   ├── contact/                   # Contact form
@@ -83,14 +90,12 @@ app/
   └── reports/                   # Intelligence reports
       └── [slug]/               # Individual report detail
 components/
-  ├── admin-content-controls.tsx # Report management table
-  ├── admin-header.tsx           # Admin navigation
-  ├── admin-sidebar.tsx          # Admin sidebar navigation
   ├── chip-input.tsx             # Multi-tag input
   ├── floating-chat.tsx          # Report Q&A widget (disabled)
   ├── search-form.tsx            # Global search
   ├── site-footer.tsx            # Public footer
   ├── site-header.tsx            # Public header with auth
+  ├── subscribe-modal-trigger.tsx# Public subscribe modal CTA
   ├── theme-toggle.tsx           # Light/dark mode switch
   └── upload-wizard.tsx          # Multi-phase ingestion
 lib/
@@ -126,15 +131,17 @@ public/
 - `/admin` – Dashboard with KPIs and activity timeline
 - `/admin/analytics` – Performance metrics
 - `/admin/content` – Content management table
-- `/admin/subscribers` – Audience management
+- `/admin/subscribers` – Platform users and roles
 - `/admin/upload` – Intelligent upload wizard
 
 ### API Routes
 
 - `POST /api/extract-from-file` – Process uploaded files with AI metadata extraction
 - `POST /api/extract-from-url` – Scrape and analyze URLs
-- `POST /api/smart-format` – Format content into semantic HTML
+- `POST /api/analyze-content` – Analyze extracted text or pasted content for metadata
+- `POST /api/beautify-content` – Format content into semantic HTML
 - `POST /api/reports/deploy` – Publish report and generate embeddings
+- `POST /api/subscribe` – Save a public subscriber email and send a welcome email via Resend
 - `GET /api/search` – Hybrid semantic + full-text search
 - `POST /api/chat` – Report-specific Q&A using vector retrieval
 
@@ -218,6 +225,18 @@ WHERE email = 'admin@example.com';
 - **Protected Routes** – All `/admin/*` routes require authentication
 - **Role Indicators** – Content management shows user capabilities based on role
 - **Graceful Fallback** – Unauthenticated users see fallback content with sign-in prompts
+
+## Subscriber Capture
+
+- Public subscribe CTAs open a modal-based email capture flow instead of linking to an on-page anchor.
+- `POST /api/subscribe` stores contacts in a Resend audience when configured and sends a welcome email.
+- Required environment variables for production:
+
+```bash
+RESEND_API_KEY="your-resend-key"
+RESEND_FROM_EMAIL="updates@your-domain.com"
+RESEND_AUDIENCE_ID="your-resend-audience-id"
+```
 
 ## Supabase Setup
 

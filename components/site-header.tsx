@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { SearchForm } from '@/components/search-form';
+import { SubscribeModalTrigger } from '@/components/subscribe-modal-trigger';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { ThemeLogo } from '@/components/theme-logo';
 import { AdminNavClient } from '@/components/admin-nav-client';
@@ -87,12 +88,9 @@ export async function SiteHeader({ dark = false, isAdmin = false, forceDarkLogo 
                             </Suspense>
                             <ThemeToggle darkSurface={dark} />
                             <div className="hidden items-center gap-2 md:flex">
-                                <Link
-                                    href="#subscribe"
+                                <SubscribeModalTrigger
                                     className="rounded-full bg-ember px-4 py-2.5 text-sm font-bold text-white shadow-soft transition hover:brightness-110"
-                                >
-                                    Subscribe Now
-                                </Link>
+                                />
                             </div>
                             <details className="relative lg:hidden">
                                 <summary
@@ -149,12 +147,9 @@ export async function SiteHeader({ dark = false, isAdmin = false, forceDarkLogo 
                                     </nav>
 
                                     <div className={cn('mt-3 border-t pt-3', dark ? 'border-white/10' : 'border-line')}>
-                                        <Link
-                                            href="#subscribe"
-                                            className="flex items-center justify-center rounded-full bg-ember px-4 py-3 text-sm font-bold text-white shadow-soft transition hover:brightness-110"
-                                        >
-                                            Subscribe Now
-                                        </Link>
+                                        <SubscribeModalTrigger
+                                            className="flex w-full items-center justify-center rounded-full bg-ember px-4 py-3 text-sm font-bold text-white shadow-soft transition hover:brightness-110"
+                                        />
                                     </div>
                                 </div>
                             </details>
