@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { CheckCircle2, Database, FileText, Globe, Presentation, Sparkles, UploadCloud, Wand2 } from 'lucide-react';
+import { CheckCircle2, Database, FileText, Globe, LoaderCircle, Presentation, Sparkles, UploadCloud } from 'lucide-react';
 import { ChipInput } from '@/components/chip-input';
 
 export type UploadStepProps = {
@@ -160,42 +160,27 @@ export type MetadataStepProps = {
     setTags: (value: string[]) => void;
     hasContent?: boolean;
     onAnalyze?: () => void;
-    onBeautify?: () => void;
     isAnalyzing?: boolean;
-    isBeautifying?: boolean;
 };
 
-export function MetadataStep({ title, summary, sourceMode, sourceUrl, categories, tags, setTitle, setSummary, setSourceUrl, setCategories, setTags, hasContent, onAnalyze, onBeautify, isAnalyzing, isBeautifying }: MetadataStepProps) {
+export function MetadataStep({ title, summary, sourceMode, sourceUrl, categories, tags, setTitle, setSummary, setSourceUrl, setCategories, setTags, hasContent, onAnalyze, isAnalyzing }: MetadataStepProps) {
     return (
         <div className="space-y-6">
             <div>
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Report Identity</p>
                 <h2 className="mt-2 font-display text-3xl font-extrabold text-ink">Add Report Details</h2>
             </div>
-            {hasContent && (onAnalyze || onBeautify) ? (
+            {hasContent && onAnalyze ? (
                 <div className="flex flex-wrap gap-3">
-                    {onAnalyze ? (
-                        <button
-                            type="button"
-                            onClick={onAnalyze}
-                            disabled={isAnalyzing || isBeautifying}
-                            className="flex items-center gap-2 rounded-full border border-ember/30 bg-ember/5 px-4 py-2 text-sm font-semibold text-ember transition hover:bg-ember/10 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                            <Sparkles className="h-4 w-4" />
-                            {isAnalyzing ? 'Analyzing\u2026' : 'Auto-fill details'}
-                        </button>
-                    ) : null}
-                    {onBeautify ? (
-                        <button
-                            type="button"
-                            onClick={onBeautify}
-                            disabled={isAnalyzing || isBeautifying}
-                            className="flex items-center gap-2 rounded-full border border-teal/30 bg-teal/5 px-4 py-2 text-sm font-semibold text-teal transition hover:bg-teal/10 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                            <Wand2 className="h-4 w-4" />
-                            {isBeautifying ? 'Enhancing\u2026' : 'Enhance formatting'}
-                        </button>
-                    ) : null}
+                    <button
+                        type="button"
+                        onClick={onAnalyze}
+                        disabled={isAnalyzing}
+                        className="flex items-center gap-2 rounded-full border border-ember/30 bg-ember/5 px-4 py-2 text-sm font-semibold text-ember transition hover:bg-ember/10 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        <Sparkles className="h-4 w-4" />
+                        {isAnalyzing ? 'Analyzing\u2026' : 'Auto-fill details'}
+                    </button>
                 </div>
             ) : null}
             <label className="block space-y-3">
@@ -234,12 +219,57 @@ export function MetadataStep({ title, summary, sourceMode, sourceUrl, categories
     );
 }
 
+export type PreviewStepProps = {
+    previewHtml: string;
+    isPreparing: boolean;
+};
+
+export function PreviewStep({ previewHtml, isPreparing }: PreviewStepProps) {
+    return (
+        <div className="space-y-6">
+            <div>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Preview</p>
+                <h2 className="mt-2 font-display text-3xl font-extrabold text-ink">Review the generated preview</h2>
+                <p className="mt-3 text-sm text-muted">
+                    We are preparing the structured preview before you move to publishing.
+                </p>
+            </div>
+
+            <div className="overflow-hidden rounded-[1.5rem] border border-line bg-mist dark:bg-panel-alt/70">
+                {isPreparing ? (
+                    <div className="flex min-h-[420px] flex-col items-center justify-center gap-4 px-8 py-16 text-center">
+                        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-teal/10 text-teal">
+                            <LoaderCircle className="h-7 w-7 animate-spin" />
+                        </span>
+                        <div className="space-y-2">
+                            <p className="font-display text-2xl font-bold text-ink">Preparing preview</p>
+                            <p className="max-w-xl text-sm leading-7 text-muted">
+                                Formatting the extracted content into a readable report layout. This usually takes a moment.
+                            </p>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="max-h-[620px] overflow-y-auto border-t border-line bg-panel-alt/40 px-5 py-5 dark:bg-panel/70">
+                        <div className="report-prose report-prose--preview prose prose-sm max-w-none rounded-[1.5rem] border border-line p-5 sm:p-6">
+                            <div
+                                className="report-prose__content"
+                                // eslint-disable-next-line react/no-danger
+                                dangerouslySetInnerHTML={{ __html: previewHtml }}
+                            />
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
 export function ReviewStep({ title, summary, sourceMode, sourceUrl, categories, tags, selectedFile, coverImageFile, coverImagePreview }: { title: string; summary: string; sourceMode: 'file' | 'url' | 'paste'; sourceUrl: string; categories: string[]; tags: string[]; selectedFile: File | null; coverImageFile?: File | null; coverImagePreview?: string | null }) {
     return (
         <div className="space-y-6">
             <div>
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Review</p>
-                <h2 className="mt-2 font-display text-3xl font-extrabold text-ink">Everything is ready for extraction</h2>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Publish</p>
+                <h2 className="mt-2 font-display text-3xl font-extrabold text-ink">Everything is ready to publish</h2>
             </div>
             <div className="rounded-[2rem] border border-line bg-mist p-6">
                 <div className="mb-5 flex items-center gap-3 text-teal">

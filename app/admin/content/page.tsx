@@ -8,11 +8,19 @@ import { getAdminContentReports } from '@/lib/content';
 import { createSupabaseServerClient } from '@/lib/supabase/clients';
 
 const statusClasses: Record<string, string> = {
-    Archived: 'bg-slate-200 text-slate-700',
-    Draft: 'bg-slate-200 text-slate-700',
-    Published: 'bg-emerald-100 text-emerald-800',
-    Scheduled: 'bg-blue-100 text-blue-800',
+    Archived: 'border-slate-300 bg-slate-100 text-slate-700',
+    Draft: 'border-slate-300 bg-slate-100 text-slate-700',
+    Published: 'border-emerald-200 bg-emerald-100 text-emerald-800',
+    Scheduled: 'border-blue-200 bg-blue-100 text-blue-800',
 };
+
+function formatCategoryLabel(category: string) {
+    return category
+        .split(/[-_\s]+/)
+        .filter(Boolean)
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+}
 
 export default async function AdminContentPage({
     searchParams,
@@ -45,7 +53,7 @@ export default async function AdminContentPage({
     }
 
     return (
-        <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <main className="site-shell max-w-[1520px] py-10">
             <div className="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
                 <div>
                     <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Curation Hub</p>
@@ -83,16 +91,23 @@ export default async function AdminContentPage({
                 categories={distinctCategories}
                 currentStatus={currentStatus}
                 currentCategory={currentCategory}
+                totalCount={totalCount}
             />
 
-            <section className="overflow-hidden rounded-[2rem] border border-line bg-panel shadow-soft">
+            <section className="overflow-hidden rounded-[2.2rem] border border-line bg-panel shadow-soft">
                 <div className="overflow-x-auto">
-                    <table className="min-w-full text-left">
+                    <table className="min-w-full table-fixed text-left">
+                        <colgroup>
+                            <col className="w-[48%]" />
+                            <col className="w-[18%]" />
+                            <col className="w-[14%]" />
+                            <col className="w-[12%]" />
+                            <col className="w-[8%]" />
+                        </colgroup>
                         <thead className="sticky top-0 bg-panel-alt text-xs font-bold uppercase tracking-[0.18em] text-muted">
                             <tr>
-                                <th className="px-6 py-5">Title & Reference</th>
+                                <th className="px-6 py-5">Report</th>
                                 <th className="px-6 py-5">Category</th>
-                                <th className="px-6 py-5">Author</th>
                                 <th className="px-6 py-5">Modified</th>
                                 <th className="px-6 py-5">Status</th>
                                 <th className="px-6 py-5 text-right">Actions</th>
@@ -100,29 +115,53 @@ export default async function AdminContentPage({
                         </thead>
                         <tbody>
                             {reports.map((report) => (
-                                <tr key={report.id} className="border-t border-line even:bg-panel-alt/60">
+                                <tr key={report.id} className="group border-t border-line transition-colors hover:bg-panel-alt/70 even:bg-panel-alt/35">
                                     <td className="px-6 py-5">
-                                        <div>
-                                            <p className="font-semibold text-navy dark:text-ember dark:hover:text-white transition-colors">{report.title}</p>
-                                            <p className="mt-1 text-xs text-muted">{report.slug}</p>
+                                        <div className="space-y-3">
+                                            <div>
+                                                <p className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-ember">Intelligence Report</p>
+                                                <p className="max-w-[32rem] text-lg font-semibold leading-7 text-navy transition-colors group-hover:text-ember">{report.title}</p>
+                                                <p className="mt-1 text-sm text-muted">Intelligence report ready for editing and public preview.</p>
+                                            </div>
+                                            <div className="flex flex-wrap items-center gap-2.5 text-xs font-semibold">
+                                                <Link
+                                                    href={`/reports/${report.slug}`}
+                                                    target="_blank"
+                                                    className="inline-flex items-center gap-2 rounded-full border border-line bg-white px-3 py-1.5 text-navy transition hover:border-ember hover:text-ember dark:border-white/12 dark:bg-[#132033] dark:text-ember dark:hover:border-ember/40 dark:hover:bg-[#182740] dark:hover:text-ember"
+                                                >
+                                                    <Eye className="h-3.5 w-3.5" />
+                                                    Open public report
+                                                </Link>
+                                                <span className="rounded-full bg-mist px-3 py-1.5 text-muted dark:bg-[#132033] dark:text-ember/80">
+                                                    Ready in publishing archive
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-5 align-middle">
+                                        <div className="max-w-[14rem]">
+                                            <span className="inline-flex min-h-10 w-full items-center justify-center rounded-[1rem] border border-blue-200 bg-blue-50 px-3.5 py-2 text-center text-xs font-bold uppercase leading-4 tracking-[0.14em] text-navy whitespace-normal break-words dark:border-white/12 dark:bg-[#132033] dark:text-ember">
+                                                {formatCategoryLabel(report.category)}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-5 align-middle">
+                                        <div className="space-y-1 text-sm text-muted">
+                                            <p className="font-semibold text-ink">{report.modified}</p>
+                                            <p>Last updated</p>
                                         </div>
                                     </td>
                                     <td className="px-6 py-5">
-                                        <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold uppercase text-navy">{report.category}</span>
-                                    </td>
-                                    <td className="px-6 py-5 text-sm text-muted">{report.author}</td>
-                                    <td className="px-6 py-5 text-sm text-muted">{report.modified}</td>
-                                    <td className="px-6 py-5">
-                                        <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${statusClasses[report.status] ?? 'bg-slate-200 text-slate-700'}`}>
+                                        <span className={`inline-flex rounded-full border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.14em] ${statusClasses[report.status] ?? 'border-slate-300 bg-slate-100 text-slate-700'}`}>
                                             {report.status}
                                         </span>
                                     </td>
                                     <td className="px-6 py-5 text-right">
-                                        <div className="flex items-center justify-end gap-1">
+                                        <div className="flex items-center justify-end gap-1.5">
                                             <Link
                                                 href={`/admin/upload?edit=${report.slug}`}
                                                 title="Edit report"
-                                                className="flex items-center justify-center h-8 w-8 rounded-lg text-muted transition hover:bg-mist hover:text-navy"
+                                                className="flex h-9 w-9 items-center justify-center rounded-xl border border-transparent bg-mist text-muted transition hover:border-ember/20 hover:bg-ember/10 hover:text-ember"
                                             >
                                                 <Pencil className="h-4 w-4" />
                                             </Link>
@@ -130,7 +169,7 @@ export default async function AdminContentPage({
                                                 href={`/reports/${report.slug}`}
                                                 target="_blank"
                                                 title="Preview report"
-                                                className="flex items-center justify-center h-8 w-8 rounded-lg text-muted transition hover:bg-mist hover:text-navy"
+                                                className="flex h-9 w-9 items-center justify-center rounded-xl border border-transparent bg-mist text-muted transition hover:border-navy/15 hover:bg-white hover:text-navy"
                                             >
                                                 <Eye className="h-4 w-4" />
                                             </Link>

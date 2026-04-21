@@ -13,11 +13,11 @@ export default async function ReportsPage() {
     return (
         <>
             <SiteHeader />
-            <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-                <ReportsExplorer 
-                    initialReports={reports} 
-                    categoryFilters={categoryFilters} 
-                    tagFilters={tagFilters} 
+            <main className="site-shell py-12">
+                <ReportsExplorer
+                    initialReports={reports}
+                    categoryFilters={categoryFilters}
+                    tagFilters={tagFilters}
                 />
             </main>
             <SiteFooter />

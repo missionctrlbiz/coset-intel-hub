@@ -65,7 +65,7 @@ export default async function AdminSubscribersPage() {
     }
 
     return (
-        <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <main className="site-shell max-w-[1520px] py-10">
             <div className="mb-10">
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Access Control</p>
                 <h1 className="mt-3 font-display text-5xl font-extrabold tracking-[-0.05em] text-ink">Platform Users</h1>

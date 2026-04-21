@@ -61,7 +61,7 @@ export default async function AdminAnalyticsPage() {
     }
 
     return (
-        <main className="min-w-0 flex-1 px-4 py-10 sm:px-6 lg:px-10">
+        <main className="site-shell max-w-[1520px] min-w-0 flex-1 py-10">
             <div className="mb-10 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
                 <div>
                     <h1 className="font-display text-5xl font-extrabold tracking-[-0.05em] text-ink">Performance Intelligence</h1>

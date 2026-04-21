@@ -4,17 +4,16 @@ import confetti from 'canvas-confetti';
 import Image from 'next/image';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Calendar, CheckCircle2, ChevronDown, Eye, ImagePlus, X } from 'lucide-react';
+import { Calendar, CheckCircle2, ImagePlus, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 
 import { ChipInput } from '@/components/chip-input';
 import { useTheme } from '@/components/theme-provider';
 import { sanitizeHtml } from '@/lib/sanitize';
-import { cn } from '@/lib/utils';
-import { MetadataStep, ReviewStep, UploadStep } from './upload-wizard-steps';
+import { MetadataStep, PreviewStep, ReviewStep, UploadStep } from './upload-wizard-steps';
 
-const steps = ['Upload File', 'Add Details', 'Review'];
-const stepProgressClasses = ['w-1/3', 'w-2/3', 'w-full'];
+const steps = ['Upload File', 'Add Details', 'Preview', 'Publish'];
+const stepProgressClasses = ['w-1/4', 'w-2/4', 'w-3/4', 'w-full'];
 
 type PublishIntent = 'draft' | 'scheduled' | 'published';
 
@@ -57,8 +56,8 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
     const [isExtracting, setIsExtracting] = useState(false);
     const [extractionError, setExtractionError] = useState<string | null>(null);
     const [extractedContent, setExtractedContent] = useState<string>(initialData?.content ?? '');
+    const [extractedSourceText, setExtractedSourceText] = useState<string>('');
     const [isAnalyzing, setIsAnalyzing] = useState(false);
-    const [isBeautifying, setIsBeautifying] = useState(false);
     const [sourceMode, setSourceMode] = useState<'file' | 'url' | 'paste'>(initialData?.sourceUrl ? 'url' : 'file');
     const [urlInput, setUrlInput] = useState(initialData?.sourceUrl ?? '');
     const [pastedContent, setPastedContent] = useState('');
@@ -66,9 +65,10 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
     const [urlError, setUrlError] = useState<string | null>(null);
     const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
     const attachmentFileRef = useRef<HTMLInputElement>(null);
-    const [previewOpen, setPreviewOpen] = useState(false);
     const [coverImagePreview, setCoverImagePreview] = useState<string | null>(null);
     const [pendingPhase, setPendingPhase] = useState<string | null>(null);
+    const [isPreviewEnhancing, setIsPreviewEnhancing] = useState(false);
+    const [previewStatus, setPreviewStatus] = useState<'idle' | 'fallback' | 'ready'>(initialData?.content ? 'ready' : 'idle');
     const celebratedResultRef = useRef<string | null>(null);
     const previewHtml = useMemo(() => sanitizeHtml(extractedContent), [extractedContent]);
 
@@ -153,9 +153,9 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
             if (sourceMode === 'paste') return pastedContent.trim().length > 0;
             return false;
         }
-        if (step === 1) return title.trim().length > 0 && summary.trim().length > 0;
+        if (step === 1) return title.trim().length > 0 && summary.trim().length > 0 && (extractedContent.trim().length > 0 || extractedSourceText.trim().length > 0);
         return true;
-    }, [selectedFile, step, summary, title, isExtracting, sourceMode, urlInput, isExtractingUrl, pastedContent]);
+    }, [selectedFile, step, summary, title, isExtracting, sourceMode, urlInput, isExtractingUrl, pastedContent, extractedContent, extractedSourceText]);
 
     async function readApiResponse<T extends Record<string, unknown>>(response: Response): Promise<T | null> {
         const contentType = response.headers.get('content-type') ?? '';
@@ -172,9 +172,42 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
         return null;
     }
 
+    async function enhancePreviewContent(content: string) {
+        if (!content.trim()) {
+            return;
+        }
+
+        setIsPreviewEnhancing(true);
+        try {
+            const response = await fetch('/api/beautify-content', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content }),
+            });
+
+            const data = await readApiResponse<{
+                success?: boolean;
+                formattedHtml?: string;
+                error?: string;
+            }>(response);
+
+            if (response.ok && data?.formattedHtml) {
+                setExtractedContent(data.formattedHtml);
+                setPreviewStatus('ready');
+            }
+        } catch {
+            // Keep the fallback preview if enhancement fails.
+        } finally {
+            setIsPreviewEnhancing(false);
+        }
+    }
+
     async function extractMetadata(file: File) {
         setIsExtracting(true);
+        setIsPreviewEnhancing(false);
         setExtractionError(null);
+        setExtractedSourceText('');
+        setPreviewStatus('idle');
         setPendingPhase('Reading the file and preparing the first draft...');
         try {
             const formData = new FormData();
@@ -195,6 +228,7 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
                 };
                 beautifiedHtml?: string;
                 fullText?: string;
+                previewStyle?: 'beautified' | 'fallback';
                 aiError?: string;
                 error?: string;
             }>(response);
@@ -222,6 +256,11 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
                 setExtractedContent(data.beautifiedHtml ?? data.fullText ?? '');
             }
 
+            if (data?.fullText) {
+                setExtractedSourceText(data.fullText);
+            }
+            setPreviewStatus(data?.previewStyle === 'beautified' ? 'ready' : data?.beautifiedHtml || data?.fullText ? 'fallback' : 'idle');
+
             if (data.aiError) {
                 setExtractionError(data.aiError);
             }
@@ -238,6 +277,8 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
 
     function handleFileSelection(file: File | null) {
         setSelectedFile(file);
+        setExtractedSourceText('');
+        setPreviewStatus('idle');
         setResult(null);
     }
 
@@ -268,34 +309,11 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
         }
     }
 
-    async function handleBeautify() {
-        if (!extractedContent) return;
-        setIsBeautifying(true);
-        try {
-            const response = await fetch('/api/beautify-content', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content: extractedContent }),
-            });
-            const data = await readApiResponse<{
-                success?: boolean;
-                formattedHtml?: string;
-                error?: string;
-            }>(response);
-            if (data?.formattedHtml) {
-                setExtractedContent(data.formattedHtml);
-            }
-        } catch {
-            // Silently fail
-        } finally {
-            setIsBeautifying(false);
-        }
-    }
-
     async function handleExtractUrl() {
         if (!urlInput.trim()) return;
         setIsExtractingUrl(true);
         setUrlError(null);
+        setPreviewStatus('idle');
         setPendingPhase('Fetching the page and drafting the report details...');
         try {
             const response = await fetch('/api/extract-from-url', {
@@ -318,7 +336,10 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
                 if (data.aiDraft.summary) setSummary(data.aiDraft.summary);
                 if (data.aiDraft.category) setCategories(data.aiDraft.category);
                 if (data.aiDraft.tags) setTags(data.aiDraft.tags);
-                if (data.aiDraft.formattedContent) setExtractedContent(data.aiDraft.formattedContent);
+                if (data.aiDraft.formattedContent) {
+                    setExtractedContent(data.aiDraft.formattedContent);
+                    setPreviewStatus('ready');
+                }
             }
             if (data?.aiError) setUrlError(data.aiError);
             setStep(1);
@@ -332,6 +353,8 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
 
     async function handlePasteAdvance() {
         setExtractedContent(pastedContent);
+        setExtractedSourceText(pastedContent);
+        setPreviewStatus('fallback');
         setIsExtracting(true);
         setPendingPhase('Analyzing the pasted content and preparing the draft...');
         try {
@@ -358,6 +381,16 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
             setPendingPhase(null);
         }
         setStep(1);
+    }
+
+    function ensurePreviewPreparation() {
+        const contentToBeautify = extractedSourceText || extractedContent;
+
+        if (!contentToBeautify || previewStatus === 'ready' || isPreviewEnhancing) {
+            return;
+        }
+
+        void enhancePreviewContent(contentToBeautify);
     }
 
     function executeSave(intent: PublishIntent) {
@@ -510,8 +543,14 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
             return;
         }
 
-        if (step < 2) {
-            setStep((current) => Math.min(current + 1, 2));
+        if (step === 1) {
+            setStep(2);
+            ensurePreviewPreparation();
+            return;
+        }
+
+        if (step < 3) {
+            setStep((current) => Math.min(current + 1, 3));
             return;
         }
     }
@@ -523,7 +562,7 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
     return (
         <>
             <div className="space-y-8">
-                <div className="relative grid gap-5 md:grid-cols-3">
+                <div className="relative grid gap-5 md:grid-cols-4">
                 <div className="absolute left-0 top-5 hidden h-px w-full bg-line md:block" />
                 <div className={`absolute left-0 top-5 hidden h-px bg-ember transition-all md:block ${stepProgressClasses[step]}`} />
                 {steps.map((label, index) => (
@@ -579,12 +618,16 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
                                         setTags={setTags}
                                         hasContent={!!extractedContent}
                                         onAnalyze={handleAnalyze}
-                                        onBeautify={handleBeautify}
                                         isAnalyzing={isAnalyzing}
-                                        isBeautifying={isBeautifying}
                                     />
                                 ) : null}
-                                {step === 2 ? <ReviewStep title={title} summary={summary} sourceMode={sourceMode} sourceUrl={urlInput} categories={categories} tags={tags} selectedFile={selectedFile} coverImageFile={coverImageFile} coverImagePreview={coverImagePreview} /> : null}
+                                {step === 2 ? (
+                                    <PreviewStep
+                                        previewHtml={previewHtml}
+                                        isPreparing={isPreviewEnhancing || previewStatus !== 'ready'}
+                                    />
+                                ) : null}
+                                {step === 3 ? <ReviewStep title={title} summary={summary} sourceMode={sourceMode} sourceUrl={urlInput} categories={categories} tags={tags} selectedFile={selectedFile} coverImageFile={coverImageFile} coverImagePreview={coverImagePreview} /> : null}
                             </motion.div>
                         </AnimatePresence>
 
@@ -595,34 +638,6 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
                             accept=".pdf,.csv,.doc,.docx,.ppt,.pptx,.txt,.md,.json,.html,.xml"
                             onChange={(event) => handleFileSelection(event.target.files?.[0] ?? null)}
                         />
-
-                        {/* HTML content preview */}
-                        {step >= 1 && extractedContent ? (
-                            <div className="mt-6 overflow-hidden rounded-[1.5rem] border border-line bg-mist dark:bg-panel-alt/70">
-                                <button
-                                    type="button"
-                                    onClick={() => setPreviewOpen((o) => !o)}
-                                    className="flex w-full items-center justify-between px-5 py-3.5 text-sm font-semibold text-ink dark:text-white"
-                                >
-                                    <span className="flex items-center gap-2">
-                                        <Eye className="h-4 w-4 text-ember" />
-                                        Preview Extracted Content
-                                    </span>
-                                    <ChevronDown className={cn('h-4 w-4 text-muted transition-transform', previewOpen && 'rotate-180')} />
-                                </button>
-                                {previewOpen ? (
-                                    <div className="max-h-[520px] overflow-y-auto border-t border-line bg-panel-alt/40 px-5 py-5 dark:bg-panel/70">
-                                        <div className="report-prose report-prose--preview prose prose-sm max-w-none rounded-[1.5rem] border border-line p-5 sm:p-6">
-                                            <div
-                                                className="report-prose__content"
-                                                // eslint-disable-next-line react/no-danger
-                                                dangerouslySetInnerHTML={{ __html: previewHtml }}
-                                            />
-                                        </div>
-                                    </div>
-                                ) : null}
-                            </div>
-                        ) : null}
 
                         {result?.tone === 'error' ? (
                             <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-4 text-sm text-rose-900">
@@ -637,7 +652,7 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
                         ) : null}
 
                         {/* Step navigation */}
-                        {step < 2 ? (
+                        {step < 3 ? (
                             <div className="mt-6 space-y-3">
                                 <div className="flex items-center justify-between gap-4">
                                     <button
@@ -650,12 +665,14 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
                                     </button>
                                     <button
                                         type="button"
-                                        disabled={!canAdvance}
+                                        disabled={!canAdvance || (step === 2 && (isPreviewEnhancing || previewStatus !== 'ready'))}
                                         onClick={handleAdvance}
                                         className="rounded-full bg-ember px-6 py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
                                     >
                                         {step === 0 && (isExtracting || isExtractingUrl)
                                             ? isExtractingUrl ? 'Importing…' : 'Extracting…'
+                                            : step === 2 && (isPreviewEnhancing || previewStatus !== 'ready')
+                                                ? 'Preparing preview…'
                                             : 'Continue'}
                                     </button>
                                 </div>

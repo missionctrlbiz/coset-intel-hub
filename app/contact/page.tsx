@@ -22,7 +22,7 @@ export default function ContactPage() {
         <>
             <SiteHeader />
             <main className="min-h-screen py-24">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="site-shell">
                     <div className="mb-16 text-center">
                         <span className="inline-block rounded-full bg-ember/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-ember">Get in touch</span>
                         <h1 className="mt-4 font-display text-4xl font-extrabold text-ink sm:text-5xl">Contact the Coalition</h1>

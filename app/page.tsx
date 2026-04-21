@@ -18,7 +18,7 @@ export default async function HomePage() {
                 <HeroCarousel featured={featured} />
                 <IntelSnapshot />
 
-                <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 space-y-24">
+                <section className="site-shell space-y-24 py-16">
                     <ReportsGrid reports={reports} />
                     <MissionAndPhilosophy />
                     <PlanetPulse blogPosts={blogPosts} />

@@ -9,7 +9,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
     }, [error]);
 
     return (
-        <div className="mx-auto flex min-h-[60vh] max-w-3xl flex-col items-center justify-center px-4 py-16 text-center sm:px-6 lg:px-8">
+        <div className="site-shell flex min-h-[60vh] max-w-3xl flex-col items-center justify-center py-16 text-center">
             <p className="text-xs font-bold uppercase tracking-[0.22em] text-ember">Application Error</p>
             <h2 className="mt-4 font-display text-4xl font-extrabold tracking-[-0.04em] text-ink">Something interrupted the page render</h2>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-muted">

@@ -175,7 +175,7 @@ export function AdminNavClient({ fullName, email, dark = false }: AdminNavClient
                     'absolute inset-x-0 top-full z-40 border-b shadow-editorial lg:hidden',
                     dark ? 'border-white/10 bg-[#0A1421]/95 backdrop-blur-xl' : 'border-line bg-white/95 backdrop-blur-xl'
                 )}>
-                    <nav className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
+                    <nav className="site-shell max-w-[1520px] py-4">
                         <div className="space-y-1">
                             {adminLinks.map(({ href, label, icon: Icon, exact }) => (
                                 <Link

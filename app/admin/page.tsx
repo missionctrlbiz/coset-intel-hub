@@ -10,7 +10,7 @@ export default async function AdminDashboardPage() {
     const { stats, activity, isFallback } = await getDashboardData();
 
     return (
-        <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <main className="site-shell max-w-[1520px] py-10">
             {/* Header Section */}
             <div className="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
                 <div>

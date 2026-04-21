@@ -67,7 +67,7 @@ export function SiteFooter() {
 
     return (
         <footer className="border-t border-line bg-panel/95 text-ink backdrop-blur dark:bg-[#08111d] dark:text-white">
-            <div className="mx-auto flex max-w-7xl flex-col gap-12 px-4 py-16 sm:px-6 lg:px-8">
+            <div className="site-shell flex flex-col gap-12 py-16">
 
                 {/* Main Footer Grid */}
                 <div className="grid gap-12 border-b border-line pb-12 lg:grid-cols-[1fr_2fr]">
@@ -79,7 +79,7 @@ export function SiteFooter() {
                         </Link>
                         <div className="max-w-md space-y-3">
                             <p className="text-sm font-bold uppercase tracking-[0.22em] text-ember">Uwem Nnyin — Our Lives</p>
-                            <p className="text-base leading-relaxed text-muted">
+                            <p className="text-base leading-relaxed text-navy/80 dark:text-white/82">
                                 Advocating for sustainable practices, promoting social and environmental justice, and empowering communities across Nigeria.
                             </p>
                         </div>
@@ -106,15 +106,15 @@ export function SiteFooter() {
                             const GroupIcon = group.icon;
                             return (
                                 <div key={group.heading} className="space-y-6">
-                                    <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-muted dark:text-white/70">
+                                    <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-navy/60 dark:text-white/78">
                                         <GroupIcon className="h-4 w-4" />
                                         {group.heading}
                                     </h3>
-                                    <ul className="space-y-4 text-sm font-medium text-navy dark:text-ember/90">
+                                    <ul className="space-y-4 text-sm font-medium text-navy dark:text-white/88">
                                         {group.links.map((link) => (
                                             <li key={link.label}>
-                                                <Link href={link.href} className="group flex items-center gap-2 transition hover:text-ember dark:hover:text-white">
-                                                    <ChevronRight className="h-3 w-3 text-muted/50 transition-transform group-hover:translate-x-1 group-hover:text-ember dark:text-white/35 dark:group-hover:text-white" />
+                                                <Link href={link.href} className="group flex items-center gap-2 transition hover:text-ember dark:hover:text-ember">
+                                                    <ChevronRight className="h-3 w-3 text-muted/50 transition-transform group-hover:translate-x-1 group-hover:text-ember dark:text-white/45 dark:group-hover:text-ember" />
                                                     {link.label}
                                                 </Link>
                                             </li>
@@ -131,35 +131,35 @@ export function SiteFooter() {
                     <div className="flex items-start gap-4 rounded-[1.5rem] border border-line bg-mist p-6 dark:bg-panel-alt">
                         <div className="rounded-full bg-navy/10 p-3 text-navy dark:bg-ember/10 dark:text-ember"><MapPin className="h-6 w-6" /></div>
                         <div>
-                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">Headquarters</p>
-                            <p className="mt-2 text-sm font-semibold text-ink">Marrakesh Street, Wuse 2<br />Abuja, Nigeria</p>
+                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-navy/55 dark:text-white/68">Headquarters</p>
+                            <p className="mt-2 text-sm font-semibold text-navy dark:text-white">Marrakesh Street, Wuse 2<br />Abuja, Nigeria</p>
                         </div>
                     </div>
                     <div className="flex items-start gap-4 rounded-[1.5rem] border border-line bg-mist p-6 dark:bg-panel-alt">
                         <div className="rounded-full bg-ember/10 p-3 text-ember"><Mail className="h-6 w-6" /></div>
                         <div>
-                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">Email Us</p>
-                            <a href="mailto:cosetng@gmail.com" className="mt-2 block text-sm font-semibold text-ink hover:text-ember transition">cosetng@gmail.com</a>
+                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-navy/55 dark:text-white/68">Email Us</p>
+                            <a href="mailto:cosetng@gmail.com" className="mt-2 block text-sm font-semibold text-navy transition hover:text-ember dark:text-white dark:hover:text-ember">cosetng@gmail.com</a>
                         </div>
                     </div>
                     <div className="flex items-start gap-4 rounded-[1.5rem] border border-line bg-mist p-6 dark:bg-panel-alt">
                         <div className="rounded-full bg-teal/10 p-3 text-teal"><Phone className="h-6 w-6" /></div>
                         <div>
-                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">Call Us</p>
-                            <a href="tel:+2348054457460" className="mt-2 block text-sm font-semibold text-ink hover:text-teal transition">+234 805 445 7460</a>
+                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-navy/55 dark:text-white/68">Call Us</p>
+                            <a href="tel:+2348054457460" className="mt-2 block text-sm font-semibold text-navy transition hover:text-teal dark:text-white dark:hover:text-teal">+234 805 445 7460</a>
                         </div>
                     </div>
                 </div>
 
                 {/* Bottom Bar */}
-                <div className="flex flex-col gap-4 border-t border-line pt-8 text-sm text-muted md:flex-row md:items-center md:justify-between">
+                <div className="flex flex-col items-center justify-center gap-4 border-t border-line pt-8 text-center text-sm text-navy/72 dark:text-white/82">
                     <p>© {new Date().getFullYear()} CoSET Intelligence Hub. All rights reserved.</p>
-                    <div className="flex items-center gap-6">
-                        <Link href="https://missionctrl.com.ng" className="flex items-center gap-2 font-semibold text-navy transition hover:text-ember dark:text-ember/90 dark:hover:text-white">
+                    <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+                        <Link href="https://missionctrl.com.ng" className="flex items-center gap-2 font-semibold text-navy underline decoration-ember/45 underline-offset-4 transition hover:text-ember dark:text-white dark:decoration-white/35 dark:hover:text-ember">
                             Made with ❤️ by MissionCTRL
                         </Link>
-                        <span className="hidden h-4 w-px bg-line md:block" />
-                        <Link href="#" className="flex items-center gap-1 font-semibold text-navy transition hover:text-ember dark:text-ember/90 dark:hover:text-white">
+                        <span className="hidden h-4 w-px bg-line sm:block" />
+                        <Link href="#" className="flex items-center gap-1 font-semibold text-navy underline decoration-ember/45 underline-offset-4 transition hover:text-ember dark:text-white dark:decoration-white/35 dark:hover:text-ember">
                             <AlertCircle className="h-4 w-4" /> Legal
                         </Link>
                     </div>

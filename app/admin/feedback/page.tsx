@@ -54,7 +54,7 @@ export default async function AdminFeedbackPage() {
     }
 
     return (
-        <main className="mx-auto max-w-[1600px] px-4 py-10 sm:px-6 lg:px-10">
+        <main className="site-shell max-w-[1520px] py-10">
             <div className="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
                 <div>
                     <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Engagement Desk</p>

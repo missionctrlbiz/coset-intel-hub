@@ -2,11 +2,30 @@ import { NextResponse } from 'next/server';
 
 import type { Database } from '@/lib/database.types';
 import { parseDocument } from '@/lib/document-parser';
-import { generateExtractionDraft, beautifyHtmlContent } from '@/lib/genai';
+import { analyzeContentForMetadata, beautifyHtmlContent, generateExtractionDraft } from '@/lib/genai';
 import { processAndEmbedReport } from '@/lib/embeddings';
 import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/supabase/clients';
 
 export const runtime = 'nodejs';
+
+const PREVIEW_BEAUTIFY_TIMEOUT_MS = 4000;
+
+const CATEGORY_KEYWORDS = [
+    { category: 'Climate', keywords: ['climate', 'emission', 'carbon', 'adaptation', 'mitigation', 'temperature'] },
+    { category: 'Energy', keywords: ['energy', 'power', 'electricity', 'oil', 'gas', 'petroleum', 'renewable'] },
+    { category: 'Geopolitics', keywords: ['geopolitics', 'regional', 'international', 'border', 'diplomacy', 'foreign policy'] },
+    { category: 'Security', keywords: ['security', 'conflict', 'violence', 'insurgency', 'terrorism', 'crime'] },
+    { category: 'Economics', keywords: ['economy', 'economic', 'finance', 'investment', 'trade', 'revenue', 'market'] },
+    { category: 'Technology', keywords: ['technology', 'digital', 'innovation', 'ai', 'artificial intelligence', 'data'] },
+    { category: 'Health', keywords: ['health', 'disease', 'hospital', 'medical', 'public health'] },
+    { category: 'Biodiversity', keywords: ['biodiversity', 'forest', 'ecosystem', 'wildlife', 'conservation'] },
+    { category: 'Governance', keywords: ['policy', 'governance', 'regulation', 'law', 'institution', 'ministry', 'government'] },
+    { category: 'Society', keywords: ['community', 'social', 'equity', 'livelihood', 'education', 'youth', 'gender'] },
+] as const;
+
+const TAG_STOPWORDS = new Set([
+    'about', 'after', 'again', 'against', 'along', 'also', 'because', 'before', 'being', 'between', 'could', 'during', 'eight', 'first', 'from', 'have', 'into', 'national', 'nigeria', 'report', 'their', 'there', 'these', 'this', 'those', 'through', 'under', 'using', 'where', 'which', 'while', 'with', 'would', 'year', 'years', 'than', 'them', 'they', 'that', 'were', 'when', 'what', 'will', 'your', 'been', 'more', 'most', 'many', 'such', 'very', 'into', 'onto', 'over', 'page', 'pages', 'section', 'figure', 'table', 'http', 'https', 'www', 'com', 'org', 'also', 'than', 'across', 'among', 'within', 'without', 'shall', 'should', 'must', 'may', 'each', 'other', 'some', 'much', 'made', 'make', 'does', 'done', 'just', 'like', 'well', 'however', 'therefore', 'therein', 'hereby', 'herein', 'including', 'include', 'based', 'according', 'towards', 'across', 'study', 'analysis', 'findings', 'summary', 'executive', 'intelligence', 'coset'
+]);
 
 type ProfileRow = Database['public']['Tables']['profiles']['Row'];
 
@@ -48,6 +67,175 @@ function normalizeProcessingText(source: string) {
         .replace(/&nbsp;/gi, ' ')
         .replace(/\s+/g, ' ')
         .trim();
+}
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number) {
+    return Promise.race<T | null>([
+        promise,
+        new Promise<null>((resolve) => {
+            setTimeout(() => resolve(null), timeoutMs);
+        }),
+    ]);
+}
+
+function escapeHtml(value: string) {
+    return value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function deriveSummary(text: string) {
+    const normalized = normalizeProcessingText(text);
+    if (!normalized) {
+        return '';
+    }
+
+    const sentences = normalized
+        .split(/(?<=[.!?])\s+/)
+        .map((sentence) => sentence.trim())
+        .filter(Boolean);
+
+    const selected: string[] = [];
+    let totalLength = 0;
+
+    for (const sentence of sentences) {
+        selected.push(sentence);
+        totalLength += sentence.length;
+
+        if (selected.length >= 3 || totalLength >= 320) {
+            break;
+        }
+    }
+
+    if (selected.length > 0) {
+        return selected.join(' ');
+    }
+
+    return `${normalized.slice(0, 280).trim()}${normalized.length > 280 ? '…' : ''}`;
+}
+
+function inferCategories(text: string) {
+    const normalized = normalizeProcessingText(text).toLowerCase();
+    if (!normalized) {
+        return [] as string[];
+    }
+
+    const scored = CATEGORY_KEYWORDS
+        .map(({ category, keywords }) => ({
+            category,
+            score: keywords.reduce((count, keyword) => count + (normalized.includes(keyword) ? 1 : 0), 0),
+        }))
+        .filter((entry) => entry.score > 0)
+        .sort((left, right) => right.score - left.score)
+        .slice(0, 3)
+        .map((entry) => entry.category);
+
+    if (scored.length > 0) {
+        return scored;
+    }
+
+    return ['Governance'];
+}
+
+function inferTags(text: string) {
+    const normalized = normalizeProcessingText(text).toLowerCase();
+    if (!normalized) {
+        return [] as string[];
+    }
+
+    const frequencies = new Map<string, number>();
+    for (const word of normalized.match(/[a-z][a-z-]{3,}/g) ?? []) {
+        if (TAG_STOPWORDS.has(word)) {
+            continue;
+        }
+
+        frequencies.set(word, (frequencies.get(word) ?? 0) + 1);
+    }
+
+    return Array.from(frequencies.entries())
+        .sort((left, right) => right[1] - left[1])
+        .slice(0, 5)
+        .map(([word]) => word.replace(/(^|-)([a-z])/g, (_, prefix, character: string) => `${prefix}${character.toUpperCase()}`));
+}
+
+function buildPlainTextPreviewHtml(text: string, fallbackTitle: string) {
+    const blocks = text
+        .split(/\n\s*\n/)
+        .map((block) => block.trim())
+        .filter(Boolean)
+        .slice(0, 80);
+
+    if (blocks.length === 0) {
+        return '';
+    }
+
+    const htmlBlocks = blocks.map((block, index) => {
+        const compactBlock = block.replace(/\s*\n\s*/g, ' ').replace(/\s+/g, ' ').trim();
+        const safeBlock = escapeHtml(compactBlock);
+        const looksLikeHeading = compactBlock.length <= 120 && !/[.!?]$/.test(compactBlock);
+
+        if (index === 0) {
+            return `<h1>${escapeHtml(looksLikeHeading ? compactBlock : fallbackTitle)}</h1>${looksLikeHeading ? '' : `<p>${safeBlock}</p>`}`;
+        }
+
+        if (looksLikeHeading) {
+            return `<h2>${escapeHtml(compactBlock)}</h2>`;
+        }
+
+        return `<p>${safeBlock}</p>`;
+    });
+
+    return htmlBlocks.join('\n');
+}
+
+type DraftLike = {
+    title?: string;
+    summary?: string;
+    category?: string[];
+    tags?: string[];
+    recommendedSlug?: string;
+    formattedContent?: string;
+} | null;
+
+function hydrateDraft(file: File, draft: DraftLike, fullText: string) {
+    const fallbackTitle = getFileStem(file.name);
+    const fallbackSummary = deriveSummary(fullText);
+    const fallbackCategories = inferCategories(fullText);
+    const fallbackTags = inferTags(fullText);
+
+    return {
+        title: draft?.title?.trim() || fallbackTitle,
+        summary: draft?.summary?.trim() || fallbackSummary,
+        category: uniqueStrings(draft?.category?.length ? draft.category : fallbackCategories, 3),
+        tags: uniqueStrings(draft?.tags?.length ? draft.tags : fallbackTags, 5),
+        recommendedSlug: draft?.recommendedSlug?.trim() || fallbackTitle,
+        ...(draft?.formattedContent ? { formattedContent: draft.formattedContent } : {}),
+    };
+}
+
+async function resolvePreviewDraft(file: File, excerpt: string, fullText: string) {
+    const draft = await generateExtractionDraft({
+        fileName: file.name,
+        fileType: file.type,
+        excerpt,
+    });
+
+    if (draft?.title || draft?.summary || draft?.category?.length || draft?.tags?.length) {
+        return hydrateDraft(file, draft, fullText || excerpt);
+    }
+
+    const fallbackMetadata = await analyzeContentForMetadata(fullText || excerpt);
+    if (!fallbackMetadata) {
+        return hydrateDraft(file, draft, fullText || excerpt);
+    }
+
+    return hydrateDraft(file, {
+        ...fallbackMetadata,
+        recommendedSlug: fallbackMetadata.title || getFileStem(file.name),
+    }, fullText || excerpt);
 }
 
 async function createUniqueSlug(supabase: ReturnType<typeof createSupabaseAdminClient>, baseValue: string) {
@@ -401,13 +589,15 @@ export async function POST(request: Request) {
         let beautifiedHtml: string | null = null;
 
         if (textPreview) {
+            const beautifyPromise = parseResult.text
+                ? (previewOnly
+                    ? withTimeout(beautifyHtmlContent(parseResult.text), PREVIEW_BEAUTIFY_TIMEOUT_MS)
+                    : beautifyHtmlContent(parseResult.text))
+                : Promise.resolve(null);
+
             const [draftResult, beautifyResult] = await Promise.allSettled([
-                generateExtractionDraft({
-                    fileName: file.name,
-                    fileType: file.type,
-                    excerpt: textPreview,
-                }),
-                parseResult.text ? beautifyHtmlContent(parseResult.text) : Promise.resolve(null),
+                resolvePreviewDraft(file, textPreview, parseResult.text),
+                beautifyPromise,
             ]);
 
             if (draftResult.status === 'fulfilled') {
@@ -421,9 +611,15 @@ export async function POST(request: Request) {
             } else {
                 console.error('Failed to beautify HTML:', beautifyResult.reason);
             }
+
+            if (!aiDraft && !aiError) {
+                aiError = 'We prepared the preview, but could not fill the report details automatically. You can still edit them manually.';
+            }
         }
 
         if (previewOnly) {
+            const previewHtml = beautifiedHtml || buildPlainTextPreviewHtml(parseResult.text, aiDraft?.title || getFileStem(file.name));
+
             return NextResponse.json({
                 success: true,
                 message: 'Extraction completed for preview.',
@@ -433,7 +629,8 @@ export async function POST(request: Request) {
                 pageCount: parseResult.pageCount,
                 truncated: parseResult.truncated,
                 fullText: parseResult.text, // Pass the full text for the editor
-                beautifiedHtml // Include the beautified HTML in preview
+                beautifiedHtml: previewHtml, // Include the beautified HTML in preview
+                previewStyle: beautifiedHtml ? 'beautified' : 'fallback',
             });
         }
 

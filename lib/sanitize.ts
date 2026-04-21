@@ -89,8 +89,10 @@ export function enhanceReportHtml(dirty: string) {
         return `<h${level}${nextAttributes}>${innerHtml}</h${level}>`;
     });
 
-    html = html.replace(/<a\b([^>]*)href=(['"])#\2([^>]*)>([\s\S]*?)<\/a>/gi, (match, beforeHref, _quote, afterHref, innerHtml) => {
-        const targetSlug = sectionSlugByLabel.get(stripHtml(innerHtml).toLowerCase());
+    html = html.replace(/<a\b([^>]*)href=(['"])#([^'"]*)\2([^>]*)>([\s\S]*?)<\/a>/gi, (match, beforeHref, _quote, hrefFragment, afterHref, innerHtml) => {
+        const normalizedFragment = slugifyFragment(hrefFragment);
+        const targetSlug = Array.from(sectionSlugByLabel.values()).find((slug) => slug === normalizedFragment)
+            ?? sectionSlugByLabel.get(stripHtml(innerHtml).toLowerCase());
 
         if (!targetSlug) {
             return match;

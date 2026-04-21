@@ -17,7 +17,79 @@ export type ExtractionDraft = {
 };
 
 function normalizeJsonResponse(rawText: string) {
-  return rawText.replace(/^```json\s*/i, '').replace(/```$/i, '').trim();
+  const cleaned = rawText
+    .trim()
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/```$/i, '')
+    .trim();
+
+  const jsonBlock = extractFirstJsonBlock(cleaned);
+  return jsonBlock ?? cleaned;
+}
+
+function extractFirstJsonBlock(rawText: string) {
+  const startIndex = rawText.search(/[\[{]/);
+  if (startIndex === -1) {
+    return null;
+  }
+
+  const openingChar = rawText[startIndex];
+  const closingChar = openingChar === '{' ? '}' : ']';
+  let depth = 0;
+  let inString = false;
+  let isEscaped = false;
+
+  for (let index = startIndex; index < rawText.length; index += 1) {
+    const character = rawText[index];
+
+    if (inString) {
+      if (isEscaped) {
+        isEscaped = false;
+        continue;
+      }
+
+      if (character === '\\') {
+        isEscaped = true;
+        continue;
+      }
+
+      if (character === '"') {
+        inString = false;
+      }
+
+      continue;
+    }
+
+    if (character === '"') {
+      inString = true;
+      continue;
+    }
+
+    if (character === openingChar) {
+      depth += 1;
+      continue;
+    }
+
+    if (character === closingChar) {
+      depth -= 1;
+      if (depth === 0) {
+        return rawText.slice(startIndex, index + 1).trim();
+      }
+    }
+  }
+
+  return null;
+}
+
+function parseModelJson<T>(rawText: string): T | null {
+  const normalized = normalizeJsonResponse(rawText);
+
+  try {
+    return JSON.parse(normalized) as T;
+  } catch (error) {
+    console.error('Failed to parse Gemini JSON response:', error, rawText);
+    return null;
+  }
 }
 
 export async function generateExtractionDraft(input: {
@@ -73,7 +145,8 @@ export async function generateExtractionDraft(input: {
     const rawText = response.text?.trim();
     if (!rawText) return null;
 
-    const parsed = JSON.parse(normalizeJsonResponse(rawText)) as ExtractionDraft;
+    const parsed = parseModelJson<ExtractionDraft>(rawText);
+    if (!parsed) return null;
 
     return {
       ...parsed,
@@ -122,7 +195,7 @@ ${content.slice(0, MAX_HTML_EXCERPT_LENGTH)}`;
     const rawText = response.text?.trim();
     if (!rawText) return null;
 
-    return JSON.parse(normalizeJsonResponse(rawText)) as ContentMetadata;
+    return parseModelJson<ContentMetadata>(rawText);
   } catch (error) {
     console.error('Failed to analyze content for metadata:', error);
     return null;

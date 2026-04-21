@@ -63,7 +63,7 @@ export function HeroCarousel({ featured }: { featured: Report[] }) {
                 ))}
             </div>
 
-            <div className="relative mx-auto flex h-full max-w-7xl flex-col justify-end px-4 pb-24 sm:px-6 lg:px-8">
+            <div className="site-shell relative flex h-full flex-col justify-end pb-24">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={`content-${currentIndex}`}
@@ -147,7 +147,7 @@ export function HeroCarousel({ featured }: { featured: Report[] }) {
 export function IntelSnapshot() {
     return (
         <section className="border-b border-line bg-panel shadow-sm">
-            <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+            <div className="site-shell py-8">
                 <div className="flex flex-wrap items-center justify-between gap-6 md:flex-nowrap">
                     <div className="w-full md:w-auto">
                         <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Intelligence Snapshot</p>

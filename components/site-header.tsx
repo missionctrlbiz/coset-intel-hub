@@ -12,9 +12,10 @@ import { createSupabaseServerClient } from '@/lib/supabase/clients';
 type SiteHeaderProps = {
     dark?: boolean;
     isAdmin?: boolean;
+    forceDarkLogo?: boolean;
 };
 
-export async function SiteHeader({ dark = false, isAdmin = false }: SiteHeaderProps) {
+export async function SiteHeader({ dark = false, isAdmin = false, forceDarkLogo = false }: SiteHeaderProps) {
     // Fetch user details for admin avatar — gracefully falls back if not signed in
     let adminFullName: string | null = null;
     let adminEmail: string | null = null;
@@ -41,33 +42,35 @@ export async function SiteHeader({ dark = false, isAdmin = false }: SiteHeaderPr
     return (
         <header
             className={cn(
-                'sticky top-0 z-50 border-b backdrop-blur-xl transition-colors',
-                dark ? 'border-white/10 bg-[#0A1421]/80 text-white' : 'border-line/70 bg-white/95 text-ink dark:border-white/10 dark:bg-panel/90 dark:text-white'
+                'sticky top-0 z-50 border-b transition-colors',
+                dark
+                    ? 'border-white/10 bg-[#07101a] text-white shadow-[0_20px_48px_rgb(2_6_23/0.46)]'
+                    : 'border-line/70 bg-white text-ink shadow-[0_12px_30px_rgb(15_23_42/0.08)] dark:border-white/10 dark:bg-panel dark:text-white'
             )}
         >
             <div className={cn(
-                'relative mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8',
-                isAdmin ? 'w-full max-w-[1600px]' : 'max-w-7xl'
+                'site-shell relative flex h-16 items-center justify-between',
+                isAdmin ? 'max-w-[1520px]' : ''
             )}>
                 {/* Logo + Nav */}
                 <div className="flex min-w-0 flex-1 items-center">
                     <Link href={isAdmin ? '/admin' : '/'} aria-label="Go to CoSET homepage" className="shrink-0 inline-flex items-center">
-                        <ThemeLogo className="w-[98px] h-auto sm:w-[118px]" forceDark={dark} />
+                        <ThemeLogo className="w-[98px] h-auto sm:w-[118px]" forceDark={forceDarkLogo} />
                     </Link>
 
                     {isAdmin ? (
                         <AdminNavClient fullName={adminFullName} email={adminEmail} dark={dark} />
                     ) : (
-                        <nav className="hidden items-center gap-1 ml-8 lg:flex">
-                            <Link href="/reports" className={cn('flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold transition hover:text-ember', dark ? 'text-white/80' : 'text-muted hover:bg-mist')}>
+                        <nav className="ml-8 hidden items-center gap-1 lg:flex">
+                            <Link href="/reports" className={cn('flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold transition hover:text-ember', dark ? 'text-white/90 hover:bg-white/5' : 'text-muted hover:bg-mist')}>
                                 <FileText className="h-4 w-4" />
                                 Reports
                             </Link>
-                            <Link href={cosetOrgLinks.about} target="_blank" rel="noopener noreferrer" className={cn('flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold transition hover:text-ember', dark ? 'text-white/80' : 'text-muted hover:bg-mist')}>
+                            <Link href={cosetOrgLinks.about} target="_blank" rel="noopener noreferrer" className={cn('flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold transition hover:text-ember', dark ? 'text-white/82 hover:bg-white/5' : 'text-muted hover:bg-mist')}>
                                 <Info className="h-4 w-4" />
                                 About Us
                             </Link>
-                            <Link href="/contact" className={cn('flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold transition hover:text-ember', dark ? 'text-white/80' : 'text-muted hover:bg-mist')}>
+                            <Link href="/contact" className={cn('flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold transition hover:text-ember', dark ? 'text-white/82 hover:bg-white/5' : 'text-muted hover:bg-mist')}>
                                 <Mail className="h-4 w-4" />
                                 Contact Us
                             </Link>
@@ -120,7 +123,6 @@ export async function SiteHeader({ dark = false, isAdmin = false }: SiteHeaderPr
                                                 dark ? 'text-white/85 hover:bg-white/5 hover:text-white' : 'text-navy hover:bg-mist'
                                             )}
                                         >
-                                            <FileText className="h-4 w-4" />
                                             Reports
                                         </Link>
                                         <Link
@@ -142,7 +144,6 @@ export async function SiteHeader({ dark = false, isAdmin = false }: SiteHeaderPr
                                                 dark ? 'text-white/85 hover:bg-white/5 hover:text-white' : 'text-navy hover:bg-mist'
                                             )}
                                         >
-                                            <Mail className="h-4 w-4" />
                                             Contact Us
                                         </Link>
                                     </nav>

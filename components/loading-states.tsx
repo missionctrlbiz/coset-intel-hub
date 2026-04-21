@@ -158,7 +158,7 @@ export function HomepageSkeleton() {
 
 export function AdminDashboardSkeleton() {
     return (
-        <main className="mx-auto max-w-[1600px] animate-pulse px-4 py-10 sm:px-6 lg:px-10">
+        <main className="site-shell max-w-[1520px] animate-pulse py-10">
             {/* Header skeleton */}
             <div className="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
                 <div>
@@ -282,7 +282,7 @@ export function EmptyAdminActivity() {
 
 export function ReportsPageSkeleton() {
     return (
-        <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <main className="site-shell py-12">
             <div className="grid gap-10 lg:grid-cols-[270px_1fr] animate-pulse">
                 {/* Sidebar Skeleton */}
                 <aside className="h-fit rounded-[2rem] border border-line bg-panel p-6 shadow-soft lg:sticky lg:top-28">
@@ -354,7 +354,7 @@ export function ReportsPageSkeleton() {
 
 export function BlogPageSkeleton() {
     return (
-        <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <main className="site-shell py-12">
             <div className="animate-pulse">
                 {/* Header Skeleton */}
                 <div className="mb-10">
@@ -428,7 +428,7 @@ export function BlogPageSkeleton() {
 
 export function ContentManagementSkeleton() {
     return (
-        <main className="mx-auto max-w-[1600px] animate-pulse px-4 py-10 sm:px-6 lg:px-10">
+        <main className="site-shell max-w-[1520px] animate-pulse py-10">
             {/* Header skeleton */}
             <div className="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
                 <div>
@@ -490,7 +490,7 @@ export function ContentManagementSkeleton() {
 
 export function AnalyticsSkeleton() {
     return (
-        <main className="mx-auto max-w-[1600px] animate-pulse px-4 py-10 sm:px-6 lg:px-10">
+        <main className="site-shell max-w-[1520px] animate-pulse py-10">
             {/* Header skeleton */}
             <div className="mb-10 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
                 <div>
@@ -572,7 +572,7 @@ export function AnalyticsSkeleton() {
 
 export function SubscribersSkeleton() {
     return (
-        <main className="mx-auto max-w-[1600px] animate-pulse px-4 py-10 sm:px-6 lg:px-10">
+        <main className="site-shell max-w-[1520px] animate-pulse py-10">
             {/* Header skeleton */}
             <div className="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
                 <div>
