@@ -3,34 +3,35 @@ import { GoogleGenAI } from '@google/genai';
 const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY || '';
 const client = apiKey ? new GoogleGenAI({ apiKey }) : null;
 const defaultModel = process.env.GOOGLE_GENERATIVE_AI_MODEL || 'gemini-1.5-pro';
+const fastModel = process.env.GOOGLE_GENERATIVE_AI_FAST_MODEL || 'gemini-1.5-flash';
 
 export const MAX_HTML_EXCERPT_LENGTH = 30_000;
 
 export type ExtractionDraft = {
-    title: string;
-    summary: string;
-    category: string[];
-    tags: string[];
-    recommendedSlug: string;
-    formattedContent?: string;
+  title: string;
+  summary: string;
+  category: string[];
+  tags: string[];
+  recommendedSlug: string;
+  formattedContent?: string;
 };
 
 function normalizeJsonResponse(rawText: string) {
-    return rawText.replace(/^```json\s*/i, '').replace(/```$/i, '').trim();
+  return rawText.replace(/^```json\s*/i, '').replace(/```$/i, '').trim();
 }
 
 export async function generateExtractionDraft(input: {
-    fileName: string;
-    fileType: string;
-    excerpt: string;
-    purpose?: string;
+  fileName: string;
+  fileType: string;
+  excerpt: string;
+  purpose?: string;
 }) {
-    if (!client || !input.excerpt.trim()) {
-        return null;
-    }
+  if (!client || !input.excerpt.trim()) {
+    return null;
+  }
 
-    const prompt = input.purpose === 'web-scraping'
-        ? `You are CoSET's URL scraping assistant. 
+  const prompt = input.purpose === 'web-scraping'
+    ? `You are CoSET's URL scraping assistant. 
            Extract the core report content from this HTML while ignoring navigation, headers, and footers.
            Return JSON only.
            
@@ -46,7 +47,7 @@ export async function generateExtractionDraft(input: {
            
            HTML Excerpt:
            ${input.excerpt.slice(0, MAX_HTML_EXCERPT_LENGTH)}`
-        : `You are CoSET's report extraction assistant.
+    : `You are CoSET's report extraction assistant.
            Analyze the uploaded file excerpt and return JSON only.
 
            Required JSON shape:
@@ -63,32 +64,32 @@ export async function generateExtractionDraft(input: {
            Excerpt:
            ${input.excerpt.slice(0, MAX_HTML_EXCERPT_LENGTH)}`;
 
-    try {
-        const response = await client.models.generateContent({
-            model: defaultModel,
-            contents: [{ role: 'user', parts: [{ text: prompt }] }]
-        });
+  try {
+    const response = await client.models.generateContent({
+      model: fastModel,
+      contents: [{ role: 'user', parts: [{ text: prompt }] }]
+    });
 
-        const rawText = response.text?.trim();
-        if (!rawText) return null;
+    const rawText = response.text?.trim();
+    if (!rawText) return null;
 
-        const parsed = JSON.parse(normalizeJsonResponse(rawText)) as ExtractionDraft;
+    const parsed = JSON.parse(normalizeJsonResponse(rawText)) as ExtractionDraft;
 
-        return {
-            ...parsed,
-            model: defaultModel,
-        };
-    } catch (error) {
-        console.error('Failed to generate extraction draft:', error);
-        return null;
-    }
+    return {
+      ...parsed,
+      model: fastModel,
+    };
+  } catch (error) {
+    console.error('Failed to generate extraction draft:', error);
+    return null;
+  }
 }
 
 export type ContentMetadata = {
-    title: string;
-    summary: string;
-    category: string[];
-    tags: string[];
+  title: string;
+  summary: string;
+  category: string[];
+  tags: string[];
 };
 
 /**
@@ -96,9 +97,9 @@ export type ContentMetadata = {
  * Used by the /api/analyze-content route to let editors auto-fill Step 1.
  */
 export async function analyzeContentForMetadata(content: string): Promise<ContentMetadata | null> {
-    if (!client || !content.trim()) return null;
+  if (!client || !content.trim()) return null;
 
-    const prompt = `You are CoSET's intelligence analyst.
+  const prompt = `You are CoSET's intelligence analyst.
 Analyze the following report content and return ONLY a JSON object — no markdown fences, no commentary.
 
 Required JSON shape:
@@ -112,20 +113,20 @@ Required JSON shape:
 Content:
 ${content.slice(0, MAX_HTML_EXCERPT_LENGTH)}`;
 
-    try {
-        const response = await client.models.generateContent({
-            model: defaultModel,
-            contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        });
+  try {
+    const response = await client.models.generateContent({
+      model: fastModel,
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    });
 
-        const rawText = response.text?.trim();
-        if (!rawText) return null;
+    const rawText = response.text?.trim();
+    if (!rawText) return null;
 
-        return JSON.parse(normalizeJsonResponse(rawText)) as ContentMetadata;
-    } catch (error) {
-        console.error('Failed to analyze content for metadata:', error);
-        return null;
-    }
+    return JSON.parse(normalizeJsonResponse(rawText)) as ContentMetadata;
+  } catch (error) {
+    console.error('Failed to analyze content for metadata:', error);
+    return null;
+  }
 }
 
 /**
@@ -135,33 +136,33 @@ ${content.slice(0, MAX_HTML_EXCERPT_LENGTH)}`;
  * recreate the visualizations as pure HTML/CSS.
  */
 function extractVisualizationData(rawHtml: string): string {
-    const scriptBlocks: string[] = [];
-    const scriptRegex = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
-    let match;
+  const scriptBlocks: string[] = [];
+  const scriptRegex = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
+  let match;
 
-    while ((match = scriptRegex.exec(rawHtml)) !== null) {
-        const scriptContent = match[1].trim();
-        // Only keep scripts that contain chart/viz data (not CDN imports)
-        if (
-            scriptContent.length > 50 &&
-            (scriptContent.includes('Chart') ||
-                scriptContent.includes('chart') ||
-                scriptContent.includes('Plotly') ||
-                scriptContent.includes('plotly') ||
-                scriptContent.includes('data') ||
-                scriptContent.includes('labels') ||
-                scriptContent.includes('datasets') ||
-                scriptContent.includes('d3.') ||
-                scriptContent.includes('echarts') ||
-                scriptContent.includes('google.visualization'))
-        ) {
-            scriptBlocks.push(scriptContent);
-        }
+  while ((match = scriptRegex.exec(rawHtml)) !== null) {
+    const scriptContent = match[1].trim();
+    // Only keep scripts that contain chart/viz data (not CDN imports)
+    if (
+      scriptContent.length > 50 &&
+      (scriptContent.includes('Chart') ||
+        scriptContent.includes('chart') ||
+        scriptContent.includes('Plotly') ||
+        scriptContent.includes('plotly') ||
+        scriptContent.includes('data') ||
+        scriptContent.includes('labels') ||
+        scriptContent.includes('datasets') ||
+        scriptContent.includes('d3.') ||
+        scriptContent.includes('echarts') ||
+        scriptContent.includes('google.visualization'))
+    ) {
+      scriptBlocks.push(scriptContent);
     }
+  }
 
-    if (scriptBlocks.length === 0) return '';
+  if (scriptBlocks.length === 0) return '';
 
-    return `
+  return `
 ## ⚠️ EXTRACTED CHART/VISUALIZATION DATA (from <script> tags):
 The original HTML contained JavaScript-driven charts (Chart.js, Plotly, D3, etc.).
 These scripts will be STRIPPED for security. You MUST recreate ALL of the following
@@ -179,24 +180,73 @@ ${scriptBlocks.join('\n\n// --- NEXT SCRIPT BLOCK ---\n\n')}
  * Pre-process raw HTML to extract inline CSS styles that provide visual context.
  */
 function extractCustomStyles(rawHtml: string): string {
-    const styleBlocks: string[] = [];
-    const styleRegex = /<style\b[^>]*>([\s\S]*?)<\/style>/gi;
-    let match;
+  const styleBlocks: string[] = [];
+  const styleRegex = /<style\b[^>]*>([\s\S]*?)<\/style>/gi;
+  let match;
 
-    while ((match = styleRegex.exec(rawHtml)) !== null) {
-        const styleContent = match[1].trim();
-        if (styleContent.length > 20) {
-            styleBlocks.push(styleContent);
-        }
+  while ((match = styleRegex.exec(rawHtml)) !== null) {
+    const styleContent = match[1].trim();
+    if (styleContent.length > 20) {
+      styleBlocks.push(styleContent);
     }
+  }
 
-    if (styleBlocks.length === 0) return '';
+  if (styleBlocks.length === 0) return '';
 
-    return `
+  return `
 ## ORIGINAL CSS STYLES (for visual context — colors, fonts, layout intent):
 \`\`\`css
 ${styleBlocks.join('\n\n')}
 \`\`\`
+
+`;
+}
+
+function inferDocumentClassGuidance(content: string): string {
+  const normalized = content.toLowerCase();
+  const policySignals = [
+    'policy',
+    'regulation',
+    'legislation',
+    'framework',
+    'recommendation',
+    'implementation',
+    'enforcement',
+    'compliance',
+    'section ',
+    'act',
+    'ministry',
+    'agency',
+    'authority',
+    'stakeholder',
+    'host community',
+  ];
+
+  const matchedSignals = policySignals.filter((signal) => normalized.includes(signal));
+  if (matchedSignals.length < 3) {
+    return '';
+  }
+
+  return `
+## DOCUMENT CLASS GUIDANCE — POLICY / LEGAL BRIEFING:
+This source reads like a policy, legal, regulatory, or institutional briefing.
+Prioritize a structure that feels like a decision-grade brief rather than a generic article.
+
+When the source supports it, include these semantic blocks:
+1. An executive summary panel that states the issue, why it matters, and the decisive takeaway.
+2. A clear separation between findings, risks/barriers, and recommendations.
+3. A policy actor or stakeholder matrix when institutions, agencies, communities, ministries, or operators are named.
+4. A legal or regulatory framework block when acts, sections, compliance duties, or enforcement pathways are mentioned.
+5. An implementation pathway or phased timeline when the document implies sequence, reform steps, or institutional actions.
+
+Preferred visual patterns for this class of report:
+- Actor matrix tables
+- Recommendation cards grouped by audience or timeline
+- Risk / barrier callouts with stronger contrast
+- Timeline strips for implementation phases
+- Comparison bars for entitlements, obligations, penalties, or resource splits
+
+Do not invent legal citations or actors. Only structure what is genuinely present in the source.
 
 `;
 }
@@ -209,17 +259,18 @@ ${styleBlocks.join('\n\n')}
  * intelligence reports using Gemini with comprehensive design guidelines.
  */
 export async function beautifyHtmlContent(content: string): Promise<string | null> {
-    if (!client || !content.trim()) return null;
+  if (!client || !content.trim()) return null;
 
-    // Pre-extract visualization data and styles before they get stripped
-    const vizData = extractVisualizationData(content);
-    const styleData = extractCustomStyles(content);
+  // Pre-extract visualization data and styles before they get stripped
+  const vizData = extractVisualizationData(content);
+  const styleData = extractCustomStyles(content);
+  const documentClassGuidance = inferDocumentClassGuidance(content);
 
-    const prompt = `You are an expert report designer and data visualization specialist for the CoSET Intelligence Hub — a socio-ecological transformation research platform focused on Nigeria.
+  const prompt = `You are an expert report designer and data visualization specialist for the CoSET Intelligence Hub — a socio-ecological transformation research platform focused on Nigeria.
 
 I will give you RAW HTML that was pasted from a browser, uploaded as a file, or scraped from a web page. Your job is to PARSE and RESTRUCTURE it into a beautifully formatted, premium-quality intelligence report using ONLY Tailwind CSS classes and inline styles.
 
-${vizData}${styleData}## RENDERING CONTEXT — CRITICAL FOR STYLING:
+${vizData}${styleData}${documentClassGuidance}## RENDERING CONTEXT — CRITICAL FOR STYLING:
 Your output HTML will be rendered inside this wrapper:
 \`\`\`html
 <article class="prose prose-slate prose-lg max-w-none">
@@ -257,6 +308,19 @@ Copy every single piece of content: headings, paragraphs, statistics, data point
 
 ### Rule 1.5: UNIQUE & ENHANCED LAYOUTS
 Avoid using the exact same structure for every report. Enhance the visualizations by using a diverse range of layout patterns, contextual layouts, and beautiful styling combos to ensure every report looks unique. You should adapt the layout creatively depending on the context.
+
+### Rule 1.6: SEMANTIC NAVIGATION & ANCHORED STRUCTURE
+- Every major section heading must be a semantic <h2> with a unique slug id, for example: <h2 id="host-community-trusts" data-section-style="signal">Host Community Trusts</h2>
+- Important subsections should use <h3 id="..."></h3> when they deserve deep linking.
+- Never output href="#" placeholders.
+- If the report has 4 or more major sections, include a visible table of contents near the top using:
+  <nav data-report-toc="true" class="not-prose bg-white rounded-[1.75rem] border border-line p-5 shadow-soft my-6">
+    <h2 class="text-sm font-bold uppercase tracking-[0.18em] text-ember">Table of Contents</h2>
+    <ul class="mt-4 space-y-2 text-sm">
+      <li><a href="#host-community-trusts" class="text-navy hover:text-ember font-semibold">Host Community Trusts</a></li>
+    </ul>
+  </nav>
+- Every TOC item must point to a real heading id that exists later in the document.
 
 ### Rule 2: RECREATE ALL CHARTS & VISUALIZATIONS AS PURE HTML/CSS
 The original HTML may contain Chart.js, Plotly, D3, or other JavaScript charts. Since scripts are stripped, you MUST recreate every chart as a pure HTML/CSS visualization:
@@ -325,12 +389,13 @@ If the original has a flow diagram, process steps, or sequential cards — wrap 
 </div>
 
 ### Rule 4: SECTION HEADERS
-<div class="mb-10">
-  <div class="flex items-center gap-3 mb-4">
-    <div class="w-1 h-8 bg-ember rounded-full"></div>
-    <h2 class="text-2xl font-bold text-navy font-display">Section Title</h2>
-  </div>
-</div>
+Do NOT use one universal decorative wrapper for every heading.
+Keep headings semantic and vary their presentation with one of these styles:
+- <h2 id="section-slug" data-section-style="signal" class="text-2xl font-bold text-navy font-display">Section Title</h2>
+- <h2 id="section-slug" data-section-style="banner" class="text-2xl font-bold text-navy font-display">Section Title</h2>
+- <h2 id="section-slug" data-section-style="marker" class="text-2xl font-bold text-navy font-display">Section Title</h2>
+- <h2 id="section-slug" data-section-style="split" class="text-2xl font-bold text-navy font-display">Section Title</h2>
+Choose heading styles contextually. Do not repeat the same heading treatment mechanically throughout the whole report.
 
 ### Rule 5: STATISTIC/DATA CALLOUT CARDS
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 my-6">
@@ -404,6 +469,8 @@ If the original has a flow diagram, process steps, or sequential cards — wrap 
 8. Wrap any section with a dark background (bg-ink, bg-navy, bg-red-50, bg-teal-50) in a <div class="not-prose ...">
 9. ALL white cards (bg-white) MUST have border border-line shadow-soft
 10. Use CoSET design tokens: border-line, bg-panel, bg-mist, text-muted, shadow-soft, shadow-editorial, rounded-2xl, rounded-[2rem], font-display for headings
+11. If the source contains numeric comparisons, percentages, rankings, budgets, counts, year changes, or survey splits, convert that information into at least one real visual component instead of leaving it as plain paragraphs.
+12. Use a mix of visuals when appropriate: metric cards, comparison bars, timeline strips, evidence grids, process flows, severity matrices, and data tables with emphasis cues.
 
 ## SELF-VALIDATION CHECKLIST (check your output against these before returning):
 □ Does every section from the original appear in the output?
@@ -416,6 +483,8 @@ If the original has a flow diagram, process steps, or sequential cards — wrap 
 □ Does the output have visual variety (not just paragraphs — mix of cards, bars, tables, callouts)?
 □ All text explicitly styled (not relying on prose defaults)?
 □ Are dark-background sections wrapped in "not-prose"?
+□ Does every TOC link point to a real heading id instead of href="#"?
+□ Did you avoid repeating the exact same heading shell across the report?
 
 Return ONLY the transformed HTML. No markdown fences, no explanations, no commentary.
 
@@ -425,24 +494,24 @@ RAW CONTENT TO TRANSFORM:
 
 ${content.slice(0, MAX_HTML_EXCERPT_LENGTH)}`;
 
-    try {
-        const response = await client.models.generateContent({
-            model: defaultModel,
-            contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        });
+  try {
+    const response = await client.models.generateContent({
+      model: defaultModel,
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    });
 
-        const rawText = response.text?.trim();
-        if (!rawText) return null;
+    const rawText = response.text?.trim();
+    if (!rawText) return null;
 
-        // Clean up — remove markdown code fences if present
-        const cleaned = rawText
-            .replace(/```html\n?/g, '')
-            .replace(/```\n?/g, '')
-            .trim();
+    // Clean up — remove markdown code fences if present
+    const cleaned = rawText
+      .replace(/```html\n?/g, '')
+      .replace(/```\n?/g, '')
+      .trim();
 
-        return cleaned;
-    } catch (error) {
-        console.error('Failed to beautify HTML content:', error);
-        return null;
-    }
+    return cleaned;
+  } catch (error) {
+    console.error('Failed to beautify HTML content:', error);
+    return null;
+  }
 }

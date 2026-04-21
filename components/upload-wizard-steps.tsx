@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { CheckCircle2, Database, FileText, Globe, Presentation, Sparkles, UploadCloud, Wand2 } from 'lucide-react';
 import { ChipInput } from '@/components/chip-input';
 
@@ -148,10 +149,13 @@ export function UploadStep({
 export type MetadataStepProps = {
     title: string;
     summary: string;
+    sourceMode: 'file' | 'url' | 'paste';
+    sourceUrl: string;
     categories: string[];
     tags: string[];
     setTitle: (value: string) => void;
     setSummary: (value: string) => void;
+    setSourceUrl: (value: string) => void;
     setCategories: (value: string[]) => void;
     setTags: (value: string[]) => void;
     hasContent?: boolean;
@@ -161,7 +165,7 @@ export type MetadataStepProps = {
     isBeautifying?: boolean;
 };
 
-export function MetadataStep({ title, summary, categories, tags, setTitle, setSummary, setCategories, setTags, hasContent, onAnalyze, onBeautify, isAnalyzing, isBeautifying }: MetadataStepProps) {
+export function MetadataStep({ title, summary, sourceMode, sourceUrl, categories, tags, setTitle, setSummary, setSourceUrl, setCategories, setTags, hasContent, onAnalyze, onBeautify, isAnalyzing, isBeautifying }: MetadataStepProps) {
     return (
         <div className="space-y-6">
             <div>
@@ -211,13 +215,26 @@ export function MetadataStep({ title, summary, categories, tags, setTitle, setSu
                     className="w-full rounded-2xl border border-line bg-panel px-4 py-4 text-sm text-ink shadow-soft outline-none transition focus:border-ember focus:ring-2 focus:ring-ember/30"
                 />
             </label>
+            <label className="block space-y-3">
+                <span className="text-sm font-semibold text-navy dark:text-white">Source Link</span>
+                <input
+                    type="url"
+                    value={sourceUrl}
+                    onChange={(event) => setSourceUrl(event.target.value)}
+                    placeholder={sourceMode === 'url' ? 'https://example.com/report' : 'Optional source reference URL'}
+                    className="w-full rounded-2xl border border-line bg-panel px-4 py-4 text-base font-medium text-ink shadow-soft outline-none transition focus:border-ember focus:ring-2 focus:ring-ember/30"
+                />
+                <p className="text-xs text-muted">
+                    {sourceMode === 'url' ? 'This imported page will be saved as the report source.' : 'Optional. Add a public source link readers can trace back to.'}
+                </p>
+            </label>
             <ChipInput label="Category Tags" placeholder="Add category and press Enter" value={categories} onChange={setCategories} />
             <ChipInput label="Topics & Tags" placeholder="Add tag and press Enter" value={tags} onChange={setTags} limit={5} />
         </div>
     );
 }
 
-export function ReviewStep({ title, summary, categories, tags, selectedFile, coverImageFile }: { title: string; summary: string; categories: string[]; tags: string[]; selectedFile: File | null; coverImageFile?: File | null }) {
+export function ReviewStep({ title, summary, sourceMode, sourceUrl, categories, tags, selectedFile, coverImageFile, coverImagePreview }: { title: string; summary: string; sourceMode: 'file' | 'url' | 'paste'; sourceUrl: string; categories: string[]; tags: string[]; selectedFile: File | null; coverImageFile?: File | null; coverImagePreview?: string | null }) {
     return (
         <div className="space-y-6">
             <div>
@@ -231,9 +248,25 @@ export function ReviewStep({ title, summary, categories, tags, selectedFile, cov
                 </div>
                 <div className="space-y-5">
                     <div>
-                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">Source File</p>
-                        <p className="mt-1 text-sm leading-7 text-muted">{selectedFile?.name ?? 'No file selected yet'}</p>
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">Source Type</p>
+                        <p className="mt-1 text-sm leading-7 text-muted">{sourceMode === 'file' ? 'File upload' : sourceMode === 'url' ? 'Imported URL' : 'Pasted content'}</p>
                     </div>
+                    <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">Source File</p>
+                        <p className="mt-1 text-sm leading-7 text-muted">{selectedFile?.name ?? (sourceMode === 'file' ? 'No file selected yet' : 'No uploaded file attached')}</p>
+                    </div>
+                    {sourceUrl ? (
+                        <div>
+                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">Source Link</p>
+                            <p className="mt-1 break-all text-sm leading-7 text-muted">{sourceUrl}</p>
+                        </div>
+                    ) : null}
+                    {sourceMode === 'url' && !sourceUrl ? (
+                        <div>
+                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">Source Link</p>
+                            <p className="mt-1 text-sm leading-7 text-muted">No source link captured yet.</p>
+                        </div>
+                    ) : null}
                     <div>
                         <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">Title</p>
                         <p className="mt-1 font-display text-2xl font-bold text-ink">{title}</p>
@@ -266,6 +299,21 @@ export function ReviewStep({ title, summary, categories, tags, selectedFile, cov
                         <div>
                             <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">Cover Image</p>
                             <p className="mt-1 text-sm leading-7 text-muted">{coverImageFile.name}</p>
+                        </div>
+                    ) : null}
+                    {coverImagePreview ? (
+                        <div>
+                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">Cover Preview</p>
+                            <div className="relative mt-3 aspect-[16/10] overflow-hidden rounded-[1.5rem] border border-line bg-panel shadow-soft">
+                                <Image
+                                    src={coverImagePreview}
+                                    alt="Selected cover preview"
+                                    fill
+                                    unoptimized
+                                    sizes="(max-width: 768px) 100vw, 720px"
+                                    className="object-cover"
+                                />
+                            </div>
                         </div>
                     ) : null}
                 </div>

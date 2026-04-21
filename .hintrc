@@ -2,7 +2,17 @@
   "extends": [
     "development"
   ],
+  "ignoredUrls": [
+    {
+      "domain": ".next/",
+      "hints": [
+        "*"
+      ]
+    }
+  ],
   "hints": {
-    "axe/aria": "off"
+    "axe/aria": "off",
+    "compat-api/html": "off",
+    "no-inline-styles": "off"
   }
 }

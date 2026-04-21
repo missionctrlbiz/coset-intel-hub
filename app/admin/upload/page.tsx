@@ -13,6 +13,7 @@ type InitialData = {
     tags: string[];
     status: string;
     coverImagePath: string | null;
+    sourceUrl: string | null;
 };
 
 export default async function AdminUploadPage({ searchParams }: { searchParams: { edit?: string } }) {
@@ -40,13 +41,14 @@ export default async function AdminUploadPage({ searchParams }: { searchParams: 
                     tags: report.tags || [],
                     status: report.status || 'draft',
                     coverImagePath: report.cover_image_path || null,
+                    sourceUrl: report.source_url || null,
                 };
             }
         }
     }
 
     return (
-        <main className="mx-auto max-w-[1600px] px-4 py-10 sm:px-6 lg:px-10">
+        <main className="site-shell max-w-[1520px] py-10">
             <UploadWizard initialData={initialData} />
         </main>
     );

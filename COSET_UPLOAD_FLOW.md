@@ -33,7 +33,7 @@ CoSET supports ingestion via file uploads and external URL scraping. Both channe
 ---
 
 ## 2. AI Processing: Metadata & Content Extraction
-CoSET utilizes **Gemini 1.5 Pro** for semantic analysis.
+Use **Gemini 1.5 Flash** for semantic analysis.
 
 ### Metadata Auto-Fill
 The system prompts Gemini to return a specific JSON structure. This ensures consistency in the "Step 1: Add Details" phase of the wizard.

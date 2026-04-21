@@ -152,6 +152,7 @@ function mapReportRow(row: ReportRow): SeedReport {
         highlight: normalizeHighlights(row.highlight),
         quote: row.quote ?? 'This report has been added to the CoSET intelligence pipeline and is ready for editorial expansion.',
         metrics: parsedMetrics,
+        html_content: row.html_content,
         downloadHref,
     };
 }
