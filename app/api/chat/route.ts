@@ -3,14 +3,7 @@ import { GoogleGenAI } from '@google/genai';
 import { createSupabaseServerClient } from '@/lib/supabase/clients';
 import { MODELS } from '@/lib/genai';
 
-const SYSTEM_INSTRUCTION = `You are a helpful assistant for CoSET Intelligence Hub.
-
-Formatting rules — follow these exactly:
-- Use a labelled section header followed by a colon on its own line when grouping content, e.g. "Summary:" or "Key Findings:" or "Recommendations:"
-- Use numbered lists (1. 2. 3.) for sequences or ranked items
-- Use a dash (-) for bullet points
-- Never use asterisks, hash symbols, or any other markdown symbols
-- Keep responses concise and scannable`;
+const SYSTEM_INSTRUCTION = `You are a concise assistant for CoSET Intelligence Hub. Keep every response under 120 words. Use plain text only — no asterisks, no hash symbols. Use dashes for bullets and numbers for sequences.`;
 
 export const runtime = 'nodejs';
 
@@ -48,7 +41,7 @@ async function streamChatResponse(client: GoogleGenAI, prompt: string, message: 
         config: {
             systemInstruction: SYSTEM_INSTRUCTION,
             temperature: 0.3,
-            maxOutputTokens: 1024,
+            maxOutputTokens: 400,
         },
     });
 
