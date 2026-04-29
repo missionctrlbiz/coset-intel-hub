@@ -255,19 +255,29 @@ export function FloatingChatWidget({ mode = 'report', slug, reportTitle, topRepo
                 body: JSON.stringify({ message: trimmed, slug, mode }),
             });
 
-            const payload = response.headers.get('content-type')?.includes('application/json')
-                ? await response.json()
-                : null;
-
-            if (!response.ok) {
-                const fallback = payload?.error ?? 'Something went wrong while generating the response.';
-
-                updateAssistantMessage(assistantMessageId, { content: fallback, streaming: false });
+            if (!response.ok || !response.body) {
+                const isJson = response.headers.get('content-type')?.includes('application/json');
+                const errorText = isJson ? (await response.json()).error : null;
+                updateAssistantMessage(assistantMessageId, {
+                    content: errorText ?? 'Something went wrong while generating the response.',
+                    streaming: false,
+                });
                 return;
             }
 
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let accumulated = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                accumulated += decoder.decode(value, { stream: true });
+                updateAssistantMessage(assistantMessageId, { content: accumulated, streaming: true });
+            }
+
             updateAssistantMessage(assistantMessageId, {
-                content: payload?.content ?? 'I could not find a grounded answer for that request.',
+                content: accumulated || 'I could not find a grounded answer for that request.',
                 streaming: false,
             });
         } catch {
