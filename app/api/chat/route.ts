@@ -37,7 +37,14 @@ async function createChatResponse(client: GoogleGenAI, prompt: string, message: 
             { role: 'user', parts: [{ text: message }] },
         ],
         config: {
-            systemInstruction: 'You are a helpful assistant for CoSET Intelligence Hub.',
+            systemInstruction: `You are a helpful assistant for CoSET Intelligence Hub.
+
+Formatting rules — follow these exactly:
+- Use a labelled section header followed by a colon on its own line when grouping content, e.g. "Summary:" or "Key Findings:" or "Recommendations:"
+- Use numbered lists (1. 2. 3.) for sequences or ranked items
+- Use a dash (-) for bullet points
+- Never use asterisks, hash symbols, or any other markdown symbols
+- Keep responses concise and scannable`,
             temperature: 0.3,
         },
     });
@@ -114,43 +121,31 @@ ${contextText || 'No published report catalog is available.'}`;
 
         const { data: reportData, error: reportError } = await supabase
             .from('reports')
-            .select('id, title, status')
+            .select('id, title, status, html_content')
             .eq('slug', slug)
             .maybeSingle();
 
-        const report = reportData as { id: string; title: string; status: string } | null;
+        const report = reportData as { id: string; title: string; status: string; html_content: string | null } | null;
 
         if (reportError || !report || report.status !== 'published') {
             return NextResponse.json({ error: 'Report not found or not published' }, { status: 404 });
         }
 
-        // Embed the user question for semantic retrieval
-        const embedResponse = await client.models.embedContent({
-            model: MODELS.embedding,
-            contents: message.trim(),
-        });
+        // Strip HTML tags to get plain text for the AI context
+        const plainText = report.html_content
+            ? report.html_content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 14000)
+            : '';
 
-        const queryEmbedding = embedResponse.embeddings?.[0]?.values;
-
-        if (!queryEmbedding) {
-            return NextResponse.json({ error: 'Failed to generate query embedding' }, { status: 500 });
+        // Fall back to stored chunks if the report has no html_content
+        let contextText = plainText;
+        if (!contextText) {
+            const { data: chunksData } = await supabase
+                .from('report_embeddings')
+                .select('content')
+                .eq('report_id', report.id)
+                .limit(20);
+            contextText = (chunksData || []).map((c: { content: string }) => c.content).join('\n\n---\n\n');
         }
-
-        // Retrieve the most relevant chunks from this report
-        const { data: chunksData, error: matchError } = await (supabase as any).rpc('match_report_embeddings', {
-            query_embedding: JSON.stringify(queryEmbedding) as any,
-            match_threshold: 0.5,
-            match_count: 5,
-            filter_report_id: report.id,
-        });
-
-        if (matchError) {
-            console.error('Vector search error:', matchError);
-            return NextResponse.json({ error: 'Error searching context' }, { status: 500 });
-        }
-
-        const chunks = chunksData as { content: string }[] | null;
-        const contextText = (chunks || []).map((c) => c.content).join('\n\n---\n\n');
 
         const systemPrompt = `You are a helpful CoSET Intelligence Hub assistant answering questions about the report "${report.title}".
 Your responses must be exclusively based on the report excerpts below.

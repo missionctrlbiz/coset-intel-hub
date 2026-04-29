@@ -22,13 +22,12 @@ export async function processAndEmbedReport(reportId: string, extractedText: str
         const batch = chunks.slice(i, i + 50);
 
         try {
-            // Using text-embedding-004 for vector embeddings
-            // As per SDK docs, we can embed multiple texts in one go if supported, or loop. We'll loop to be safe.
             const responses = await Promise.all(
                 batch.map(text =>
                     client.models.embedContent({
-                        model: 'text-embedding-004',
-                        contents: text,
+                        model: 'gemini-embedding-001',
+                        contents: [text],
+                        config: { outputDimensionality: 768 },
                     }).catch(() => null)
                 )
             );

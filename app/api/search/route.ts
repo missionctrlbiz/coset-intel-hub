@@ -18,8 +18,9 @@ export async function GET(request: NextRequest) {
         try {
             const client = new GoogleGenAI({ apiKey });
             const embeddingResponse = await client.models.embedContent({
-                model: 'text-embedding-004',
-                contents: query,
+                model: 'gemini-embedding-001',
+                contents: [query],
+                config: { outputDimensionality: 768 },
             });
 
             const queryEmbedding = embeddingResponse?.embeddings?.[0]?.values;

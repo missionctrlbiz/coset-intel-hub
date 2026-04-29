@@ -5,9 +5,9 @@ const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY || '';
 const client = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 export const MODELS = {
-  fast: process.env.GOOGLE_GENERATIVE_AI_FAST_MODEL ?? 'gemini-2.0-flash',
+  fast: process.env.GOOGLE_GENERATIVE_AI_FAST_MODEL ?? 'gemini-2.5-flash',
   standard: process.env.GOOGLE_GENERATIVE_AI_MODEL ?? 'gemini-2.5-pro',
-  embedding: 'text-embedding-004',
+  embedding: 'gemini-embedding-001',
 } as const;
 
 export const MAX_HTML_EXCERPT_LENGTH = 30_000;

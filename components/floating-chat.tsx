@@ -30,7 +30,7 @@ type FloatingChatWidgetProps = {
 
 const EMPTY_TOP_REPORTS: TopReport[] = [];
 
-const INLINE_TOKEN_PATTERN = /(\*\*[^*]+\*\*|\[[^\]]+\]\((?:https?:\/\/|\/|mailto:|tel:)[^)]+\)|(?:https?:\/\/[^\s<]+|\/(?:reports|blog|contact|login|admin)[^\s<]*|mailto:[^\s<]+|tel:[^\s<]+))/g;
+const LINK_PATTERN = /(\[[^\]]+\]\((?:https?:\/\/|\/|mailto:|tel:)[^)]+\)|(?:https?:\/\/[^\s<]+|\/(?:reports|blog|contact|login|admin)[^\s<]*|mailto:[^\s<]+|tel:[^\s<]+))/g;
 
 function buildMessageId(prefix: string) {
     return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -40,81 +40,54 @@ function getSafeHref(rawHref: string) {
     if (/^(https?:\/\/|mailto:|tel:|\/)/.test(rawHref)) {
         return rawHref;
     }
-
     return null;
-}
-
-function splitTrailingPunctuation(value: string) {
-    const match = value.match(/^(.*?)([),.!?;:]+)?$/);
-
-    return {
-        core: match?.[1] ?? value,
-        suffix: match?.[2] ?? '',
-    };
 }
 
 function renderInlineContent(content: string, keyPrefix: string) {
     const nodes: React.ReactNode[] = [];
     let lastIndex = 0;
 
-    for (const match of content.matchAll(INLINE_TOKEN_PATTERN)) {
+    for (const match of content.matchAll(LINK_PATTERN)) {
         const token = match[0];
         const start = match.index ?? 0;
 
         if (start > lastIndex) {
-            nodes.push(<span key={`${keyPrefix}-text-${start}`}>{content.slice(lastIndex, start)}</span>);
+            nodes.push(<span key={`${keyPrefix}-t-${start}`}>{content.slice(lastIndex, start)}</span>);
         }
 
-        if (token.startsWith('**') && token.endsWith('**')) {
-            nodes.push(
-                <strong key={`${keyPrefix}-bold-${start}`} className="font-semibold text-ember">
-                    {token.slice(2, -2)}
-                </strong>
-            );
-        } else if (token.startsWith('[')) {
-            const markdownLink = token.match(/^\[([^\]]+)\]\((.+)\)$/);
-            const label = markdownLink?.[1] ?? token;
-            const href = markdownLink?.[2] ? getSafeHref(markdownLink[2]) : null;
-
+        if (token.startsWith('[')) {
+            const m = token.match(/^\[([^\]]+)\]\((.+)\)$/);
+            const label = m?.[1] ?? token;
+            const href = m?.[2] ? getSafeHref(m[2]) : null;
             if (href) {
-                const isExternal = !href.startsWith('/');
                 nodes.push(
-                    <a
-                        key={`${keyPrefix}-md-link-${start}`}
-                        href={href}
-                        target={isExternal ? '_blank' : undefined}
-                        rel={isExternal ? 'noopener noreferrer' : undefined}
-                        className="font-semibold text-ember underline decoration-ember/55 underline-offset-4 transition hover:text-white"
-                    >
+                    <a key={`${keyPrefix}-l-${start}`} href={href}
+                        target={!href.startsWith('/') ? '_blank' : undefined}
+                        rel={!href.startsWith('/') ? 'noopener noreferrer' : undefined}
+                        className="font-semibold text-ember underline decoration-ember/50 underline-offset-4 transition hover:text-white">
                         {label}
                     </a>
                 );
             } else {
-                nodes.push(<span key={`${keyPrefix}-md-link-fallback-${start}`}>{token}</span>);
+                nodes.push(<span key={`${keyPrefix}-lf-${start}`}>{token}</span>);
             }
         } else {
-            const { core, suffix } = splitTrailingPunctuation(token);
+            const trailMatch = token.match(/^(.*?)([),.!?;:]+)?$/);
+            const core = trailMatch?.[1] ?? token;
+            const suffix = trailMatch?.[2] ?? '';
             const href = getSafeHref(core);
-            const isExternal = href ? !href.startsWith('/') : false;
-
             if (href) {
                 nodes.push(
-                    <a
-                        key={`${keyPrefix}-link-${start}`}
-                        href={href}
-                        target={isExternal ? '_blank' : undefined}
-                        rel={isExternal ? 'noopener noreferrer' : undefined}
-                        className="font-semibold text-ember underline decoration-ember/55 underline-offset-4 transition hover:text-white"
-                    >
+                    <a key={`${keyPrefix}-u-${start}`} href={href}
+                        target={!href.startsWith('/') ? '_blank' : undefined}
+                        rel={!href.startsWith('/') ? 'noopener noreferrer' : undefined}
+                        className="font-semibold text-ember underline decoration-ember/50 underline-offset-4 transition hover:text-white">
                         {core}
                     </a>
                 );
+                if (suffix) nodes.push(<span key={`${keyPrefix}-s-${start}`}>{suffix}</span>);
             } else {
-                nodes.push(<span key={`${keyPrefix}-link-fallback-${start}`}>{core}</span>);
-            }
-
-            if (suffix) {
-                nodes.push(<span key={`${keyPrefix}-suffix-${start}`}>{suffix}</span>);
+                nodes.push(<span key={`${keyPrefix}-uf-${start}`}>{token}</span>);
             }
         }
 
@@ -129,38 +102,65 @@ function renderInlineContent(content: string, keyPrefix: string) {
 }
 
 function renderMessageContent(content: string) {
-    return content.split('\n').map((line, index) => {
-        const numbered = line.match(/^(\d+)\.\s+(.*)$/);
-        const bulleted = line.match(/^[-•]\s+(.*)$/);
+    const lines = content.split('\n');
+    const elements: React.ReactNode[] = [];
 
-        if (!line.trim()) {
-            return <div key={`line-${index}`} className="h-2" />;
+    lines.forEach((line, index) => {
+        const trimmed = line.trim();
+
+        if (!trimmed) {
+            elements.push(<div key={`gap-${index}`} className="h-1.5" />);
+            return;
         }
 
+        // Section header: "Key Findings:" or "Summary:" — label on its own line ending with colon
+        const sectionHeader = trimmed.match(/^([A-Z][A-Za-z\s&/-]{1,45}):$/);
+        if (sectionHeader) {
+            elements.push(
+                <div key={`h-${index}`} className="mt-3 mb-1.5 flex items-center gap-2 first:mt-0">
+                    <span className="h-px flex-1 bg-ember/20" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-ember">{sectionHeader[1]}</span>
+                    <span className="h-px flex-1 bg-ember/20" />
+                </div>
+            );
+            return;
+        }
+
+        // Numbered list: 1. or 1)
+        const numbered = trimmed.match(/^(\d+)[.)]\s+(.+)$/);
         if (numbered) {
-            return (
-                <div key={`line-${index}`} className="my-1 flex gap-2">
-                    <span className="min-w-[1.3rem] font-semibold text-ember">{numbered[1]}.</span>
-                    <span>{renderInlineContent(numbered[2], `line-${index}`)}</span>
+            elements.push(
+                <div key={`n-${index}`} className="my-1 flex gap-2.5 pl-0.5">
+                    <span className="mt-px flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-ember/15 text-[10px] font-bold text-ember">
+                        {numbered[1]}
+                    </span>
+                    <span className="text-white/88 leading-snug">{renderInlineContent(numbered[2], `n-${index}`)}</span>
                 </div>
             );
+            return;
         }
 
+        // Bullet list: -, *, •
+        const bulleted = trimmed.match(/^[-*•]\s+(.+)$/);
         if (bulleted) {
-            return (
-                <div key={`line-${index}`} className="my-1 flex gap-2">
-                    <span className="font-bold text-ember">•</span>
-                    <span>{renderInlineContent(bulleted[1], `line-${index}`)}</span>
+            elements.push(
+                <div key={`b-${index}`} className="my-1 flex gap-2.5 pl-0.5">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-ember/70" />
+                    <span className="text-white/88 leading-snug">{renderInlineContent(bulleted[1], `b-${index}`)}</span>
                 </div>
             );
+            return;
         }
 
-        return (
-            <div key={`line-${index}`} className="my-1">
-                {renderInlineContent(line, `line-${index}`)}
-            </div>
+        // Plain text paragraph
+        elements.push(
+            <p key={`p-${index}`} className="my-0.5 leading-relaxed text-white/88">
+                {renderInlineContent(trimmed, `p-${index}`)}
+            </p>
         );
     });
+
+    return elements;
 }
 
 function buildInitialMessages(mode: AssistantMode, reportTitle: string | undefined, topReports: TopReport[]) {
