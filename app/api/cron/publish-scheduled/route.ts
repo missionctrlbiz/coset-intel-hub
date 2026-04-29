@@ -5,7 +5,8 @@ export const runtime = 'nodejs';
 
 /**
  * Cron job: flip reports from 'scheduled' → 'published' when their publish time has arrived.
- * Configured in vercel.json: { "crons": [{ "path": "/api/cron/publish-scheduled", "schedule": "* /5 * * * *" }] }
+ * Configured in vercel.json — runs daily at 09:00 UTC (Vercel Hobby plan limit).
+ * On Vercel Pro, change schedule to "0 * * * *" (hourly) or finer.
  * Secured by CRON_SECRET — Vercel sets the Authorization header automatically.
  */
 export async function GET(request: Request) {
