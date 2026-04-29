@@ -48,7 +48,6 @@ async function streamChatResponse(client: GoogleGenAI, prompt: string, message: 
         config: {
             systemInstruction: SYSTEM_INSTRUCTION,
             temperature: 0.3,
-            thinkingConfig: { thinkingBudget: 0 },
             maxOutputTokens: 1024,
         },
     });
