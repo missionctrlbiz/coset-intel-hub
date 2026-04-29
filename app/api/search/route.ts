@@ -58,12 +58,12 @@ export async function GET(request: NextRequest) {
         }
     }
 
-    // Fallback or supplement with text search
+    // Fallback or supplement with full-text search (uses the GIN tsvector index)
     const { data: textResults } = await supabase
         .from('reports')
         .select('id, slug, title, description, category, cover_image_path, image_path')
         .eq('status', 'published')
-        .or(`title.ilike.%${query}%,description.ilike.%${query}%`)
+        .textSearch('search_vector', query, { type: 'plain', config: 'english' })
         .limit(5);
 
     // Merge and deduplicate results, prioritizing semantic results

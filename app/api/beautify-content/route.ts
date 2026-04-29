@@ -1,33 +1,15 @@
 import { NextResponse } from 'next/server';
 
 import { beautifyHtmlContent } from '@/lib/genai';
-import { createSupabaseServerClient } from '@/lib/supabase/clients';
+import { requireRole } from '@/lib/auth';
 
 export const runtime = 'nodejs';
 export const maxDuration = 120;
 
 export async function POST(request: Request) {
     try {
-        const supabase = await createSupabaseServerClient();
-        const {
-            data: { user },
-        } = await supabase.auth.getUser();
-
-        if (!user) {
-            return NextResponse.json({ error: 'You must be signed in.' }, { status: 401 });
-        }
-
-        const { data: profileData } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .maybeSingle();
-
-        const profile = profileData as { role: string } | null;
-
-        if (!profile || (profile.role !== 'admin' && profile.role !== 'editor')) {
-            return NextResponse.json({ error: 'Editor or admin role required.' }, { status: 403 });
-        }
+        const auth = await requireRole(['admin', 'editor']);
+        if (auth instanceof Response) return auth;
 
         const body = (await request.json()) as { content?: string };
         const content = typeof body.content === 'string' ? body.content.trim() : '';
@@ -36,6 +18,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'content is required.' }, { status: 400 });
         }
 
+        // beautifyHtmlContent sanitizes the AI output with DOMPurify before returning
         const formattedHtml = await beautifyHtmlContent(content);
 
         if (!formattedHtml) {

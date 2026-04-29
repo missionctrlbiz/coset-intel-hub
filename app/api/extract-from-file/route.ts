@@ -306,6 +306,11 @@ export async function POST(request: Request) {
         const coverImageFile = formData.get('coverImage') as File | null;
         const downloadFileFile = downloadFile instanceof File ? downloadFile : null;
 
+        // Guard: reject oversized uploads before reading into memory
+        if (file instanceof File && file.size > 50 * 1024 * 1024) {
+            return NextResponse.json({ error: 'File size exceeds the 50 MB limit.' }, { status: 400 });
+        }
+
         // Guard: new reports require a file or pasted/URL text content
         if (!id && !(file instanceof File) && !textContent) {
             return NextResponse.json({ error: 'Expected a file upload under the "file" field.' }, { status: 400 });

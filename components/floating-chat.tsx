@@ -8,6 +8,7 @@ import clsx from 'clsx';
 type Message = {
     role: 'user' | 'assistant';
     content: string;
+    streaming?: boolean;
 };
 
 export function FloatingChatWidget({ slug }: { slug: string }) {
@@ -18,9 +19,7 @@ export function FloatingChatWidget({ slug }: { slug: string }) {
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () => {
-        if (messagesEndRef.current) {
-            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-        }
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
     useEffect(() => {
@@ -32,10 +31,14 @@ export function FloatingChatWidget({ slug }: { slug: string }) {
         const trimmed = input.trim();
         if (!trimmed || isLoading) return;
 
-        const newMessages: Message[] = [...messages, { role: 'user', content: trimmed }];
-        setMessages(newMessages);
+        const userMessages: Message[] = [...messages, { role: 'user', content: trimmed }];
+        setMessages(userMessages);
         setInput('');
         setIsLoading(true);
+
+        // Append a placeholder for the streaming assistant reply
+        const assistantIndex = userMessages.length;
+        setMessages([...userMessages, { role: 'assistant', content: '', streaming: true }]);
 
         try {
             const response = await fetch('/api/chat', {
@@ -44,15 +47,46 @@ export function FloatingChatWidget({ slug }: { slug: string }) {
                 body: JSON.stringify({ message: trimmed, slug }),
             });
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                setMessages([...newMessages, { role: 'assistant', content: data.error || 'Something went wrong.' }]);
-            } else {
-                setMessages([...newMessages, { role: 'assistant', content: data.answer }]);
+            if (!response.ok || !response.body) {
+                const fallback = response.headers.get('content-type')?.includes('json')
+                    ? (await response.json()).error ?? 'Something went wrong.'
+                    : 'Something went wrong.';
+                setMessages((prev) => {
+                    const updated = [...prev];
+                    updated[assistantIndex] = { role: 'assistant', content: fallback };
+                    return updated;
+                });
+                return;
             }
-        } catch (error) {
-            setMessages([...newMessages, { role: 'assistant', content: 'Connection error while contacting AI.' }]);
+
+            // Stream tokens into the placeholder message
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let accumulated = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                accumulated += decoder.decode(value, { stream: true });
+                setMessages((prev) => {
+                    const updated = [...prev];
+                    updated[assistantIndex] = { role: 'assistant', content: accumulated, streaming: true };
+                    return updated;
+                });
+            }
+
+            // Mark streaming complete
+            setMessages((prev) => {
+                const updated = [...prev];
+                updated[assistantIndex] = { role: 'assistant', content: accumulated };
+                return updated;
+            });
+        } catch {
+            setMessages((prev) => {
+                const updated = [...prev];
+                updated[assistantIndex] = { role: 'assistant', content: 'Connection error while contacting AI.' };
+                return updated;
+            });
         } finally {
             setIsLoading(false);
         }
@@ -103,12 +137,16 @@ export function FloatingChatWidget({ slug }: { slug: string }) {
                                     )}
                                 >
                                     {msg.content}
+                                    {msg.streaming && msg.content && (
+                                        <span className="ml-1 inline-block h-3 w-0.5 animate-pulse bg-ember align-middle" />
+                                    )}
                                 </div>
                             ))}
-                            {isLoading && (
+
+                            {isLoading && messages[messages.length - 1]?.content === '' && (
                                 <div className="mr-auto flex max-w-[85%] items-center gap-2 rounded-2xl rounded-tl-sm border border-line bg-white px-4 py-2.5 text-sm text-ink">
                                     <Loader2 className="h-4 w-4 animate-spin text-ember" />
-                                    <span>Searching...</span>
+                                    <span>Searching…</span>
                                 </div>
                             )}
                             <div ref={messagesEndRef} />

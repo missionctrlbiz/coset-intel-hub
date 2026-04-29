@@ -1,9 +1,14 @@
 import { GoogleGenAI } from '@google/genai';
+import DOMPurify from 'isomorphic-dompurify';
 
 const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY || '';
 const client = apiKey ? new GoogleGenAI({ apiKey }) : null;
-const defaultModel = process.env.GOOGLE_GENERATIVE_AI_MODEL || 'gemini-1.5-pro';
-const fastModel = process.env.GOOGLE_GENERATIVE_AI_FAST_MODEL || 'gemini-1.5-flash';
+
+export const MODELS = {
+  fast: process.env.GOOGLE_GENERATIVE_AI_FAST_MODEL ?? 'gemini-2.0-flash',
+  standard: process.env.GOOGLE_GENERATIVE_AI_MODEL ?? 'gemini-2.5-pro',
+  embedding: 'text-embedding-004',
+} as const;
 
 export const MAX_HTML_EXCERPT_LENGTH = 30_000;
 
@@ -138,7 +143,7 @@ export async function generateExtractionDraft(input: {
 
   try {
     const response = await client.models.generateContent({
-      model: fastModel,
+      model: MODELS.fast,
       contents: [{ role: 'user', parts: [{ text: prompt }] }]
     });
 
@@ -150,7 +155,7 @@ export async function generateExtractionDraft(input: {
 
     return {
       ...parsed,
-      model: fastModel,
+      model: MODELS.fast,
     };
   } catch (error) {
     console.error('Failed to generate extraction draft:', error);
@@ -188,7 +193,7 @@ ${content.slice(0, MAX_HTML_EXCERPT_LENGTH)}`;
 
   try {
     const response = await client.models.generateContent({
-      model: fastModel,
+      model: MODELS.fast,
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
     });
 
@@ -569,20 +574,25 @@ ${content.slice(0, MAX_HTML_EXCERPT_LENGTH)}`;
 
   try {
     const response = await client.models.generateContent({
-      model: defaultModel,
+      model: MODELS.standard,
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
     });
 
     const rawText = response.text?.trim();
     if (!rawText) return null;
 
-    // Clean up — remove markdown code fences if present
+    // Strip markdown fences if Gemini wrapped output in them
     const cleaned = rawText
       .replace(/```html\n?/g, '')
       .replace(/```\n?/g, '')
       .trim();
 
-    return cleaned;
+    // Sanitize AI-generated HTML before returning — prevents stored XSS
+    return DOMPurify.sanitize(cleaned, {
+      ADD_TAGS: ['style'],
+      ADD_ATTR: ['style', 'data-section-style', 'data-report-toc', 'id'],
+      FORCE_BODY: false,
+    });
   } catch (error) {
     console.error('Failed to beautify HTML content:', error);
     return null;
