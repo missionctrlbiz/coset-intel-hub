@@ -67,38 +67,54 @@ export async function POST(request: Request) {
                 lower.includes('recent') ||
                 lower.includes('newest');
 
-            let reports: ReportRow[] | null = null;
-
-            if (!isLatestRequest) {
-                const { data } = await supabase
-                    .from('reports')
-                    .select('title, slug, description, category, tags')
-                    .eq('status', 'published')
-                    .textSearch('search_vector', trimmed, { type: 'websearch' })
-                    .limit(6);
-                reports = data as ReportRow[] | null;
-            }
-
-            if (!reports?.length) {
+            if (isLatestRequest) {
                 const { data } = await supabase
                     .from('reports')
                     .select('title, slug, description, category, tags')
                     .eq('status', 'published')
                     .order('published_at', { ascending: false })
                     .limit(6);
-                reports = data as ReportRow[] | null;
-                const intro = isLatestRequest
-                    ? 'Here are the most recently published CoSET Intelligence reports:'
-                    : `No reports matched your query. Here are the latest reports:`;
+                const reports = data as ReportRow[] | null;
                 return plainText(
                     reports?.length
-                        ? formatReportList(reports, intro)
+                        ? formatReportList(reports, 'Here are the most recently published CoSET Intelligence reports:')
                         : 'No published reports are available at the moment. Check back soon.'
                 );
             }
 
+            // Derive a clean search term (strip trailing generic words like "research", "briefs")
+            const searchTerm = trimmed
+                .replace(/\b(research|briefs?|reports?|publications?)\b/gi, '')
+                .replace(/\s{2,}/g, ' ')
+                .trim() || trimmed;
+
+            const { data: searchResults } = await supabase
+                .from('reports')
+                .select('title, slug, description, category, tags')
+                .eq('status', 'published')
+                .textSearch('search_vector', searchTerm, { type: 'websearch' })
+                .limit(6);
+
+            const reports = searchResults as ReportRow[] | null;
+
+            if (reports?.length) {
+                return plainText(
+                    formatReportList(reports, `CoSET Intelligence reports on "${searchTerm}":`)
+                );
+            }
+
+            // Fallback — show latest but clearly name what was searched
+            const { data: latestData } = await supabase
+                .from('reports')
+                .select('title, slug, description, category, tags')
+                .eq('status', 'published')
+                .order('published_at', { ascending: false })
+                .limit(6);
+            const latest = latestData as ReportRow[] | null;
             return plainText(
-                formatReportList(reports, 'Here are CoSET Intelligence reports matching your query:')
+                latest?.length
+                    ? formatReportList(latest, `No reports found for "${searchTerm}". Here are the latest published reports:`)
+                    : 'No published reports are available at the moment. Check back soon.'
             );
         }
 
@@ -134,36 +150,87 @@ export async function POST(request: Request) {
             : 'Not specified';
 
         if (lower.includes('summar') || lower.includes('overview') || lower.includes('about')) {
+            // Full description + all metadata
             return plainText(
                 description
-                    ? `Summary:\n\n${description}\n\n- Categories: ${cats}\n- Tags: ${tagList}`
-                    : `${title}\n\n- Categories: ${cats}\n- Tags: ${tagList}\n\nNo summary is available for this report.`
+                    ? [
+                        `Report Overview: ${title}`,
+                        '',
+                        description,
+                        '',
+                        `- Categories: ${cats}`,
+                        `- Tags: ${tagList}`,
+                        `- Published: ${publishedDate}`,
+                        author ? `- Author: ${author}` : null,
+                    ].filter((l) => l !== null).join('\n')
+                    : [
+                        title,
+                        '',
+                        `- Categories: ${cats}`,
+                        `- Published: ${publishedDate}`,
+                        '',
+                        `No summary is stored for this report. [Open the full report](/reports/${slug}) to read it.`,
+                    ].join('\n')
             );
         }
 
         if (lower.includes('key finding') || lower.includes('finding') || lower.includes('conclusion')) {
+            // First sentence of description as the headline finding, then invite to read more
+            const firstSentence = description
+                ? (description.match(/^[^.!?]+[.!?]/) ?? [description.slice(0, 160)])[0].trim()
+                : null;
             return plainText(
-                description
-                    ? `Key Overview:\n\n${description}\n\n[Read the full report](/reports/${slug})`
-                    : `No structured findings are stored for this report.\n\n[Open the full report](/reports/${slug}) to read the analysis.`
+                firstSentence
+                    ? [
+                        'Key Findings:',
+                        '',
+                        firstSentence,
+                        '',
+                        `This report covers: ${cats}`,
+                        '',
+                        `[Open the full report for complete analysis](/reports/${slug})`,
+                    ].join('\n')
+                    : [
+                        'Key Findings:',
+                        '',
+                        `No structured findings are stored for "${title}".`,
+                        '',
+                        `[Open the full report to read the analysis](/reports/${slug})`,
+                    ].join('\n')
             );
         }
 
         if (lower.includes('policy') || lower.includes('recommendation')) {
+            // Lead with policy categories/tags as the actionable lens, description as context
+            const policyAreas = [
+                ...(category ?? []),
+                ...(tags ?? []),
+            ].filter(Boolean);
             return plainText(
-                description
-                    ? `Policy Context:\n\n${description}\n\n- Categories: ${cats}\n\n[Read the full policy analysis](/reports/${slug})`
-                    : `No policy detail is stored for this report.\n\n[Open the full report](/reports/${slug})`
+                [
+                    'Policy Focus Areas:',
+                    '',
+                    policyAreas.length
+                        ? policyAreas.map((a) => `- ${a}`).join('\n')
+                        : '- Policy areas not specified for this report.',
+                    '',
+                    description
+                        ? `Context:\n${description.length > 200 ? description.slice(description.length - 200) + '…' : description}`
+                        : null,
+                    '',
+                    `[Read the full policy analysis](/reports/${slug})`,
+                ].filter((l) => l !== null).join('\n')
             );
         }
 
         if (lower.includes('source') || lower.includes('reference') || lower.includes('citation') || lower.includes('author')) {
+            // Metadata only — no description
             return plainText(
                 [
-                    'Source References:',
+                    'Source Details:',
                     '',
                     `- Title: ${title}`,
-                    author ? `- Author: ${author}` : null,
+                    author ? `- Author: ${author}` : '- Author: Not specified',
                     `- Published: ${publishedDate}`,
                     `- Categories: ${cats}`,
                     tags?.length ? `- Tags: ${tagList}` : null,
