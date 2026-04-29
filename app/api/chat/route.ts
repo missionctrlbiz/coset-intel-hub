@@ -1,18 +1,116 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { createSupabaseServerClient } from '@/lib/supabase/clients';
+import { MODELS } from '@/lib/genai';
 
 export const runtime = 'nodejs';
 
+type ChatMode = 'general' | 'report';
+
+type ReportCatalogEntry = {
+    title: string;
+    slug: string;
+    description: string | null;
+    category: string[] | null;
+    tags: string[] | null;
+    published_at: string | null;
+};
+
+function formatCatalogContext(reports: ReportCatalogEntry[]) {
+    return reports
+        .map((report, index) => {
+            const categories = report.category?.join(', ') || 'Uncategorized';
+            const tags = report.tags?.length ? report.tags.join(', ') : 'No tags listed';
+            const publishedAt = report.published_at || 'Unknown publish date';
+
+            return `${index + 1}. ${report.title}\nSlug: ${report.slug}\nPath: /reports/${report.slug}\nCategories: ${categories}\nTags: ${tags}\nPublished: ${publishedAt}\nDescription: ${report.description || 'No description available.'}`;
+        })
+        .join('\n\n');
+}
+
+async function createChatResponse(client: GoogleGenAI, prompt: string, message: string) {
+    const response = await client.models.generateContent({
+        model: MODELS.standard,
+        contents: [
+            { role: 'user', parts: [{ text: prompt }] },
+            { role: 'model', parts: [{ text: 'Understood. Please provide the user question.' }] },
+            { role: 'user', parts: [{ text: message }] },
+        ],
+        config: {
+            systemInstruction: 'You are a helpful assistant for CoSET Intelligence Hub.',
+            temperature: 0.3,
+        },
+    });
+
+    const content = response.text?.trim();
+
+    if (!content) {
+        return NextResponse.json({ error: 'No response was generated.' }, { status: 502 });
+    }
+
+    return NextResponse.json({ content });
+}
+
 export async function POST(request: Request) {
     try {
-        const { message, slug } = await request.json();
+        const { message, slug, mode = 'report' } = await request.json() as {
+            message?: string;
+            slug?: string;
+            mode?: ChatMode;
+        };
 
-        if (!message || !slug) {
-            return NextResponse.json({ error: 'Message and slug are required' }, { status: 400 });
+        if (!message?.trim()) {
+            return NextResponse.json({ error: 'A message is required' }, { status: 400 });
+        }
+
+        const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+        if (!apiKey) {
+            return NextResponse.json({ error: 'Generative AI is not configured' }, { status: 503 });
         }
 
         const supabase = await createSupabaseServerClient();
+        const client = new GoogleGenAI({ apiKey });
+
+        if (mode === 'general') {
+            const { data: matchedReports } = await supabase
+                .from('reports')
+                .select('title, slug, description, category, tags, published_at')
+                .eq('status', 'published')
+                .textSearch('search_vector', message.trim(), { type: 'websearch' })
+                .limit(6);
+
+            const { data: latestReports } = await supabase
+                .from('reports')
+                .select('title, slug, description, category, tags, published_at')
+                .eq('status', 'published')
+                .order('featured', { ascending: false })
+                .order('published_at', { ascending: false })
+                .limit(6);
+
+            const matchedCatalog = (matchedReports ?? []) as ReportCatalogEntry[];
+            const latestCatalog = (latestReports ?? []) as ReportCatalogEntry[];
+
+            const combinedReports: ReportCatalogEntry[] = [...matchedCatalog, ...latestCatalog].filter(
+                (report, index, collection) => collection.findIndex((candidate) => candidate.slug === report.slug) === index
+            );
+
+            const contextText = formatCatalogContext(combinedReports.slice(0, 8));
+            const generalPrompt = `You are a helpful CoSET Intelligence Hub assistant.
+Answer only from the published report catalog below.
+If you mention a report, format it as a markdown link like [Report Title](/reports/report-slug).
+If the catalog does not support the answer, say so clearly and suggest [Browse all reports](/reports).
+Do not invent URLs, sources, or findings beyond the catalog.
+Keep the response concise, direct, and useful.
+
+Published Report Catalog:
+${contextText || 'No published report catalog is available.'}`;
+
+            return createChatResponse(client, generalPrompt, message.trim());
+        }
+
+        if (!slug) {
+            return NextResponse.json({ error: 'A report slug is required for report chat' }, { status: 400 });
+        }
 
         const { data: reportData, error: reportError } = await supabase
             .from('reports')
@@ -26,17 +124,10 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Report not found or not published' }, { status: 404 });
         }
 
-        const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
-        if (!apiKey) {
-            return NextResponse.json({ error: 'Generative AI is not configured' }, { status: 500 });
-        }
-
-        const client = new GoogleGenAI({ apiKey });
-
-        // 2. Generate embedding for user message
+        // Embed the user question for semantic retrieval
         const embedResponse = await client.models.embedContent({
-            model: 'text-embedding-004',
-            contents: message,
+            model: MODELS.embedding,
+            contents: message.trim(),
         });
 
         const queryEmbedding = embedResponse.embeddings?.[0]?.values;
@@ -45,9 +136,9 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Failed to generate query embedding' }, { status: 500 });
         }
 
-        // 3. Search Supabase for relevant context
+        // Retrieve the most relevant chunks from this report
         const { data: chunksData, error: matchError } = await (supabase as any).rpc('match_report_embeddings', {
-            query_embedding: queryEmbedding,
+            query_embedding: JSON.stringify(queryEmbedding) as any,
             match_threshold: 0.5,
             match_count: 5,
             filter_report_id: report.id,
@@ -59,39 +150,19 @@ export async function POST(request: Request) {
         }
 
         const chunks = chunksData as { content: string }[] | null;
+        const contextText = (chunks || []).map((c) => c.content).join('\n\n---\n\n');
 
-        const contextText = (chunks || [])
-            .map((chunk) => chunk.content)
-            .join('\n\n---\n\n');
-
-        // 4. Send to Gemini 2.5 Pro
         const systemPrompt = `You are a helpful CoSET Intelligence Hub assistant answering questions about the report "${report.title}".
-Your responses MUST be exclusively based on the following excerpts from the report.
-If the context does not contain the answer, politely say that you cannot find the answer in the report.
-Use citations like [Excerpt 1] etc if appropriate, but since it's all from the same report, just referencing the text is fine. Be concise and clear.
+Your responses must be exclusively based on the report excerpts below.
+If the context does not contain the answer, say that you cannot find it in this report.
+If helpful, you may reference the current report as [Open this report](/reports/${slug}).
+Do not invent facts, sources, or links.
+Be concise and clear.
 
 Context Excerpts:
-${contextText || "No relevant excerpts found in the report."}`;
+${contextText || 'No relevant excerpts found in the report.'}`;
 
-        const chatResponse = await client.models.generateContent({
-            model: 'gemini-2.5-pro',
-            contents: [
-                { role: 'user', parts: [{ text: systemPrompt }] },
-                { role: 'model', parts: [{ text: 'Understood. Please provide your query.' }] },
-                { role: 'user', parts: [{ text: message }] },
-            ],
-            config: {
-                systemInstruction: "You are a helpful assistant for CoSET Intelligence Hub",
-                temperature: 0.3
-            }
-        });
-
-        if (!chatResponse.text) {
-            return NextResponse.json({ error: 'Failed to generate answer' }, { status: 500 });
-        }
-
-        return NextResponse.json({ answer: chatResponse.text });
-
+        return createChatResponse(client, systemPrompt, message.trim());
     } catch (error) {
         console.error('Chat API Error:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

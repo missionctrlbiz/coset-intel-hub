@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { CalendarDays, ChevronRight, Clock3, Download, UserRound } from 'lucide-react';
 import { notFound } from 'next/navigation';
 
+import { FloatingChatWidget } from '@/components/floating-chat';
 import { ReportViewTracker } from '@/components/report-view-tracker';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
@@ -110,6 +111,7 @@ export default async function ReportDetailPage({ params }: { params: { slug: str
                 </div>
             </main>
             <SiteFooter />
+            <FloatingChatWidget mode="report" slug={report.slug} reportTitle={report.title} />
         </>
     );
 }

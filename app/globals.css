@@ -21,7 +21,7 @@
 html.dark {
   color-scheme: dark;
   --color-ink: 236 242 248;
-  --color-navy: 24 64 107;
+  --color-navy: 9 21 35;
   --color-teal: 111 207 194;
   --color-ember: 255 170 86;
   --color-mist: 23 31 45;
@@ -93,7 +93,7 @@ textarea::placeholder {
 }
 
 html.dark .text-navy {
-  color: rgb(188 219 245 / var(--tw-text-opacity, 1));
+  color: rgb(var(--color-ember) / var(--tw-text-opacity, 1));
 }
 
 html.dark a.text-navy:is(:hover, :focus-visible),
