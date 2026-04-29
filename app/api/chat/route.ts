@@ -30,7 +30,7 @@ function formatCatalogContext(reports: ReportCatalogEntry[]) {
 
 async function createChatResponse(client: GoogleGenAI, prompt: string, message: string) {
     const response = await client.models.generateContent({
-        model: MODELS.standard,
+        model: MODELS.fast,
         contents: [
             { role: 'user', parts: [{ text: prompt }] },
             { role: 'model', parts: [{ text: 'Understood. Please provide the user question.' }] },
