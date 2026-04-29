@@ -111,7 +111,7 @@ export default async function ReportDetailPage({ params }: { params: { slug: str
                 </div>
             </main>
             <SiteFooter />
-            <FloatingChatWidget slug={report.slug} />
+            <FloatingChatWidget mode="report" slug={report.slug} reportTitle={report.title} />
         </>
     );
 }

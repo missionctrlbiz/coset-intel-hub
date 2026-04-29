@@ -1,188 +1,429 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { Bot, Send, X, Loader2, MessageCircleQuestion } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Loader2, MessageCircle, Send, X } from 'lucide-react';
 import clsx from 'clsx';
 
+type AssistantMode = 'general' | 'report';
+
+type TopReport = {
+    title: string;
+    slug: string;
+    category: string;
+};
+
 type Message = {
-    role: 'user' | 'assistant';
+    id: string;
+    role: 'assistant' | 'user';
     content: string;
+    actions?: string[];
     streaming?: boolean;
 };
 
-export function FloatingChatWidget({ slug }: { slug: string }) {
+type FloatingChatWidgetProps = {
+    mode?: AssistantMode;
+    slug?: string;
+    reportTitle?: string;
+    topReports?: TopReport[];
+};
+
+const EMPTY_TOP_REPORTS: TopReport[] = [];
+
+const INLINE_TOKEN_PATTERN = /(\*\*[^*]+\*\*|\[[^\]]+\]\((?:https?:\/\/|\/|mailto:|tel:)[^)]+\)|(?:https?:\/\/[^\s<]+|\/(?:reports|blog|contact|login|admin)[^\s<]*|mailto:[^\s<]+|tel:[^\s<]+))/g;
+
+function buildMessageId(prefix: string) {
+    return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function getSafeHref(rawHref: string) {
+    if (/^(https?:\/\/|mailto:|tel:|\/)/.test(rawHref)) {
+        return rawHref;
+    }
+
+    return null;
+}
+
+function splitTrailingPunctuation(value: string) {
+    const match = value.match(/^(.*?)([),.!?;:]+)?$/);
+
+    return {
+        core: match?.[1] ?? value,
+        suffix: match?.[2] ?? '',
+    };
+}
+
+function renderInlineContent(content: string, keyPrefix: string) {
+    const nodes: React.ReactNode[] = [];
+    let lastIndex = 0;
+
+    for (const match of content.matchAll(INLINE_TOKEN_PATTERN)) {
+        const token = match[0];
+        const start = match.index ?? 0;
+
+        if (start > lastIndex) {
+            nodes.push(<span key={`${keyPrefix}-text-${start}`}>{content.slice(lastIndex, start)}</span>);
+        }
+
+        if (token.startsWith('**') && token.endsWith('**')) {
+            nodes.push(
+                <strong key={`${keyPrefix}-bold-${start}`} className="font-semibold text-ember">
+                    {token.slice(2, -2)}
+                </strong>
+            );
+        } else if (token.startsWith('[')) {
+            const markdownLink = token.match(/^\[([^\]]+)\]\((.+)\)$/);
+            const label = markdownLink?.[1] ?? token;
+            const href = markdownLink?.[2] ? getSafeHref(markdownLink[2]) : null;
+
+            if (href) {
+                const isExternal = !href.startsWith('/');
+                nodes.push(
+                    <a
+                        key={`${keyPrefix}-md-link-${start}`}
+                        href={href}
+                        target={isExternal ? '_blank' : undefined}
+                        rel={isExternal ? 'noopener noreferrer' : undefined}
+                        className="font-semibold text-ember underline decoration-ember/55 underline-offset-4 transition hover:text-white"
+                    >
+                        {label}
+                    </a>
+                );
+            } else {
+                nodes.push(<span key={`${keyPrefix}-md-link-fallback-${start}`}>{token}</span>);
+            }
+        } else {
+            const { core, suffix } = splitTrailingPunctuation(token);
+            const href = getSafeHref(core);
+            const isExternal = href ? !href.startsWith('/') : false;
+
+            if (href) {
+                nodes.push(
+                    <a
+                        key={`${keyPrefix}-link-${start}`}
+                        href={href}
+                        target={isExternal ? '_blank' : undefined}
+                        rel={isExternal ? 'noopener noreferrer' : undefined}
+                        className="font-semibold text-ember underline decoration-ember/55 underline-offset-4 transition hover:text-white"
+                    >
+                        {core}
+                    </a>
+                );
+            } else {
+                nodes.push(<span key={`${keyPrefix}-link-fallback-${start}`}>{core}</span>);
+            }
+
+            if (suffix) {
+                nodes.push(<span key={`${keyPrefix}-suffix-${start}`}>{suffix}</span>);
+            }
+        }
+
+        lastIndex = start + token.length;
+    }
+
+    if (lastIndex < content.length) {
+        nodes.push(<span key={`${keyPrefix}-tail`}>{content.slice(lastIndex)}</span>);
+    }
+
+    return nodes;
+}
+
+function renderMessageContent(content: string) {
+    return content.split('\n').map((line, index) => {
+        const numbered = line.match(/^(\d+)\.\s+(.*)$/);
+        const bulleted = line.match(/^[-•]\s+(.*)$/);
+
+        if (!line.trim()) {
+            return <div key={`line-${index}`} className="h-2" />;
+        }
+
+        if (numbered) {
+            return (
+                <div key={`line-${index}`} className="my-1 flex gap-2">
+                    <span className="min-w-[1.3rem] font-semibold text-ember">{numbered[1]}.</span>
+                    <span>{renderInlineContent(numbered[2], `line-${index}`)}</span>
+                </div>
+            );
+        }
+
+        if (bulleted) {
+            return (
+                <div key={`line-${index}`} className="my-1 flex gap-2">
+                    <span className="font-bold text-ember">•</span>
+                    <span>{renderInlineContent(bulleted[1], `line-${index}`)}</span>
+                </div>
+            );
+        }
+
+        return (
+            <div key={`line-${index}`} className="my-1">
+                {renderInlineContent(line, `line-${index}`)}
+            </div>
+        );
+    });
+}
+
+function buildInitialMessages(mode: AssistantMode, reportTitle: string | undefined, topReports: TopReport[]) {
+    if (mode === 'general') {
+        const reportList = topReports.length > 0
+            ? topReports.slice(0, 5).map((report, index) => `${index + 1}. [${report.title}](/reports/${report.slug}) — ${report.category}`).join('\n')
+            : '';
+
+        return [
+            {
+                id: 'init-general',
+                role: 'assistant' as const,
+                content: `Welcome to the **CoSET Intelligence Hub**. I can help you explore published research, compare themes, and point you to the right report quickly.\n\n${reportList ? `Here are the latest published reports:\n\n${reportList}\n\n` : ''}Ask about a topic, a policy issue, or a report title and I will stay within the published CoSET material.`,
+                actions: ['Latest published reports', 'Climate justice research', 'Energy transition briefs', 'Browse all reports'],
+            },
+        ];
+    }
+
+    return [
+        {
+            id: 'init-report',
+            role: 'assistant' as const,
+            content: reportTitle
+                ? `You are viewing **${reportTitle}**. Ask for a summary, key findings, policy recommendations, or source references and I will answer from this report only.`
+                : 'Ask about this report and I will answer from the published CoSET material attached to it.',
+            actions: ['Summarize this report', 'Key findings', 'Policy recommendations', 'Source references'],
+        },
+    ];
+}
+
+export function FloatingChatWidget({ mode = 'report', slug, reportTitle, topReports: providedTopReports }: FloatingChatWidgetProps) {
+    const topReports = providedTopReports ?? EMPTY_TOP_REPORTS;
+    const initialMessages = useMemo(
+        () => buildInitialMessages(mode, reportTitle, topReports),
+        [mode, reportTitle, topReports]
+    );
     const [isOpen, setIsOpen] = useState(false);
-    const [messages, setMessages] = useState<Message[]>([]);
+    const [messages, setMessages] = useState<Message[]>(() => initialMessages);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
+    useEffect(() => {
+        setMessages(initialMessages);
+    }, [initialMessages]);
 
     useEffect(() => {
-        scrollToBottom();
+        const container = messagesContainerRef.current;
+
+        if (!container) {
+            return;
+        }
+
+        const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+        const shouldStickToBottom = distanceFromBottom < 96;
+
+        if (shouldStickToBottom) {
+            container.scrollTop = container.scrollHeight;
+        }
     }, [messages, isLoading]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        const trimmed = input.trim();
-        if (!trimmed || isLoading) return;
+    function updateAssistantMessage(messageId: string, updates: Partial<Message>) {
+        setMessages((prev) => prev.map((message) => message.id === messageId ? { ...message, ...updates } : message));
+    }
 
-        const userMessages: Message[] = [...messages, { role: 'user', content: trimmed }];
-        setMessages(userMessages);
+    async function handleSend(sourceText = input) {
+        const trimmed = sourceText.trim();
+        if (!trimmed || isLoading || (mode === 'report' && !slug)) {
+            return;
+        }
+
+        const userMessage: Message = {
+            id: buildMessageId('user'),
+            role: 'user',
+            content: trimmed,
+        };
+        const assistantMessageId = buildMessageId('assistant');
+
+        setMessages((prev) => [
+            ...prev,
+            userMessage,
+            { id: assistantMessageId, role: 'assistant', content: '', streaming: true },
+        ]);
         setInput('');
         setIsLoading(true);
-
-        // Append a placeholder for the streaming assistant reply
-        const assistantIndex = userMessages.length;
-        setMessages([...userMessages, { role: 'assistant', content: '', streaming: true }]);
 
         try {
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: trimmed, slug }),
+                body: JSON.stringify({ message: trimmed, slug, mode }),
             });
 
-            if (!response.ok || !response.body) {
-                const fallback = response.headers.get('content-type')?.includes('json')
-                    ? (await response.json()).error ?? 'Something went wrong.'
-                    : 'Something went wrong.';
-                setMessages((prev) => {
-                    const updated = [...prev];
-                    updated[assistantIndex] = { role: 'assistant', content: fallback };
-                    return updated;
-                });
+            const payload = response.headers.get('content-type')?.includes('application/json')
+                ? await response.json()
+                : null;
+
+            if (!response.ok) {
+                const fallback = payload?.error ?? 'Something went wrong while generating the response.';
+
+                updateAssistantMessage(assistantMessageId, { content: fallback, streaming: false });
                 return;
             }
 
-            // Stream tokens into the placeholder message
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let accumulated = '';
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                accumulated += decoder.decode(value, { stream: true });
-                setMessages((prev) => {
-                    const updated = [...prev];
-                    updated[assistantIndex] = { role: 'assistant', content: accumulated, streaming: true };
-                    return updated;
-                });
-            }
-
-            // Mark streaming complete
-            setMessages((prev) => {
-                const updated = [...prev];
-                updated[assistantIndex] = { role: 'assistant', content: accumulated };
-                return updated;
+            updateAssistantMessage(assistantMessageId, {
+                content: payload?.content ?? 'I could not find a grounded answer for that request.',
+                streaming: false,
             });
         } catch {
-            setMessages((prev) => {
-                const updated = [...prev];
-                updated[assistantIndex] = { role: 'assistant', content: 'Connection error while contacting AI.' };
-                return updated;
+            updateAssistantMessage(assistantMessageId, {
+                content: 'Connection error while contacting CoSET Intelligence.',
+                streaming: false,
             });
         } finally {
             setIsLoading(false);
         }
-    };
+    }
 
     return (
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+        <>
+            <AnimatePresence>
+                {!isOpen && (
+                    <motion.button
+                        initial={{ scale: 0.92, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.92, opacity: 0 }}
+                        onClick={() => setIsOpen(true)}
+                        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full border border-ember/60 bg-ember text-white shadow-[0_18px_36px_rgb(2_6_23/0.35)] transition hover:-translate-y-1 hover:brightness-110"
+                        aria-label="Open CoSET assistant"
+                    >
+                        <MessageCircle className="h-6 w-6 text-white" />
+                        <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-navy bg-white animate-pulse" />
+                    </motion.button>
+                )}
+            </AnimatePresence>
+
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
-                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                        initial={{ opacity: 0, y: 28, scale: 0.96 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                        className="flex h-[450px] w-[350px] flex-col overflow-hidden rounded-[1.5rem] border border-line bg-panel shadow-editorial"
+                        exit={{ opacity: 0, y: 28, scale: 0.96 }}
+                        transition={{ type: 'spring', stiffness: 280, damping: 28 }}
+                        className="fixed bottom-6 right-6 z-50 flex h-[600px] max-h-[calc(100vh-5rem)] w-[420px] max-w-[calc(100vw-1.5rem)] flex-col overflow-hidden rounded-[1.75rem] border border-ember/25 bg-[#07111b] text-white shadow-[0_40px_120px_rgb(2_6_23/0.55)]"
                     >
-                        {/* Header */}
-                        <div className="flex items-center justify-between bg-ink px-5 py-4 text-white">
-                            <div className="flex items-center gap-2">
-                                <Bot className="h-5 w-5 text-ember" />
-                                <span className="font-display font-bold">Report AI</span>
+                        <div className="flex items-center justify-between bg-ember px-4 py-4">
+                            <div className="flex min-w-0 items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#07111b] shadow-soft">
+                                    <MessageCircle className="h-5 w-5 text-white" />
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="truncate font-display text-lg font-extrabold leading-tight text-white">CoSET Assistant</p>
+                                    <p className="truncate text-xs font-semibold text-white/82">
+                                        {mode === 'report' ? 'Report chat' : 'Research chat'}
+                                    </p>
+                                </div>
                             </div>
-                            <button
-                                onClick={() => setIsOpen(false)}
-                                className="text-white/70 transition hover:text-white"
-                                aria-label="Close Chat"
-                            >
-                                <X className="h-5 w-5" />
-                            </button>
+                            <div className="flex items-center gap-1">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsOpen(false)}
+                                    className="rounded-lg p-1.5 text-white/82 transition hover:bg-black/10 hover:text-white"
+                                    aria-label="Close assistant"
+                                >
+                                    <X className="h-5 w-5" />
+                                </button>
+                            </div>
                         </div>
 
-                        {/* Messages */}
-                        <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-mist/30">
-                            {messages.length === 0 && (
-                                <div className="text-center text-sm text-muted mt-10">
-                                    <Bot className="mx-auto mb-3 h-8 w-8 text-muted/50" />
-                                    Ask any question to quickly retrieve information from this report.
-                                </div>
-                            )}
+                        <div className="border-b border-ember/15 bg-[#0b1724] px-4 py-2 text-xs font-medium text-ember">
+                            {mode === 'report'
+                                ? (reportTitle ?? 'CoSET Report Analysis')
+                                : `${topReports.length} published reports available`}
+                        </div>
 
-                            {messages.map((msg, index) => (
+                        <div ref={messagesContainerRef} className="flex-1 space-y-4 overflow-y-auto overscroll-contain bg-[#07111b] p-4 [scrollbar-color:rgb(255_170_86)_transparent] [scrollbar-width:thin]">
+                            {messages.map((message) => (
                                 <div
-                                    key={index}
-                                    className={clsx(
-                                        'max-w-[85%] rounded-2xl px-4 py-2.5 text-sm',
-                                        msg.role === 'user'
-                                            ? 'ml-auto rounded-tr-sm bg-navy text-white'
-                                            : 'mr-auto rounded-tl-sm bg-white border border-line text-ink'
-                                    )}
+                                    key={message.id}
+                                    className={clsx('flex gap-3', message.role === 'user' ? 'flex-row-reverse' : 'flex-row')}
                                 >
-                                    {msg.content}
-                                    {msg.streaming && msg.content && (
-                                        <span className="ml-1 inline-block h-3 w-0.5 animate-pulse bg-ember align-middle" />
-                                    )}
+                                    <div className="mt-1 shrink-0">
+                                        <div
+                                            className={clsx(
+                                                'flex h-8 w-8 items-center justify-center rounded-full shadow-sm',
+                                                message.role === 'assistant' ? 'bg-ember text-white' : 'bg-white/14 text-white'
+                                            )}
+                                        >
+                                            {message.role === 'assistant'
+                                                ? <MessageCircle className="h-4 w-4" />
+                                                : <span className="text-xs font-bold">U</span>}
+                                        </div>
+                                    </div>
+                                    <div
+                                        className={clsx(
+                                            'max-w-[85%] rounded-2xl p-3.5 text-sm leading-relaxed shadow-sm',
+                                            message.role === 'assistant'
+                                                ? 'rounded-tl-sm border border-ember/12 bg-[#0d1a28] text-white'
+                                                : 'rounded-tr-sm bg-ember text-white'
+                                        )}
+                                    >
+                                        {message.streaming && !message.content ? (
+                                            <div className="flex items-center gap-2">
+                                                <Loader2 className="h-4 w-4 animate-spin text-ember" />
+                                                <span className="text-xs font-medium text-white/72">Thinking…</span>
+                                            </div>
+                                        ) : (
+                                            <div>{renderMessageContent(message.content)}</div>
+                                        )}
+
+                                        {message.actions && message.actions.length > 0 && !message.streaming && (
+                                            <div className="mt-3 flex flex-wrap gap-2">
+                                                {message.actions.map((action) => (
+                                                    <button
+                                                        key={action}
+                                                        type="button"
+                                                        onClick={() => handleSend(action)}
+                                                        disabled={isLoading}
+                                                        className="rounded-lg border border-ember/18 bg-[#0a1521] px-2.5 py-1.5 text-left text-xs font-semibold text-ember transition hover:border-ember/45 hover:bg-[#102031] hover:text-white disabled:cursor-not-allowed disabled:opacity-55"
+                                                    >
+                                                        {action}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             ))}
-
-                            {isLoading && messages[messages.length - 1]?.content === '' && (
-                                <div className="mr-auto flex max-w-[85%] items-center gap-2 rounded-2xl rounded-tl-sm border border-line bg-white px-4 py-2.5 text-sm text-ink">
-                                    <Loader2 className="h-4 w-4 animate-spin text-ember" />
-                                    <span>Searching…</span>
-                                </div>
-                            )}
                             <div ref={messagesEndRef} />
                         </div>
 
-                        {/* Input Area */}
-                        <form onSubmit={handleSubmit} className="border-t border-line bg-panel p-3">
-                            <div className="flex items-center gap-2 rounded-xl border border-line bg-mist px-3 py-2 focus-within:border-navy focus-within:ring-1 focus-within:ring-navy transition">
+                        <form
+                            onSubmit={(event) => {
+                                event.preventDefault();
+                                handleSend();
+                            }}
+                            className="border-t border-ember/15 bg-[#07111b] p-3"
+                        >
+                            <div className="flex items-center gap-2 rounded-xl border border-ember/18 bg-[#0d1a28] px-3 py-1.5 transition focus-within:border-ember/70 focus-within:ring-2 focus-within:ring-ember/20">
                                 <input
                                     type="text"
                                     value={input}
-                                    onChange={(e) => setInput(e.target.value)}
-                                    placeholder="Ask about this report..."
-                                    className="flex-1 bg-transparent text-sm text-ink placeholder:text-muted focus:outline-none"
+                                    onChange={(event) => setInput(event.target.value)}
+                                    placeholder={mode === 'report' ? 'Ask this report...' : 'Ask about reports or policy...'}
+                                    className="flex-1 bg-transparent py-2.5 text-sm text-white placeholder:text-white/56 outline-none"
                                 />
                                 <button
                                     type="submit"
                                     disabled={!input.trim() || isLoading}
+                                    className="rounded-lg bg-ember p-2 text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
                                     aria-label="Send message"
-                                    className="rounded-lg bg-ember p-1.5 text-white transition hover:brightness-110 disabled:opacity-50"
                                 >
-                                    <Send className="h-4 w-4" />
+                                    <Send className="h-4 w-4 text-white" />
                                 </button>
                             </div>
+                            <p className="mt-1.5 px-1 text-center text-[10px] text-white/56">
+                                Grounded in published CoSET material.
+                            </p>
                         </form>
                     </motion.div>
                 )}
             </AnimatePresence>
-
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="flex h-14 w-14 items-center justify-center rounded-full bg-ember text-white shadow-lg transition hover:-translate-y-1 hover:brightness-110 hover:shadow-xl focus:outline-none"
-                aria-label="Toggle AI Chat"
-            >
-                {isOpen ? <X className="h-6 w-6" /> : <MessageCircleQuestion className="h-6 w-6" />}
-            </button>
-        </div>
+        </>
     );
 }
