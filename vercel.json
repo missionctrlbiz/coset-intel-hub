@@ -4,5 +4,10 @@
       "path": "/api/cron/publish-scheduled",
       "schedule": "0 9 * * *"
     }
-  ]
+  ],
+  "functions": {
+    "app/api/chat/route.ts": {
+      "maxDuration": 30
+    }
+  }
 }

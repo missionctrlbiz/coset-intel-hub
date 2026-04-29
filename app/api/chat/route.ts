@@ -46,6 +46,8 @@ Formatting rules — follow these exactly:
 - Never use asterisks, hash symbols, or any other markdown symbols
 - Keep responses concise and scannable`,
             temperature: 0.3,
+            thinkingConfig: { thinkingBudget: 0 },
+            maxOutputTokens: 1024,
         },
     });
 
