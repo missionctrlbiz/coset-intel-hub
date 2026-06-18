@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useInView } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -152,38 +153,95 @@ export function HeroCarousel({ featured }: { featured: Report[] }) {
 // ============================================================================
 // Intel Snapshot
 // ============================================================================
+type SnapshotStat = {
+    icon: typeof Flame;
+    value: number;
+    suffix: string;
+    label: string;
+    accent: 'ember' | 'teal' | 'navy';
+};
+
+const SNAPSHOT_STATS: SnapshotStat[] = [
+    { icon: Flame, value: 16000, suffix: '+', label: 'Gas Flaring Sites', accent: 'ember' },
+    { icon: Users, value: 45000, suffix: '+', label: 'Active Contributors', accent: 'teal' },
+    { icon: Map, value: 182, suffix: '+', label: 'Communities Reached', accent: 'navy' },
+];
+
+const ACCENT_CLASSES: Record<SnapshotStat['accent'], { bar: string; chip: string; icon: string }> = {
+    ember: { bar: 'border-ember', chip: 'bg-ember/20', icon: 'text-ember' },
+    teal: { bar: 'border-teal', chip: 'bg-teal/20', icon: 'text-teal' },
+    navy: { bar: 'border-navy', chip: 'bg-navy/20', icon: 'text-navy' },
+};
+
+/**
+ * Count-up number that animates from 0 → value once when scrolled into view.
+ * Renders the final value immediately for SSR / no-JS and prefers-reduced-motion,
+ * so the meaningful content is always present.
+ */
+function CountUp({ value, suffix }: { value: number; suffix: string }) {
+    const ref = useRef<HTMLSpanElement>(null);
+    const inView = useInView(ref, { once: true, amount: 0.4 });
+    const [display, setDisplay] = useState(value);
+
+    useEffect(() => {
+        if (!inView) return;
+        // Respect reduced-motion users: jump straight to the final value.
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReduced) {
+            setDisplay(value);
+            return;
+        }
+        const duration = 1400; // ms
+        const start = performance.now();
+        let raf = 0;
+        const tick = (now: number) => {
+            const t = Math.min((now - start) / duration, 1);
+            // easeOutCubic — quick start, gentle settle
+            const eased = 1 - Math.pow(1 - t, 3);
+            setDisplay(Math.round(eased * value));
+            if (t < 1) raf = requestAnimationFrame(tick);
+        };
+        raf = requestAnimationFrame(tick);
+        return () => cancelAnimationFrame(raf);
+    }, [inView, value]);
+
+    return (
+        <span ref={ref}>
+            {display.toLocaleString()}{suffix}
+        </span>
+    );
+}
+
 export function IntelSnapshot() {
     return (
         <section className="border-b border-line bg-panel shadow-sm">
             <div className="site-shell py-8">
-                <div className="flex flex-wrap items-center justify-between gap-6 xl:flex-nowrap">
-                    <div className="w-full md:w-auto">
+                {/*
+                  Layout:
+                  - mobile / tablet (< lg): heading stacked on top, stats below
+                  - lg+ : heading left, stats right (side-by-side)
+                */}
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between lg:gap-10">
+                    <div className="w-full lg:w-auto lg:shrink-0">
                         <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Intelligence Snapshot</p>
                         <h2 className="mt-1 font-display text-2xl font-bold text-ink">Operational signal at a glance</h2>
                     </div>
 
-                    <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-3 md:w-auto md:flex-1 md:gap-8 lg:pl-12">
-                        <div className="flex items-center gap-4 border-l-4 border-ember bg-mist p-4 rounded-r-xl">
-                            <div className="rounded-full bg-ember/20 p-2 text-ember"><Flame className="h-5 w-5" /></div>
-                            <div>
-                                <p className="font-display text-2xl font-black text-ink">16,000+</p>
-                                <p className="text-xs font-bold uppercase tracking-wider text-muted">Gas Flaring Sites</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-4 border-l-4 border-teal bg-mist p-4 rounded-r-xl">
-                            <div className="rounded-full bg-teal/20 p-2 text-teal"><Users className="h-5 w-5" /></div>
-                            <div>
-                                <p className="font-display text-2xl font-black text-ink">45,000+</p>
-                                <p className="text-xs font-bold uppercase tracking-wider text-muted">Active Contributors</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-4 border-l-4 border-navy bg-mist p-4 rounded-r-xl">
-                            <div className="rounded-full bg-navy/20 p-2 text-navy"><Map className="h-5 w-5" /></div>
-                            <div>
-                                <p className="font-display text-2xl font-black text-ink">182+</p>
-                                <p className="text-xs font-bold uppercase tracking-wider text-muted">Communities Reached</p>
-                            </div>
-                        </div>
+                    <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-3 lg:w-auto lg:flex-1 lg:gap-8 lg:pl-12">
+                        {SNAPSHOT_STATS.map(({ icon: Icon, value, suffix, label, accent }) => {
+                            const a = ACCENT_CLASSES[accent];
+                            return (
+                                <div key={label} className={`flex items-center gap-4 border-l-4 bg-mist p-4 rounded-r-xl ${a.bar}`}>
+                                    <div className={`rounded-full p-2 ${a.chip} ${a.icon}`}><Icon className="h-5 w-5" /></div>
+                                    <div>
+                                        <p className="font-display text-2xl font-black text-ink tabular-nums">
+                                            <CountUp value={value} suffix={suffix} />
+                                        </p>
+                                        <p className="text-xs font-bold uppercase tracking-wider text-muted">{label}</p>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </div>
