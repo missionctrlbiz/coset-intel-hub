@@ -12,6 +12,21 @@ const config: Config = {
     ],
     theme: {
         extend: {
+            opacity: {
+                6: '0.06',
+                8: '0.08',
+                12: '0.12',
+                18: '0.18',
+                22: '0.22',
+                45: '0.45',
+                55: '0.55',
+                68: '0.68',
+                72: '0.72',
+                78: '0.78',
+                82: '0.82',
+                88: '0.88',
+                92: '0.92',
+            },
             colors: {
                 ink: withOpacity('--color-ink'),
                 navy: withOpacity('--color-navy'),
