@@ -92,13 +92,20 @@ textarea::placeholder {
   letter-spacing: -0.03em;
 }
 
-html.dark .text-navy {
-  color: rgb(var(--color-ember) / var(--tw-text-opacity, 1));
-}
+@layer base {
+  /*
+   * Dark-mode defaults for navy-on-dark text. Placing these in @layer base
+   * keeps them below the utilities layer, so any explicit `dark:text-*`
+   * (e.g. `dark:text-white/82`) wins in the cascade as intended.
+   */
+  html.dark .text-navy {
+    color: rgb(var(--color-ember) / var(--tw-text-opacity, 1));
+  }
 
-html.dark a.text-navy:is(:hover, :focus-visible),
-html.dark a:is(:hover, :focus-visible) .text-navy {
-  color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+  html.dark a.text-navy:is(:hover, :focus-visible),
+  html.dark a:is(:hover, :focus-visible) .text-navy {
+    color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+  }
 }
 
 .site-shell {
