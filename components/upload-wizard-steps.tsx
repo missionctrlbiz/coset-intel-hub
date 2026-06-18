@@ -63,7 +63,7 @@ export function UploadStep({
             {sourceMode === 'file' ? (
                 <>
                     <div
-                        className="rounded-[2rem] border-2 border-dashed border-line bg-mist px-6 py-12 text-center"
+                        className="rounded-3xl border-2 border-dashed border-line bg-mist px-6 py-12 text-center"
                         onDragOver={(event) => event.preventDefault()}
                         onDrop={(event) => {
                             event.preventDefault();
@@ -82,7 +82,7 @@ export function UploadStep({
                             Browse Files
                         </button>
                         {selectedFile ? (
-                            <div className="mx-auto mt-6 max-w-lg rounded-[1.5rem] border border-line bg-panel px-5 py-4 text-left shadow-soft">
+                            <div className="mx-auto mt-6 max-w-lg rounded-2xl border border-line bg-panel px-5 py-4 text-left shadow-soft">
                                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Selected File</p>
                                 <p className="mt-2 font-display text-xl font-bold text-ink">{selectedFile.name}</p>
                                 <p className="mt-2 text-sm text-muted">{(selectedFile.size / (1024 * 1024)).toFixed(2)} MB</p>
@@ -95,7 +95,7 @@ export function UploadStep({
             {/* URL tab */}
             {sourceMode === 'url' ? (
                 <div className="space-y-5">
-                    <div className="rounded-[2rem] border border-line bg-mist px-6 py-8">
+                    <div className="rounded-3xl border border-line bg-mist px-6 py-8">
                         <div className="mb-4 flex items-center gap-3">
                             <Globe className="h-6 w-6 text-ink" />
                             <h3 className="font-display text-lg font-bold text-ink">Import from URL</h3>
@@ -235,7 +235,7 @@ export function PreviewStep({ previewHtml, isPreparing }: PreviewStepProps) {
                 </p>
             </div>
 
-            <div className="overflow-hidden rounded-[1.5rem] border border-line bg-mist dark:bg-panel-alt/70">
+            <div className="overflow-hidden rounded-2xl border border-line bg-mist dark:bg-panel-alt/70">
                 {isPreparing ? (
                     <div className="flex min-h-[420px] flex-col items-center justify-center gap-4 px-8 py-16 text-center">
                         <span className="flex h-14 w-14 items-center justify-center rounded-full bg-teal/10 text-teal">
@@ -250,7 +250,7 @@ export function PreviewStep({ previewHtml, isPreparing }: PreviewStepProps) {
                     </div>
                 ) : (
                     <div className="max-h-[620px] overflow-y-auto border-t border-line bg-panel-alt/40 px-5 py-5 dark:bg-panel/70">
-                        <div className="report-prose report-prose--preview prose prose-sm max-w-none rounded-[1.5rem] border border-line p-5 sm:p-6">
+                        <div className="report-prose report-prose--preview prose prose-sm max-w-none rounded-2xl border border-line p-5 sm:p-6">
                             <div
                                 className="report-prose__content"
                                 // eslint-disable-next-line react/no-danger
@@ -271,7 +271,7 @@ export function ReviewStep({ title, summary, sourceMode, sourceUrl, categories, 
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Publish</p>
                 <h2 className="mt-2 font-display text-3xl font-extrabold text-ink">Everything is ready to publish</h2>
             </div>
-            <div className="rounded-[2rem] border border-line bg-mist p-6">
+            <div className="rounded-3xl border border-line bg-mist p-6">
                 <div className="mb-5 flex items-center gap-3 text-teal">
                     <CheckCircle2 className="h-5 w-5" />
                     <p className="font-semibold">Review your report details and draft the content.</p>
@@ -334,7 +334,7 @@ export function ReviewStep({ title, summary, sourceMode, sourceUrl, categories, 
                     {coverImagePreview ? (
                         <div>
                             <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">Cover Preview</p>
-                            <div className="relative mt-3 aspect-[16/10] overflow-hidden rounded-[1.5rem] border border-line bg-panel shadow-soft">
+                            <div className="relative mt-3 aspect-[16/10] overflow-hidden rounded-2xl border border-line bg-panel shadow-soft">
                                 <Image
                                     src={coverImagePreview}
                                     alt="Selected cover preview"

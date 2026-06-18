@@ -2,13 +2,13 @@
 
 import confetti from 'canvas-confetti';
 import Image from 'next/image';
-import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Calendar, CheckCircle2, ImagePlus, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 
 import { ChipInput } from '@/components/chip-input';
 import { useTheme } from '@/components/theme-provider';
+import { Button } from '@/components/ui/button';
 import { sanitizeHtml } from '@/lib/sanitize';
 import { MetadataStep, PreviewStep, ReviewStep, UploadStep } from './upload-wizard-steps';
 
@@ -562,7 +562,7 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
     return (
         <>
             <div className="space-y-8">
-                <div className="relative grid gap-5 md:grid-cols-4">
+                <div className="relative grid gap-5 sm:grid-cols-2 md:grid-cols-4">
                 <div className="absolute left-0 top-5 hidden h-px w-full bg-line md:block" />
                 <div className={`absolute left-0 top-5 hidden h-px bg-ember transition-all md:block ${stepProgressClasses[step]}`} />
                 {steps.map((label, index) => (
@@ -578,8 +578,8 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
                 ))}
                 </div>
 
-                <div className="items-start gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1.1fr)_320px]">
-                    <div className="self-start rounded-[2rem] border border-line bg-panel p-6 shadow-editorial dark:bg-gradient-to-b dark:from-panel dark:to-panel-alt/70 sm:p-8">
+                <div className="items-start gap-6 md:grid md:grid-cols-[minmax(0,1fr)_260px] lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1.1fr)_320px]">
+                    <div className="self-start rounded-3xl border border-line bg-panel p-6 shadow-editorial dark:bg-gradient-to-b dark:from-panel dark:to-panel-alt/70 sm:p-8">
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={step}
@@ -635,7 +635,7 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
                             ref={fileInputRef}
                             hidden
                             type="file"
-                            accept=".pdf,.csv,.doc,.docx,.ppt,.pptx,.txt,.md,.json,.html,.xml"
+                            accept=".pdf,.csv,.doc,.docx,.ppt,.pptx,.txt,.md,.json,.html,.xml,.png,.jpg,.jpeg,.webp"
                             onChange={(event) => handleFileSelection(event.target.files?.[0] ?? null)}
                         />
 
@@ -755,7 +755,7 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
                     </div>
 
                     <aside className="self-start space-y-5 lg:sticky lg:top-24">
-                        <div className="rounded-[2rem] border border-line bg-panel p-5 shadow-soft dark:bg-gradient-to-b dark:from-panel dark:to-panel-alt/70">
+                        <div className="rounded-3xl border border-line bg-panel p-5 shadow-soft dark:bg-gradient-to-b dark:from-panel dark:to-panel-alt/70">
                             <p className="mb-1 text-xs font-bold uppercase tracking-[0.18em] text-ember">Classification</p>
                             <p className="mb-4 font-display text-lg font-bold text-ink">Categories &amp; Tags</p>
                             <div className="space-y-4">
@@ -775,7 +775,7 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
                             </div>
                         </div>
 
-                        <div className="rounded-[2rem] border border-line bg-panel p-5 shadow-soft dark:bg-gradient-to-b dark:from-panel dark:to-panel-alt/70">
+                        <div className="rounded-3xl border border-line bg-panel p-5 shadow-soft dark:bg-gradient-to-b dark:from-panel dark:to-panel-alt/70">
                             <div className="mb-4 flex items-start justify-between gap-3">
                                 <div>
                                     <p className="font-display text-lg font-bold text-ink">Cover Image</p>
@@ -788,11 +788,11 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
                             <button
                                 type="button"
                                 onClick={() => coverImageInputRef.current?.click()}
-                                className="flex w-full min-h-[150px] flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-line bg-mist px-5 text-center text-muted transition hover:border-ember hover:bg-ember/5 dark:bg-panel-alt/70"
+                                className="flex w-full min-h-[150px] flex-col items-center justify-center rounded-2xl border border-dashed border-line bg-mist px-5 text-center text-muted transition hover:border-ember hover:bg-ember/5 dark:bg-panel-alt/70"
                             >
                                 {coverImagePreview ? (
                                     <>
-                                        <div className="relative -mx-5 -mt-0 mb-4 h-44 w-[calc(100%+2.5rem)] overflow-hidden rounded-[1.25rem] border border-line bg-panel shadow-soft">
+                                        <div className="relative -mx-5 -mt-0 mb-4 h-44 w-[calc(100%+2.5rem)] overflow-hidden rounded-2xl border border-line bg-panel shadow-soft">
                                             <Image
                                                 src={coverImagePreview}
                                                 alt="Cover preview"
@@ -827,7 +827,7 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
                         </div>
 
                         {step >= 1 ? (
-                            <div className="rounded-[2rem] border border-line bg-panel p-5 shadow-soft dark:bg-gradient-to-b dark:from-panel dark:to-panel-alt/70">
+                            <div className="rounded-3xl border border-line bg-panel p-5 shadow-soft dark:bg-gradient-to-b dark:from-panel dark:to-panel-alt/70">
                                 <div className="mb-4 flex items-start justify-between gap-3">
                                     <div>
                                         <p className="font-display text-lg font-bold text-ink">Downloadable File</p>
@@ -840,7 +840,7 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
                                 <button
                                     type="button"
                                     onClick={() => attachmentFileRef.current?.click()}
-                                    className="flex w-full flex-col items-center justify-center gap-3 rounded-[1.5rem] border border-dashed border-line bg-mist px-5 py-8 text-center text-muted transition hover:border-ember hover:bg-ember/5 dark:bg-panel-alt/70"
+                                    className="flex w-full flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-line bg-mist px-5 py-8 text-center text-muted transition hover:border-ember hover:bg-ember/5 dark:bg-panel-alt/70"
                                 >
                                     {attachmentFile ? (
                                         <>
@@ -887,18 +887,20 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 12, scale: 0.98 }}
                             transition={{ duration: 0.24, ease: 'easeOut' }}
-                            className="relative w-full max-w-2xl overflow-hidden rounded-[2.5rem] border border-line bg-panel shadow-editorial dark:bg-[linear-gradient(180deg,rgba(17,24,39,0.98),rgba(26,32,44,0.96))]"
+                            className="relative w-full max-w-2xl overflow-hidden rounded-3xl border border-line bg-panel shadow-editorial dark:bg-[linear-gradient(180deg,rgba(17,24,39,0.98),rgba(26,32,44,0.96))]"
                         >
                             <div className="absolute inset-x-0 top-0 h-32 bg-[radial-gradient(circle_at_top,rgba(233,115,22,0.18),transparent_72%)] dark:bg-[radial-gradient(circle_at_top,rgba(251,146,60,0.22),transparent_72%)]" />
 
-                            <button
+                            <Button
                                 type="button"
-                                onClick={dismissSuccessModal}
+                                variant="ghost"
+                                size="md"
                                 aria-label="Close success dialog"
-                                className="absolute right-5 top-5 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-line bg-white/80 text-muted transition hover:text-ink dark:bg-white/5 dark:hover:text-white"
+                                onClick={dismissSuccessModal}
+                                className="absolute right-5 top-5 z-10 h-10 w-10 border border-line bg-white/80 text-muted hover:text-ink dark:bg-white/5 dark:hover:text-white"
                             >
                                 <X className="h-4 w-4" />
-                            </button>
+                            </Button>
 
                             <div className="relative px-6 py-10 sm:px-8 sm:py-12 md:px-10 md:py-14">
                                 <div className="mx-auto flex max-w-xl flex-col items-center text-center">
@@ -922,30 +924,36 @@ export function UploadWizard({ initialData }: UploadWizardProps = {}) {
                                 </div>
 
                                 <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap">
-                                    <Link
+                                    <Button
+                                        variant="primary"
+                                        size="lg"
                                         href="/admin/content"
                                         onClick={dismissSuccessModal}
-                                        className="inline-flex min-h-12 items-center justify-center rounded-full bg-ember px-6 py-3 text-sm font-semibold text-white shadow-soft transition hover:brightness-110"
+                                        className="min-h-12 font-semibold shadow-soft"
                                     >
                                         Go to Manage Reports
-                                    </Link>
+                                    </Button>
                                     {result.reportSlug ? (
-                                        <Link
+                                        <Button
+                                            variant="outline"
+                                            size="lg"
                                             href={`/reports/${result.reportSlug}`}
                                             target="_blank"
                                             onClick={dismissSuccessModal}
-                                            className="inline-flex min-h-12 items-center justify-center rounded-full border border-line bg-panel-alt px-6 py-3 text-sm font-semibold text-navy transition hover:border-ember hover:text-ember dark:bg-white/5 dark:text-white dark:hover:border-ember dark:hover:text-ember"
+                                            className="min-h-12 border-line bg-panel-alt font-semibold text-navy hover:border-ember hover:text-ember dark:bg-white/5 dark:text-white dark:hover:border-ember dark:hover:text-ember"
                                         >
                                             View Report
-                                        </Link>
+                                        </Button>
                                     ) : null}
-                                    <button
+                                    <Button
                                         type="button"
+                                        variant="outline"
+                                        size="lg"
                                         onClick={dismissSuccessModal}
-                                        className="inline-flex min-h-12 items-center justify-center rounded-full border border-line bg-mist px-6 py-3 text-sm font-semibold text-ink transition hover:border-navy hover:text-navy dark:bg-white/5 dark:text-white dark:hover:border-ember dark:hover:text-ember"
+                                        className="min-h-12 border-line bg-mist font-semibold text-ink hover:border-navy hover:text-navy dark:bg-white/5 dark:text-white dark:hover:border-ember dark:hover:text-ember"
                                     >
                                         Close
-                                    </button>
+                                    </Button>
                                 </div>
                             </div>
                         </motion.div>

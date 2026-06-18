@@ -28,9 +28,17 @@ type FloatingChatWidgetProps = {
     topReports?: TopReport[];
 };
 
+type HistoryEntry = {
+    role: 'user' | 'assistant';
+    content: string;
+};
+
 const EMPTY_TOP_REPORTS: TopReport[] = [];
+const MAX_HISTORY_TURNS = 6;
 
 const LINK_PATTERN = /(\[[^\]]+\]\((?:https?:\/\/|\/|mailto:|tel:)[^)]+\)|(?:https?:\/\/[^\s<]+|\/(?:reports|blog|contact|login|admin)[^\s<]*|mailto:[^\s<]+|tel:[^\s<]+))/g;
+const BOLD_PATTERN = /\*\*([^*]+)\*\*/g;
+const HEADING_PATTERN = /^(#{1,3})\s+(.+)$/;
 
 function buildMessageId(prefix: string) {
     return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -52,7 +60,11 @@ function renderInlineContent(content: string, keyPrefix: string) {
         const start = match.index ?? 0;
 
         if (start > lastIndex) {
-            nodes.push(<span key={`${keyPrefix}-t-${start}`}>{content.slice(lastIndex, start)}</span>);
+            nodes.push(
+                <span key={`${keyPrefix}-t-${start}`}>
+                    {renderBoldSpans(content.slice(lastIndex, start), `${keyPrefix}-t-${start}`)}
+                </span>,
+            );
         }
 
         if (token.startsWith('[')) {
@@ -66,7 +78,7 @@ function renderInlineContent(content: string, keyPrefix: string) {
                         rel={!href.startsWith('/') ? 'noopener noreferrer' : undefined}
                         className="font-semibold text-ember underline decoration-ember/50 underline-offset-4 transition hover:text-white">
                         {label}
-                    </a>
+                    </a>,
                 );
             } else {
                 nodes.push(<span key={`${keyPrefix}-lf-${start}`}>{token}</span>);
@@ -83,7 +95,7 @@ function renderInlineContent(content: string, keyPrefix: string) {
                         rel={!href.startsWith('/') ? 'noopener noreferrer' : undefined}
                         className="font-semibold text-ember underline decoration-ember/50 underline-offset-4 transition hover:text-white">
                         {core}
-                    </a>
+                    </a>,
                 );
                 if (suffix) nodes.push(<span key={`${keyPrefix}-s-${start}`}>{suffix}</span>);
             } else {
@@ -95,10 +107,29 @@ function renderInlineContent(content: string, keyPrefix: string) {
     }
 
     if (lastIndex < content.length) {
-        nodes.push(<span key={`${keyPrefix}-tail`}>{content.slice(lastIndex)}</span>);
+        nodes.push(
+            <span key={`${keyPrefix}-tail`}>
+                {renderBoldSpans(content.slice(lastIndex), `${keyPrefix}-tail`)}
+            </span>,
+        );
     }
 
     return nodes;
+}
+
+function renderBoldSpans(text: string, keyPrefix: string) {
+    const parts = text.split(BOLD_PATTERN);
+    if (parts.length === 1) return text;
+    return parts.map((part, i) => {
+        if (i % 2 === 1) {
+            return (
+                <strong key={`${keyPrefix}-b-${i}`} className="font-bold text-white">
+                    {part}
+                </strong>
+            );
+        }
+        return <span key={`${keyPrefix}-s-${i}`}>{part}</span>;
+    });
 }
 
 function renderMessageContent(content: string) {
@@ -110,6 +141,19 @@ function renderMessageContent(content: string) {
 
         if (!trimmed) {
             elements.push(<div key={`gap-${index}`} className="h-1.5" />);
+            return;
+        }
+
+        // Markdown heading: ## Title or ### Title
+        const mdHeading = trimmed.match(HEADING_PATTERN);
+        if (mdHeading) {
+            const level = mdHeading[1].length;
+            const text = mdHeading[2];
+            elements.push(
+                <div key={`h-${index}`} className={clsx('mt-4 mb-1.5 first:mt-0', level === 2 ? 'text-base' : 'text-sm')}>
+                    <span className="font-bold text-ember">{text}</span>
+                </div>,
+            );
             return;
         }
 
@@ -173,7 +217,7 @@ function buildInitialMessages(mode: AssistantMode, reportTitle: string | undefin
             {
                 id: 'init-general',
                 role: 'assistant' as const,
-                content: `Welcome to the **CoSET Intelligence Hub**. I can help you explore published research, compare themes, and point you to the right report quickly.\n\n${reportList ? `Here are the latest published reports:\n\n${reportList}\n\n` : ''}Ask about a topic, a policy issue, or a report title and I will stay within the published CoSET material.`,
+                content: `Welcome to the **CoSET Intelligence Hub**. I am powered by AI and grounded in published CoSET research — I search across all reports to find relevant analysis for your questions.\n\n${reportList ? `Here are the latest published reports:\n\n${reportList}\n\n` : ''}Ask about any topic — climate, energy, governance, biodiversity, security — and I will answer from the published material with citations.`,
                 actions: ['Latest published reports', 'Climate justice research', 'Energy transition briefs', 'Browse all reports'],
             },
         ];
@@ -184,8 +228,8 @@ function buildInitialMessages(mode: AssistantMode, reportTitle: string | undefin
             id: 'init-report',
             role: 'assistant' as const,
             content: reportTitle
-                ? `You are viewing **${reportTitle}**. Ask for a summary, key findings, policy recommendations, or source references and I will answer from this report only.`
-                : 'Ask about this report and I will answer from the published CoSET material attached to it.',
+                ? `You are viewing **${reportTitle}**. I have indexed this report's content and can answer detailed questions about its findings, data, methodology, and recommendations.`
+                : 'Ask about this report and I will answer from its indexed content.',
             actions: ['Summarize this report', 'Key findings', 'Policy recommendations', 'Source references'],
         },
     ];
@@ -195,7 +239,7 @@ export function FloatingChatWidget({ mode = 'report', slug, reportTitle, topRepo
     const topReports = providedTopReports ?? EMPTY_TOP_REPORTS;
     const initialMessages = useMemo(
         () => buildInitialMessages(mode, reportTitle, topReports),
-        [mode, reportTitle, topReports]
+        [mode, reportTitle, topReports],
     );
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>(() => initialMessages);
@@ -203,6 +247,12 @@ export function FloatingChatWidget({ mode = 'report', slug, reportTitle, topRepo
     const [isLoading, setIsLoading] = useState(false);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const conversationHistoryRef = useRef<HistoryEntry[]>([]);
+
+    // Reset history when mode, slug, or title changes
+    useEffect(() => {
+        conversationHistoryRef.current = [];
+    }, [mode, slug, reportTitle]);
 
     useEffect(() => {
         setMessages(initialMessages);
@@ -248,11 +298,13 @@ export function FloatingChatWidget({ mode = 'report', slug, reportTitle, topRepo
         setInput('');
         setIsLoading(true);
 
+        const history = conversationHistoryRef.current.slice(-MAX_HISTORY_TURNS);
+
         try {
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: trimmed, slug, mode }),
+                body: JSON.stringify({ message: trimmed, slug, mode, history }),
             });
 
             if (!response.ok || !response.body) {
@@ -276,10 +328,17 @@ export function FloatingChatWidget({ mode = 'report', slug, reportTitle, topRepo
                 updateAssistantMessage(assistantMessageId, { content: accumulated, streaming: true });
             }
 
+            const finalContent = accumulated || 'I could not find a grounded answer for that request.';
             updateAssistantMessage(assistantMessageId, {
-                content: accumulated || 'I could not find a grounded answer for that request.',
+                content: finalContent,
                 streaming: false,
             });
+
+            // Record the exchange in conversation history
+            conversationHistoryRef.current.push(
+                { role: 'user', content: trimmed },
+                { role: 'assistant', content: finalContent },
+            );
         } catch {
             updateAssistantMessage(assistantMessageId, {
                 content: 'Connection error while contacting CoSET Intelligence.',
@@ -299,7 +358,7 @@ export function FloatingChatWidget({ mode = 'report', slug, reportTitle, topRepo
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.92, opacity: 0 }}
                         onClick={() => setIsOpen(true)}
-                        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full border border-ember/60 bg-ember text-white shadow-[0_18px_36px_rgb(2_6_23/0.35)] transition hover:-translate-y-1 hover:brightness-110"
+                        className="fixed bottom-4 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full border border-ember/60 bg-ember text-white shadow-[0_18px_36px_rgb(2_6_23/0.35)] transition hover:-translate-y-1 hover:brightness-110 sm:bottom-6 sm:right-6"
                         aria-label="Open CoSET assistant"
                     >
                         <MessageCircle className="h-6 w-6 text-white" />
@@ -315,7 +374,7 @@ export function FloatingChatWidget({ mode = 'report', slug, reportTitle, topRepo
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 28, scale: 0.96 }}
                         transition={{ type: 'spring', stiffness: 280, damping: 28 }}
-                        className="fixed bottom-6 right-6 z-50 flex h-[600px] max-h-[calc(100vh-5rem)] w-[420px] max-w-[calc(100vw-1.5rem)] flex-col overflow-hidden rounded-[1.75rem] border border-ember/25 bg-[#07111b] text-white shadow-[0_40px_120px_rgb(2_6_23/0.55)]"
+                        className="fixed bottom-4 right-4 z-50 flex h-[600px] max-h-[calc(100vh-5rem)] w-[420px] max-w-[calc(100vw-1.5rem)] flex-col overflow-hidden rounded-3xl border border-ember/25 bg-[#07111b] text-white shadow-[0_40px_120px_rgb(2_6_23/0.55)] sm:bottom-6 sm:right-6"
                     >
                         <div className="flex items-center justify-between bg-ember px-4 py-4">
                             <div className="flex min-w-0 items-center gap-3">

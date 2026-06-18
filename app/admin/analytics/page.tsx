@@ -64,27 +64,27 @@ export default async function AdminAnalyticsPage() {
         <main className="site-shell max-w-[1520px] min-w-0 flex-1 py-10">
             <div className="mb-10 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
                 <div>
-                    <h1 className="font-display text-5xl font-extrabold tracking-[-0.05em] text-ink">Performance Intelligence</h1>
+                    <h1 className="font-display text-3xl font-extrabold tracking-[-0.05em] text-ink sm:text-4xl lg:text-5xl">Performance Intelligence</h1>
                     <p className="mt-3 max-w-3xl text-lg text-muted">Curated analytics reflecting real-time engagement, export behavior, and reader growth across the CoSET ecosystem.</p>
                 </div>
             </div>
 
             <div className="grid gap-6 xl:grid-cols-[1.45fr_0.85fr]">
-                <section className="rounded-[2rem] border border-line bg-panel p-6 shadow-soft">
+                <section className="rounded-3xl border border-line bg-panel p-6 shadow-soft">
                     <div className="grid gap-4 md:grid-cols-3">
-                        <div className="rounded-[1.5rem] bg-panel-alt p-5">
+                        <div className="rounded-2xl bg-panel-alt p-5">
                             <p className="text-sm text-muted">Total Views</p>
                             <div className="mt-3">
                                 <p className="font-display text-4xl font-extrabold tracking-[-0.05em] text-navy">{formatCount(totalViews)}</p>
                             </div>
                         </div>
-                        <div className="rounded-[1.5rem] bg-panel-alt p-5">
+                        <div className="rounded-2xl bg-panel-alt p-5">
                             <p className="text-sm text-muted">Total Downloads</p>
                             <div className="mt-3">
                                 <p className="font-display text-4xl font-extrabold tracking-[-0.05em] text-navy">{formatCount(totalDownloads)}</p>
                             </div>
                         </div>
-                        <div className="rounded-[1.5rem] bg-panel-alt p-5">
+                        <div className="rounded-2xl bg-panel-alt p-5">
                             <p className="text-sm text-muted">Published Reports</p>
                             <div className="mt-3">
                                 <p className="font-display text-4xl font-extrabold tracking-[-0.05em] text-navy">{publishedCount}</p>
@@ -92,10 +92,10 @@ export default async function AdminAnalyticsPage() {
                         </div>
                     </div>
 
-                    <div className="mt-6 rounded-[1.75rem] bg-mist p-6">
+                    <div className="mt-6 rounded-3xl bg-mist p-6">
                         <p className="font-display text-2xl font-bold text-navy">Download Momentum</p>
                         <p className="mt-2 text-sm text-muted">Cumulative exports across all published reports.</p>
-                        <div className="mt-8 h-[320px] rounded-[1.5rem] bg-panel p-6 shadow-soft">
+                        <div className="mt-8 h-[320px] rounded-2xl bg-panel p-6 shadow-soft">
                             <svg viewBox="0 0 600 240" className="h-full w-full" fill="none">
                                 <path d="M0 170 C80 160, 100 110, 180 120 S300 200, 380 140 S520 80, 600 130" stroke="currentColor" strokeWidth="4" strokeLinecap="round" className="text-navy" />
                                 <circle cx="140" cy="122" r="5" fill="rgb(var(--color-panel))" stroke="rgb(var(--color-navy))" strokeWidth="3" />
@@ -106,7 +106,7 @@ export default async function AdminAnalyticsPage() {
                 </section>
 
                 <div className="space-y-6">
-                    <section className="rounded-[2rem] bg-ink p-6 text-white shadow-editorial">
+                    <section className="rounded-3xl bg-ink p-6 text-white shadow-editorial">
                         <p className="font-display text-2xl font-bold">Sector Interest</p>
                         <div className="mt-6 flex justify-center">
                             <div className="relative flex h-56 w-56 items-center justify-center rounded-full border-[18px] border-blue-200/80 border-r-ember border-t-ember">
@@ -130,9 +130,9 @@ export default async function AdminAnalyticsPage() {
                         </div>
                     </section>
 
-                    <section className="rounded-[2rem] border border-line bg-panel p-6 shadow-soft">
+                    <section className="rounded-3xl border border-line bg-panel p-6 shadow-soft">
                         <p className="font-display text-2xl font-bold text-navy">Top Downloaded Reports</p>
-                        <div className="mt-5 overflow-hidden rounded-[1.25rem] border border-line">
+                        <div className="mt-5 overflow-x-auto rounded-2xl border border-line">
                             <table className="min-w-full text-left text-sm">
                                 <thead className="bg-panel-alt text-xs font-bold uppercase tracking-[0.18em] text-muted">
                                     <tr>

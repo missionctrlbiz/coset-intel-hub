@@ -2,11 +2,12 @@ import { NextResponse } from 'next/server';
 
 import type { Database } from '@/lib/database.types';
 import { parseDocument } from '@/lib/document-parser';
-import { analyzeContentForMetadata, beautifyHtmlContent, generateExtractionDraft } from '@/lib/genai';
+import { analyzeContentForMetadata, beautifyHtmlContent, extractContentFromImage, generateExtractionDraft } from '@/lib/genai';
 import { processAndEmbedReport } from '@/lib/embeddings';
 import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/supabase/clients';
 
 export const runtime = 'nodejs';
+export const maxDuration = 120;
 
 const PREVIEW_BEAUTIFY_TIMEOUT_MS = 4000;
 
@@ -586,8 +587,30 @@ export async function POST(request: Request) {
         }
 
         // ── DOCUMENT PARSING PIPELINE (PDF, DOCX, PPTX, TXT, etc.) ────────────
-        const parseResult = await parseDocument(file);
-        const textPreview = parseResult.text.slice(0, 12000);
+        const isVisualFile = /^image\/(png|jpe?g|webp)$/.test(file.type) ||
+            file.name.match(/\.(png|jpe?g|webp)$/i);
+
+        let parseResult = await parseDocument(file);
+        let textPreview = parseResult.text.slice(0, 12000);
+
+        // For image files, use Gemini vision to extract text
+        if (isVisualFile || (file.type === 'application/pdf' && parseResult.text.length < 200)) {
+            try {
+                const fileBuffer = Buffer.from(await file.arrayBuffer());
+                const base64 = fileBuffer.toString('base64');
+                const visionText = await extractContentFromImage(base64, file.type, file.name);
+                if (visionText && visionText.length > (parseResult.text?.length ?? 0)) {
+                    parseResult = {
+                        ...parseResult,
+                        text: visionText,
+                        parserUsed: 'gemini-vision',
+                    };
+                    textPreview = visionText.slice(0, 12000);
+                }
+            } catch (e) {
+                console.error('Gemini vision extraction failed, using text parser:', e);
+            }
+        }
 
         let aiDraft = null;
         let aiError: string | null = null;

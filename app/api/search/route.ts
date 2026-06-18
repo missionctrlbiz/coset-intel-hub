@@ -1,16 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { createSupabasePublicClient } from '@/lib/supabase/clients';
+import { searchQuerySchema, validationError } from '@/lib/validation';
+import { withRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
-    const query = request.nextUrl.searchParams.get('q')?.trim();
-    if (!query || query.length < 2) {
-        return NextResponse.json({ results: [] });
+    // Rate limit: 30 requests per minute
+    const rateLimitResponse = withRateLimit(request, 'search', 30, 60_000);
+    if (rateLimitResponse) return rateLimitResponse;
+
+    const queryRaw = request.nextUrl.searchParams.get('q');
+    const parsed = searchQuerySchema.safeParse({ q: queryRaw ?? '' });
+    if (!parsed.success) {
+        return NextResponse.json({ results: [], error: validationError(parsed) }, { status: 400 });
     }
+
+    const query = parsed.data.q;
 
     const supabase = createSupabasePublicClient();
 
-    // Try embedding-based semantic search first
     const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
     let semanticResults: { id: string; slug: string; title: string; description: string; category: string[]; image: string; score: number }[] = [];
 
@@ -27,11 +36,11 @@ export async function GET(request: NextRequest) {
 
             if (queryEmbedding) {
                 const { data: matchedChunks } = await supabase.rpc('match_report_embeddings', {
-                    query_embedding: JSON.stringify(queryEmbedding) as any,
-                    match_threshold: 0.3,
+                    query_embedding: JSON.stringify(queryEmbedding),
+                    match_threshold: 0.15,
                     match_count: 10,
-                    filter_report_id: '' as any,
-                });
+                    filter_report_id: null as any,
+                }) as { data: any[] | null; error: any };
 
                 if (matchedChunks && matchedChunks.length > 0) {
                     const reportIds = [...new Set(matchedChunks.map((c: { report_id: string }) => c.report_id))];
@@ -55,11 +64,10 @@ export async function GET(request: NextRequest) {
                 }
             }
         } catch (e) {
-            console.error('Semantic search failed, falling back to text search:', e);
+            logger.warn('Semantic search failed, falling back to text search', { error: e });
         }
     }
 
-    // Fallback or supplement with full-text search (uses the GIN tsvector index)
     const { data: textResults } = await supabase
         .from('reports')
         .select('id, slug, title, description, category, cover_image_path, image_path')
@@ -67,7 +75,6 @@ export async function GET(request: NextRequest) {
         .textSearch('search_vector', query, { type: 'plain', config: 'english' })
         .limit(5);
 
-    // Merge and deduplicate results, prioritizing semantic results
     const mergedMap = new Map<string, typeof semanticResults[number]>();
     for (const r of semanticResults) {
         mergedMap.set(r.id, r);

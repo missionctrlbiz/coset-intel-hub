@@ -392,7 +392,7 @@ Avoid using the exact same structure for every report. Enhance the visualization
 - Important subsections should use <h3 id="..."></h3> when they deserve deep linking.
 - Never output href="#" placeholders.
 - If the report has 4 or more major sections, include a visible table of contents near the top using:
-  <nav data-report-toc="true" class="not-prose bg-white rounded-[1.75rem] border border-line p-5 shadow-soft my-6">
+  <nav data-report-toc="true" class="not-prose bg-white rounded-3xl border border-line p-5 shadow-soft my-6">
     <h2 class="text-sm font-bold uppercase tracking-[0.18em] text-ember">Table of Contents</h2>
     <ul class="mt-4 space-y-2 text-sm">
       <li><a href="#host-community-trusts" class="text-navy hover:text-ember font-semibold">Host Community Trusts</a></li>
@@ -453,7 +453,7 @@ The original HTML may contain Chart.js, Plotly, D3, or other JavaScript charts. 
 
 ### Rule 3: PROCESS FLOWS & STEP SEQUENCES
 If the original has a flow diagram, process steps, or sequential cards — wrap in "not-prose" to prevent prose color overrides on the dark background:
-<div class="not-prose bg-ink rounded-[2rem] p-8 my-8 shadow-editorial">
+<div class="not-prose bg-ink rounded-3xl p-8 my-8 shadow-editorial">
   <h3 class="text-2xl font-bold text-white text-center mb-2">Process Title</h3>
   <p class="text-blue-200 text-center text-sm mb-8 max-w-2xl mx-auto">Description</p>
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -546,7 +546,7 @@ Choose heading styles contextually. Do not repeat the same heading treatment mec
 7. Use conic-gradient for pie/donut charts, percentage widths for bar charts, colored badges for severity
 8. Wrap any section with a dark background (bg-ink, bg-navy, bg-red-50, bg-teal-50) in a <div class="not-prose ...">
 9. ALL white cards (bg-white) MUST have border border-line shadow-soft
-10. Use CoSET design tokens: border-line, bg-panel, bg-mist, text-muted, shadow-soft, shadow-editorial, rounded-2xl, rounded-[2rem], font-display for headings
+10. Use CoSET design tokens: border-line, bg-panel, bg-mist, text-muted, shadow-soft, shadow-editorial, rounded-2xl, rounded-3xl, font-display for headings
 11. If the source contains numeric comparisons, percentages, rankings, budgets, counts, year changes, or survey splits, convert that information into at least one real visual component instead of leaving it as plain paragraphs.
 12. Use a mix of visuals when appropriate: metric cards, comparison bars, timeline strips, evidence grids, process flows, severity matrices, and data tables with emphasis cues.
 
@@ -595,6 +595,58 @@ ${content.slice(0, MAX_HTML_EXCERPT_LENGTH)}`;
     });
   } catch (error) {
     console.error('Failed to beautify HTML content:', error);
+    return null;
+  }
+}
+
+/**
+ * Extract raw text content from an image, PDF screenshot, or presentation slide via Gemini vision.
+ * This provides OCR-like extraction for files that pdf-parse cannot handle (scanned PDFs, image-based
+ * reports, screenshots of web pages, etc.). The output is plain text suitable for feeding into
+ * `beautifyHtmlContent()` or `generateExtractionDraft()`.
+ */
+export async function extractContentFromImage(
+  base64Data: string,
+  mimeType: string,
+  fileName: string,
+): Promise<string | null> {
+  if (!client) return null;
+  if (!base64Data) return null;
+
+  const prompt = `Extract ALL visible text from this ${mimeType === 'application/pdf' ? 'PDF page' : 'image'} exactly as it appears.
+
+Rules:
+- Copy every heading, paragraph, statistic, table cell, chart label, bullet point, footnote, caption, and number EXACTLY.
+- Preserve section hierarchy with markdown headings (## for main sections, ### for subsections).
+- For tables, use markdown table format (| Header | ... |).
+- For charts, extract all axis labels, data values, and the chart title.
+- Do NOT rephrase, summarize, or omit anything. Every visible word must appear.
+- Return plain markdown — no HTML, no code fences, no commentary.
+
+File name: ${fileName}`;
+
+  try {
+    const response = await client.models.generateContent({
+      model: MODELS.standard,
+      contents: [{
+        role: 'user',
+        parts: [
+          { text: prompt },
+          { inlineData: { mimeType, data: base64Data } },
+        ],
+      }],
+    });
+
+    const rawText = response.text?.trim();
+    if (!rawText) return null;
+
+    // Strip markdown fences that Gemini sometimes wraps output in
+    return rawText
+      .replace(/^```(?:markdown)?\s*/i, '')
+      .replace(/```\s*$/i, '')
+      .trim();
+  } catch (error) {
+    console.error('Failed to extract content from image:', error);
     return null;
   }
 }

@@ -89,7 +89,7 @@ export function SearchForm({ dark }: { dark?: boolean }) {
                 <Search className="h-4 w-4 shrink-0 text-muted" />
                 <input
                     aria-label="Search CoSET Intelligence Hub"
-                    className="w-56 bg-transparent text-sm outline-none placeholder:text-muted/60"
+                    className="w-40 bg-transparent text-sm outline-none placeholder:text-muted/60 sm:w-48 lg:w-56"
                     placeholder="Search CoSET Intelligence Hub..."
                     value={query}
                     onChange={handleChange}
@@ -104,7 +104,7 @@ export function SearchForm({ dark }: { dark?: boolean }) {
             </form>
 
             {showDropdown && results.length > 0 && (
-                <div className="absolute right-0 top-full z-50 mt-2 w-96 rounded-2xl border border-line bg-panel p-2 shadow-editorial">
+                <div className="absolute right-0 top-full z-50 mt-2 w-[min(24rem,calc(100vw-2rem))] rounded-2xl border border-line bg-panel p-2 shadow-editorial">
                     <p className="px-3 py-2 text-xs font-bold uppercase tracking-[0.18em] text-muted">
                         {results.length} result{results.length !== 1 ? 's' : ''} found
                     </p>
@@ -144,7 +144,7 @@ export function SearchForm({ dark }: { dark?: boolean }) {
             )}
 
             {showDropdown && results.length === 0 && query.length >= 2 && !isLoading && (
-                <div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-2xl border border-line bg-panel p-6 text-center shadow-editorial">
+                <div className="absolute right-0 top-full z-50 mt-2 w-[min(20rem,calc(100vw-2rem))] rounded-2xl border border-line bg-panel p-6 text-center shadow-editorial">
                     <Search className="mx-auto h-8 w-8 text-muted/40" />
                     <p className="mt-3 text-sm font-semibold text-ink">No results found</p>
                     <p className="mt-1 text-xs text-muted">Try adjusting your search query</p>

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
-
 import { analyzeContentForMetadata } from '@/lib/genai';
 import { createSupabaseServerClient } from '@/lib/supabase/clients';
+import { analyzeContentSchema, validationError } from '@/lib/validation';
+import { logger } from '@/lib/logger';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -29,25 +30,24 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Editor or admin role required.' }, { status: 403 });
         }
 
-        const body = (await request.json()) as { content?: string };
-        const content = typeof body.content === 'string' ? body.content.trim() : '';
-
-        if (!content) {
-            return NextResponse.json({ error: 'content is required.' }, { status: 400 });
+        const body = await request.json().catch(() => ({}));
+        const parsed = analyzeContentSchema.safeParse(body);
+        if (!parsed.success) {
+            return NextResponse.json({ error: validationError(parsed) }, { status: 400 });
         }
 
-        const metadata = await analyzeContentForMetadata(content);
+        const metadata = await analyzeContentForMetadata(parsed.data.content);
 
         if (!metadata) {
             return NextResponse.json(
                 { error: 'Could not analyze the content. Please try again.' },
-                { status: 422 }
+                { status: 422 },
             );
         }
 
         return NextResponse.json({ success: true, metadata });
     } catch (error) {
-        console.error('[analyze-content]', error);
+        logger.error('Analyze content error', error);
         return NextResponse.json({ error: 'Internal server error.' }, { status: 500 });
     }
 }

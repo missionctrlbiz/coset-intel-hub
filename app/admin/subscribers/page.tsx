@@ -84,42 +84,42 @@ export default async function AdminSubscribersPage() {
         <main className="site-shell max-w-[1520px] py-10">
             <div className="mb-10">
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Access Control</p>
-                <h1 className="mt-3 font-display text-5xl font-extrabold tracking-[-0.05em] text-ink">Subscribers & Platform Users</h1>
+                <h1 className="mt-3 font-display text-3xl font-extrabold tracking-[-0.05em] text-ink sm:text-4xl lg:text-5xl">Subscribers & Platform Users</h1>
                 <p className="mt-3 max-w-3xl text-lg text-muted">
                     View newsletter subscribers alongside registered platform users and their access roles across the CoSET Intelligence Hub.
                 </p>
             </div>
 
             {authError ? (
-                <div className="rounded-[2rem] border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900 shadow-soft">
+                <div className="rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900 shadow-soft">
                     Sign in to manage platform users.
                 </div>
             ) : !isAdmin ? (
-                <div className="rounded-[2rem] border border-blue-200 bg-blue-50 px-5 py-4 text-sm text-navy shadow-soft">
+                <div className="rounded-3xl border border-blue-200 bg-blue-50 px-5 py-4 text-sm text-navy shadow-soft">
                     Admin role is required to view platform users.
                 </div>
             ) : (
                 <div className="space-y-8">
                     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                        <div className="rounded-[1.6rem] border border-line bg-panel p-5 shadow-soft">
+                        <div className="rounded-2xl border border-line bg-panel p-5 shadow-soft">
                             <p className="text-sm text-muted">Newsletter Subscribers</p>
                             <p className="mt-3 font-display text-4xl font-extrabold tracking-[-0.05em] text-navy">{newsletterSubscribers.length}</p>
                         </div>
-                        <div className="rounded-[1.6rem] border border-line bg-panel p-5 shadow-soft">
+                        <div className="rounded-2xl border border-line bg-panel p-5 shadow-soft">
                             <p className="text-sm text-muted">Active Subscribers</p>
                             <p className="mt-3 font-display text-4xl font-extrabold tracking-[-0.05em] text-navy">{newsletterSubscribers.filter((subscriber) => subscriber.is_active).length}</p>
                         </div>
-                        <div className="rounded-[1.6rem] border border-line bg-panel p-5 shadow-soft">
+                        <div className="rounded-2xl border border-line bg-panel p-5 shadow-soft">
                             <p className="text-sm text-muted">Platform Users</p>
                             <p className="mt-3 font-display text-4xl font-extrabold tracking-[-0.05em] text-navy">{profiles.length}</p>
                         </div>
-                        <div className="rounded-[1.6rem] border border-line bg-panel p-5 shadow-soft">
+                        <div className="rounded-2xl border border-line bg-panel p-5 shadow-soft">
                             <p className="text-sm text-muted">Admin Accounts</p>
                             <p className="mt-3 font-display text-4xl font-extrabold tracking-[-0.05em] text-navy">{profiles.filter((profile) => profile.role === 'admin').length}</p>
                         </div>
                     </div>
 
-                    <section className="overflow-hidden rounded-[2rem] border border-line bg-panel shadow-soft">
+                    <section className="overflow-hidden rounded-3xl border border-line bg-panel shadow-soft">
                         <div className="border-b border-line bg-panel-alt px-6 py-5">
                             <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Audience List</p>
                             <h2 className="mt-2 font-display text-2xl font-bold text-navy">Newsletter Subscribers</h2>
@@ -136,22 +136,22 @@ export default async function AdminSubscribersPage() {
                                     <thead className="bg-panel-alt text-xs font-bold uppercase tracking-[0.18em] text-muted">
                                         <tr>
                                             <th className="px-6 py-5">Email</th>
-                                            <th className="px-6 py-5">Source</th>
+                                            <th className="hidden px-6 py-5 sm:table-cell">Source</th>
                                             <th className="px-6 py-5">Status</th>
-                                            <th className="px-6 py-5">Saved</th>
+                                            <th className="hidden px-6 py-5 md:table-cell">Saved</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {newsletterSubscribers.map((subscriber) => (
                                             <tr key={subscriber.id} className="border-t border-line even:bg-panel-alt/60">
                                                 <td className="px-6 py-5 text-sm font-semibold text-navy">{subscriber.email}</td>
-                                                <td className="px-6 py-5 text-sm text-muted">{subscriber.source}</td>
+                                                <td className="hidden px-6 py-5 text-sm text-muted sm:table-cell">{subscriber.source}</td>
                                                 <td className="px-6 py-5">
                                                     <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${subscriber.is_active ? 'bg-teal/10 text-teal' : 'bg-slate-200 text-slate-600'}`}>
                                                         {subscriber.is_active ? 'active' : 'inactive'}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-5 text-sm text-muted">{formatDate(subscriber.created_at)}</td>
+                                                <td className="hidden px-6 py-5 text-sm text-muted md:table-cell">{formatDate(subscriber.created_at)}</td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -160,7 +160,7 @@ export default async function AdminSubscribersPage() {
                         )}
                     </section>
 
-                    <section className="overflow-hidden rounded-[2rem] border border-line bg-panel shadow-soft">
+                    <section className="overflow-hidden rounded-3xl border border-line bg-panel shadow-soft">
                         <div className="border-b border-line bg-panel-alt px-6 py-5">
                             <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Access Control</p>
                             <h2 className="mt-2 font-display text-2xl font-bold text-navy">Platform Users</h2>
@@ -178,8 +178,8 @@ export default async function AdminSubscribersPage() {
                                         <tr>
                                             <th className="px-6 py-5">Name</th>
                                             <th className="px-6 py-5">Email</th>
-                                            <th className="px-6 py-5">Role</th>
-                                            <th className="px-6 py-5">Joined</th>
+                                            <th className="hidden px-6 py-5 md:table-cell">Role</th>
+                                            <th className="hidden px-6 py-5 md:table-cell">Joined</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -189,14 +189,14 @@ export default async function AdminSubscribersPage() {
                                                     <p className="font-semibold text-navy">{profile.full_name ?? '—'}</p>
                                                 </td>
                                                 <td className="px-6 py-5 text-sm text-muted">{profile.email ?? '—'}</td>
-                                                <td className="px-6 py-5">
+                                                <td className="hidden px-6 py-5 md:table-cell">
                                                     <span
                                                         className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${roleClasses[profile.role ?? 'viewer'] ?? 'bg-slate-200 text-slate-600'}`}
                                                     >
                                                         {profile.role ?? 'viewer'}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-5 text-sm text-muted">{formatDate(profile.created_at)}</td>
+                                                <td className="hidden px-6 py-5 text-sm text-muted md:table-cell">{formatDate(profile.created_at)}</td>
                                             </tr>
                                         ))}
                                     </tbody>

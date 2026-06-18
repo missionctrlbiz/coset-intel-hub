@@ -50,13 +50,13 @@ export async function SiteHeader({ dark = false, isAdmin = false, forceDarkLogo 
             )}
         >
             <div className={cn(
-                'site-shell relative flex h-16 items-center justify-between',
+                'site-shell relative flex h-16 items-center justify-between gap-3',
                 isAdmin ? 'max-w-[1520px]' : ''
             )}>
                 {/* Logo + Nav */}
                 <div className="flex min-w-0 flex-1 items-center">
                     <Link href={isAdmin ? '/admin' : '/'} aria-label="Go to CoSET homepage" className="shrink-0 inline-flex items-center">
-                        <ThemeLogo className="w-[98px] h-auto sm:w-[118px]" forceDark={forceDarkLogo} />
+                        <ThemeLogo className="w-[98px] h-auto sm:w-[118px]" forceDark={forceDarkLogo || dark} />
                     </Link>
 
                     {isAdmin ? (
@@ -89,7 +89,8 @@ export async function SiteHeader({ dark = false, isAdmin = false, forceDarkLogo 
                             <ThemeToggle darkSurface={dark} />
                             <div className="hidden items-center gap-2 md:flex">
                                 <SubscribeModalTrigger
-                                    className="rounded-full bg-ember px-4 py-2.5 text-sm font-bold text-white shadow-soft transition hover:brightness-110"
+                                    size="sm"
+                                    className="font-bold shadow-soft"
                                 />
                             </div>
                             <details className="relative lg:hidden">
@@ -107,7 +108,7 @@ export async function SiteHeader({ dark = false, isAdmin = false, forceDarkLogo 
 
                                 <div
                                     className={cn(
-                                        'absolute right-0 top-full mt-3 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-b-[1.75rem] rounded-t-none border p-3 shadow-editorial',
+                                        'absolute right-0 top-full mt-3 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-b-3xl rounded-t-none border p-3 shadow-editorial',
                                         dark
                                             ? 'border-white/10 bg-[#0A1421]/95 text-white backdrop-blur-2xl'
                                             : 'border-line bg-white/95 text-ink backdrop-blur-2xl dark:border-white/10 dark:bg-panel/95 dark:text-white'
@@ -148,7 +149,9 @@ export async function SiteHeader({ dark = false, isAdmin = false, forceDarkLogo 
 
                                     <div className={cn('mt-3 border-t pt-3', dark ? 'border-white/10' : 'border-line')}>
                                         <SubscribeModalTrigger
-                                            className="flex w-full items-center justify-center rounded-full bg-ember px-4 py-3 text-sm font-bold text-white shadow-soft transition hover:brightness-110"
+                                            size="md"
+                                            fullWidth
+                                            className="font-bold shadow-soft"
                                         />
                                     </div>
                                 </div>

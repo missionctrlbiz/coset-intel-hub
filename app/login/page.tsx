@@ -71,9 +71,9 @@ function LoginPageContent() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="rounded-[2rem] border border-white/12 bg-white/8 p-1 shadow-editorial backdrop-blur-xl"
+                        className="rounded-3xl border border-white/12 bg-white/8 p-1 shadow-editorial backdrop-blur-xl"
                     >
-                        <div className="rounded-[1.8rem] border border-white/10 bg-white/5 p-6 sm:p-8">
+                        <div className="rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8">
                             <form action={handleSubmit} className="space-y-6">
                                 <input type="hidden" name="redirect" value={redirectTo} />
                                 <div className="space-y-2">

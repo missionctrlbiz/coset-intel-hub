@@ -10,7 +10,7 @@ export type ParseResult = {
     text: string;
     pageCount: number | null;
     mimeType: string;
-    parserUsed: 'pdf-parse' | 'officeparser' | 'text' | 'none';
+    parserUsed: 'pdf-parse' | 'officeparser' | 'text' | 'none' | 'gemini-vision';
     truncated: boolean;
 };
 

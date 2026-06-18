@@ -2,12 +2,17 @@ import { NextResponse } from 'next/server';
 
 import type { Database } from '@/lib/database.types';
 import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/supabase/clients';
+import { feedbackIdSchema, validationError } from '@/lib/validation';
+import { logger } from '@/lib/logger';
 
 export const runtime = 'nodejs';
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
 type FeedbackRow = Database['public']['Tables']['hub_feedback']['Row'];
+
+function validateFeedbackId(id: string): string | null {
+    const parsed = feedbackIdSchema.safeParse({ id });
+    return parsed.success ? parsed.data.id : null;
+}
 
 async function authorizeFeedbackManager() {
     const supabase = await createSupabaseServerClient();
@@ -35,7 +40,8 @@ async function authorizeFeedbackManager() {
 }
 
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
-    if (!params.id || !UUID_RE.test(params.id)) {
+    const id = validateFeedbackId(params.id);
+    if (!id) {
         return NextResponse.json({ error: 'Invalid feedback id.' }, { status: 400 });
     }
 
@@ -70,7 +76,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
         const { data, error } = await auth.admin
             .from('hub_feedback')
             .update(updateData)
-            .eq('id', params.id)
+            .eq('id', id)
             .select('*')
             .single();
 
@@ -88,7 +94,8 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 }
 
 export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
-    if (!params.id || !UUID_RE.test(params.id)) {
+    const id = validateFeedbackId(params.id);
+    if (!id) {
         return NextResponse.json({ error: 'Invalid feedback id.' }, { status: 400 });
     }
 
@@ -97,7 +104,7 @@ export async function DELETE(_request: Request, { params }: { params: { id: stri
         return auth.error;
     }
 
-    const { error } = await auth.admin.from('hub_feedback').delete().eq('id', params.id);
+    const { error } = await auth.admin.from('hub_feedback').delete().eq('id', id);
 
     if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 });

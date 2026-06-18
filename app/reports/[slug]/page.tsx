@@ -7,6 +7,7 @@ import { FloatingChatWidget } from '@/components/floating-chat';
 import { ReportViewTracker } from '@/components/report-view-tracker';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
+import { Button } from '@/components/ui/button';
 import { getPublishedReportBySlug, getPublishedReportSlugs } from '@/lib/content';
 import { sanitizeHtml } from '@/lib/sanitize';
 
@@ -30,7 +31,7 @@ export default async function ReportDetailPage({ params }: { params: { slug: str
             <SiteHeader dark />
             <main>
                 <section className="site-shell py-5 sm:py-6">
-                    <div className="rounded-[1.35rem] border border-white/10 bg-[#08111d] px-4 py-3 shadow-[0_16px_36px_rgb(2_6_23/0.28)] sm:px-5">
+                    <div className="rounded-3xl border border-white/10 bg-[#08111d] px-4 py-3 shadow-[0_16px_36px_rgb(2_6_23/0.28)] sm:px-5">
                         <nav className="flex flex-wrap items-center gap-2 text-sm text-white/72">
                             <Link href="/" className="font-medium transition hover:text-white">Home</Link>
                             <ChevronRight className="h-4 w-4 opacity-45" />
@@ -42,14 +43,14 @@ export default async function ReportDetailPage({ params }: { params: { slug: str
                 </section>
 
                 <section className="site-shell pb-8 sm:pb-10">
-                    <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#0b1626] text-white shadow-editorial dark:bg-[#0d1828]">
+                    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#0b1626] text-white shadow-editorial dark:bg-[#0d1828]">
                         <div className="absolute inset-0">
                             <Image src={report.image} alt={report.title} fill priority className="object-cover opacity-22" />
                         </div>
                         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,10,18,0.5)_0%,rgba(5,10,18,0.78)_100%)]" />
                         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,10,18,0.78)_0%,rgba(5,10,18,0.72)_36%,rgba(5,10,18,0.44)_62%,rgba(5,10,18,0.18)_100%)]" />
                         <div className="relative px-6 py-10 sm:px-10 lg:px-12 lg:py-14">
-                            <div className="max-w-4xl rounded-[1.75rem] bg-black/25 px-5 py-5 backdrop-blur-[2px] sm:px-6 sm:py-6 lg:bg-black/15">
+                            <div className="max-w-4xl rounded-3xl bg-black/25 px-5 py-5 backdrop-blur-[2px] sm:px-6 sm:py-6 lg:bg-black/15">
                                 <h1 className="font-display text-4xl font-extrabold leading-[1.02] tracking-[-0.05em] sm:text-5xl lg:text-6xl">
                                     {report.title}
                                 </h1>
@@ -77,13 +78,10 @@ export default async function ReportDetailPage({ params }: { params: { slug: str
                                 </div>
                                 {report.downloadHref ? (
                                     <div className="mt-8">
-                                        <Link
-                                            href={report.downloadHref}
-                                            className="inline-flex items-center gap-2 rounded-xl bg-ember px-5 py-3 text-sm font-semibold text-white transition hover:brightness-110"
-                                        >
+                                        <Button variant="primary" size="md" href={report.downloadHref}>
                                             <Download className="h-4 w-4" />
                                             Download report
-                                        </Link>
+                                        </Button>
                                     </div>
                                 ) : null}
                             </div>
@@ -93,11 +91,11 @@ export default async function ReportDetailPage({ params }: { params: { slug: str
 
                 <div className="site-shell py-10 sm:py-12">
                     <div className="space-y-10">
-                        <article className="report-prose prose prose-slate prose-lg max-w-none rounded-[2.2rem] border border-line p-6 shadow-editorial backdrop-blur-sm sm:p-8 lg:p-10 lg:px-12">
+                        <article className="report-prose prose prose-slate prose-lg max-w-none rounded-3xl border border-line p-6 shadow-editorial backdrop-blur-sm sm:p-8 lg:p-10 lg:px-12">
                             {report.html_content ? (
                                 <div className="report-prose__content" dangerouslySetInnerHTML={{ __html: sanitizeHtml(report.html_content) }} />
                             ) : (
-                                <div className="rounded-[1.5rem] border border-dashed border-line bg-mist px-6 py-12 text-center text-muted not-prose">
+                                <div className="rounded-2xl border border-dashed border-line bg-mist px-6 py-12 text-center text-muted not-prose">
                                     This report is published, but the formatted body is still being prepared.
                                 </div>
                             )}

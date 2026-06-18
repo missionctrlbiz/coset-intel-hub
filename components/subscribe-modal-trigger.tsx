@@ -5,11 +5,16 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { CheckCircle2, Mail, X } from 'lucide-react';
 import { useState } from 'react';
 
+import { Button, type ButtonVariant } from '@/components/ui/button';
+
 type SubscribeModalTriggerProps = {
     label?: string;
     className?: string;
     modalTitle?: string;
     modalDescription?: string;
+    variant?: ButtonVariant;
+    size?: 'sm' | 'md' | 'lg';
+    fullWidth?: boolean;
 };
 
 type SubscribeResponse = {
@@ -25,6 +30,9 @@ export function SubscribeModalTrigger({
     className,
     modalTitle = 'Subscribe to CoSET Updates',
     modalDescription = defaultDescription,
+    variant = 'primary',
+    size = 'md',
+    fullWidth = false,
 }: SubscribeModalTriggerProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [email, setEmail] = useState('');
@@ -89,9 +97,16 @@ export function SubscribeModalTrigger({
 
     return (
         <>
-            <button type="button" onClick={() => setIsOpen(true)} className={className}>
+            <Button
+                type="button"
+                variant={variant}
+                size={size}
+                fullWidth={fullWidth}
+                className={className}
+                onClick={() => setIsOpen(true)}
+            >
                 {label}
-            </button>
+            </Button>
 
             <AnimatePresence>
                 {isOpen ? (
@@ -106,20 +121,22 @@ export function SubscribeModalTrigger({
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 12, scale: 0.98 }}
                             transition={{ duration: 0.22, ease: 'easeOut' }}
-                            className="relative w-full max-w-xl overflow-hidden rounded-[2rem] border border-white/12 bg-[#08131f] text-white shadow-[0_40px_120px_rgb(2_6_23/0.48)]"
+                            className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-white/12 bg-[#08131f] text-white shadow-[0_40px_120px_rgb(2_6_23/0.48)]"
                         >
-                            <button
+                            <Button
                                 type="button"
-                                onClick={closeModal}
+                                variant="ghost"
+                                size="md"
                                 aria-label="Close subscribe modal"
-                                className="absolute right-5 top-5 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/12 bg-white/6 text-white/82 transition hover:bg-white/12 hover:text-white"
+                                onClick={closeModal}
+                                className="absolute right-5 top-5 z-10 h-10 w-10 border border-white/12 bg-white/6 text-white/82 hover:bg-white/12 hover:text-white"
                             >
                                 <X className="h-5 w-5" />
-                            </button>
+                            </Button>
 
                             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(229,75,34,0.18),transparent_28%),radial-gradient(circle_at_80%_20%,rgba(13,148,136,0.16),transparent_26%)]" />
 
-                            <div className="relative px-7 py-8 sm:px-10 sm:py-10">
+                            <div className="relative px-5 py-8 sm:px-10 sm:py-10">
                                 {!success ? (
                                     <div className="space-y-7">
                                         <div className="space-y-4 text-center">
@@ -146,31 +163,35 @@ export function SubscribeModalTrigger({
                                                     onChange={(event) => setEmail(event.target.value)}
                                                     placeholder="you@example.com"
                                                     required
-                                                    className="w-full rounded-[1.2rem] border border-white/12 bg-white/8 px-4 py-4 text-base text-white outline-none transition placeholder:text-white/45 focus:border-ember/70 focus:bg-white/10 focus:ring-2 focus:ring-ember/20"
+                                                    className="w-full rounded-2xl border border-white/12 bg-white/8 px-4 py-4 text-base text-white outline-none transition placeholder:text-white/45 focus:border-ember/70 focus:bg-white/10 focus:ring-2 focus:ring-ember/20"
                                                 />
                                             </label>
 
                                             {error ? (
-                                                <div className="rounded-[1.2rem] border border-rose-300/22 bg-rose-500/12 px-4 py-3 text-sm text-rose-100">
+                                                <div className="rounded-2xl border border-rose-300/22 bg-rose-500/12 px-4 py-3 text-sm text-rose-100">
                                                     {error}
                                                 </div>
                                             ) : null}
 
-                                            <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-                                                <button
+                                            <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center">
+                                                <Button
                                                     type="submit"
+                                                    variant="primary"
+                                                    size="lg"
                                                     disabled={isSubmitting}
-                                                    className="inline-flex min-w-[180px] items-center justify-center rounded-full bg-ember px-6 py-3.5 text-sm font-bold text-white shadow-soft transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                                                    className="w-full font-bold shadow-soft sm:w-auto sm:min-w-[180px]"
                                                 >
                                                     {isSubmitting ? 'Saving...' : 'Save my email'}
-                                                </button>
-                                                <button
+                                                </Button>
+                                                <Button
                                                     type="button"
+                                                    variant="outline"
+                                                    size="lg"
                                                     onClick={closeModal}
-                                                    className="inline-flex min-w-[180px] items-center justify-center rounded-full border border-white/14 bg-white/6 px-6 py-3.5 text-sm font-semibold text-white/88 transition hover:bg-white/10 hover:text-white"
+                                                    className="w-full border-white/14 bg-white/6 text-white/88 hover:bg-white/10 hover:text-white sm:w-auto sm:min-w-[180px]"
                                                 >
                                                     Cancel
-                                                </button>
+                                                </Button>
                                             </div>
                                         </form>
                                     </div>
@@ -189,13 +210,15 @@ export function SubscribeModalTrigger({
                                             </p>
                                         </div>
                                         <div className="flex justify-center">
-                                            <button
+                                            <Button
                                                 type="button"
+                                                variant="primary"
+                                                size="lg"
                                                 onClick={closeModal}
-                                                className="inline-flex min-w-[200px] items-center justify-center rounded-full bg-ember px-6 py-3.5 text-sm font-bold text-white shadow-soft transition hover:brightness-110"
+                                                className="w-full font-bold shadow-soft sm:w-auto sm:min-w-[200px]"
                                             >
                                                 Close
-                                            </button>
+                                            </Button>
                                         </div>
                                     </div>
                                 )}

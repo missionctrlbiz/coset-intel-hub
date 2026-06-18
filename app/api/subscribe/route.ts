@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
-
 import { createSupabaseAdminClient } from '@/lib/supabase/clients';
+import { subscribeSchema, validationError } from '@/lib/validation';
+import { withRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 export const runtime = 'nodejs';
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 let resend: Resend | null = null;
 
@@ -13,32 +13,32 @@ function getResend() {
     if (!resend && process.env.RESEND_API_KEY) {
         resend = new Resend(process.env.RESEND_API_KEY);
     }
-
     return resend;
 }
 
 export async function POST(request: Request) {
     try {
-        const body = (await request.json()) as { email?: string };
-        const email = body.email?.trim().toLowerCase() ?? '';
+        const rateLimitResponse = withRateLimit(request, 'subscribe', 10, 60_000);
+        if (rateLimitResponse) return rateLimitResponse;
 
-        if (!EMAIL_RE.test(email)) {
-            return NextResponse.json({ error: 'Please provide a valid email address.' }, { status: 400 });
+        const body = await request.json().catch(() => ({}));
+        const parsed = subscribeSchema.safeParse(body);
+        if (!parsed.success) {
+            return NextResponse.json({ error: validationError(parsed) }, { status: 400 });
         }
+
+        const { email } = parsed.data;
 
         const admin = createSupabaseAdminClient();
         const { error: saveError } = await admin
             .from('newsletter_subscribers')
             .upsert(
-                {
-                    email,
-                    source: 'public-modal',
-                    is_active: true,
-                },
+                { email, source: 'public-modal', is_active: true },
                 { onConflict: 'email' },
             );
 
         if (saveError) {
+            logger.error('Subscribe save error', saveError);
             return NextResponse.json({ error: saveError.message }, { status: 500 });
         }
 
@@ -51,7 +51,6 @@ export async function POST(request: Request) {
         }
 
         const audienceId = process.env.RESEND_AUDIENCE_ID;
-
         if (audienceId) {
             try {
                 const contact = await resendClient.contacts.create({
@@ -74,7 +73,7 @@ export async function POST(request: Request) {
                     })
                     .eq('email', email);
             } catch (error) {
-                console.error('[subscribe] failed to add audience contact', error);
+                logger.warn('Failed to add Resend audience contact', { error });
             }
         }
 
@@ -96,7 +95,7 @@ export async function POST(request: Request) {
         });
 
         if (error) {
-            console.error('[subscribe] resend email error', error);
+            logger.warn('Resend email error on subscribe', error);
             return NextResponse.json({
                 success: true,
                 message: 'Your email has been saved. We will send you updates when new publications go live.',
@@ -108,8 +107,9 @@ export async function POST(request: Request) {
             message: 'Your email has been saved. We will send you updates when new publications go live.',
         });
     } catch (error) {
+        logger.error('Subscribe API error', error);
         return NextResponse.json(
-            { error: error instanceof Error ? error.message : 'Could not save your email right now.' },
+            { error: 'Could not save your email right now.' },
             { status: 500 },
         );
     }

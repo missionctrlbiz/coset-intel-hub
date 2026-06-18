@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-import { ThemeProvider } from '@/components/theme-provider';
+import { AppProviders } from '@/components/app-providers';
 import { cosetSans } from '@/lib/fonts';
 
 import './globals.css';
@@ -41,9 +41,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <script dangerouslySetInnerHTML={{ __html: themeScript }} />
             </head>
             <body className="bg-mist font-sans text-ink antialiased">
-                <ThemeProvider>
+                <AppProviders>
                     {children}
-                </ThemeProvider>
+                </AppProviders>
             </body>
         </html>
     );

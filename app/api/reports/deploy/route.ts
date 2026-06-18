@@ -2,28 +2,22 @@ import { NextResponse } from 'next/server';
 
 import type { Database } from '@/lib/database.types';
 import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/supabase/clients';
+import { reportDeploySchema, validationError } from '@/lib/validation';
+import { logger } from '@/lib/logger';
 
 export const runtime = 'nodejs';
 
 type ContentStatus = Database['public']['Enums']['content_status'];
 
-const VALID_STATUSES: ContentStatus[] = ['draft', 'published', 'scheduled', 'archived'];
-
 export async function PATCH(request: Request) {
     try {
-        const body = (await request.json()) as { reportId?: string; status?: string; scheduledAt?: string };
-        const { reportId, status, scheduledAt } = body;
-
-        if (!reportId || typeof reportId !== 'string') {
-            return NextResponse.json({ error: 'reportId is required.' }, { status: 400 });
+        const body = await request.json().catch(() => ({}));
+        const parsed = reportDeploySchema.safeParse(body);
+        if (!parsed.success) {
+            return NextResponse.json({ error: validationError(parsed) }, { status: 400 });
         }
 
-        if (!status || !VALID_STATUSES.includes(status as ContentStatus)) {
-            return NextResponse.json(
-                { error: `status must be one of: ${VALID_STATUSES.join(', ')}.` },
-                { status: 400 }
-            );
-        }
+        const { reportId, status, scheduledAt } = parsed.data;
 
         const supabase = await createSupabaseServerClient();
         const adminSupabase = createSupabaseAdminClient();
@@ -74,9 +68,10 @@ export async function PATCH(request: Request) {
 
         return NextResponse.json({ success: true, report });
     } catch (error) {
+        logger.error('Report deploy error', error);
         return NextResponse.json(
-            { error: error instanceof Error ? error.message : 'An unexpected error occurred.' },
-            { status: 500 }
+            { error: 'An unexpected error occurred.' },
+            { status: 500 },
         );
     }
 }

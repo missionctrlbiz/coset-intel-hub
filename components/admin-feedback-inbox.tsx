@@ -3,6 +3,8 @@
 import { MailOpen, MessageSquareReply, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState, useTransition } from 'react';
 
+import { Button } from '@/components/ui/button';
+
 export type FeedbackItem = {
     id: string;
     name: string;
@@ -125,7 +127,7 @@ export function AdminFeedbackInbox({ initialFeedback }: AdminFeedbackInboxProps)
 
     if (feedback.length === 0) {
         return (
-            <section className="rounded-[2rem] border border-line bg-panel p-10 text-center shadow-soft">
+            <section className="rounded-3xl border border-line bg-panel p-10 text-center shadow-soft">
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Feedback Inbox</p>
                 <h2 className="mt-3 font-display text-3xl font-extrabold tracking-[-0.04em] text-ink">No feedback yet</h2>
                 <p className="mt-3 text-sm leading-7 text-muted">New public feedback submissions will appear here once they are sent from the contact page.</p>
@@ -134,8 +136,8 @@ export function AdminFeedbackInbox({ initialFeedback }: AdminFeedbackInboxProps)
     }
 
     return (
-        <div className="grid gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
-            <aside className="rounded-[2rem] border border-line bg-panel p-4 shadow-soft">
+        <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
+            <aside className="rounded-3xl border border-line bg-panel p-4 shadow-soft">
                 <div className="mb-3 flex items-center justify-between px-2 pt-2">
                     <div>
                         <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Inbox</p>
@@ -148,7 +150,7 @@ export function AdminFeedbackInbox({ initialFeedback }: AdminFeedbackInboxProps)
                             key={item.id}
                             type="button"
                             onClick={() => setSelectedId(item.id)}
-                            className={`w-full rounded-[1.5rem] border px-4 py-4 text-left transition ${selectedId === item.id ? 'border-ember bg-ember/5 shadow-soft' : 'border-line bg-panel-alt/50 hover:border-ember/40 hover:bg-mist'}`}
+                            className={`w-full rounded-2xl border px-4 py-4 text-left transition ${selectedId === item.id ? 'border-ember bg-ember/5 shadow-soft' : 'border-line bg-panel-alt/50 hover:border-ember/40 hover:bg-mist'}`}
                         >
                             <div className="flex items-start justify-between gap-3">
                                 <div>
@@ -169,7 +171,7 @@ export function AdminFeedbackInbox({ initialFeedback }: AdminFeedbackInboxProps)
                 </div>
             </aside>
 
-            <section className="rounded-[2rem] border border-line bg-panel p-6 shadow-soft sm:p-8">
+            <section className="rounded-3xl border border-line bg-panel p-6 shadow-soft sm:p-8">
                 {selectedFeedback ? (
                     <>
                         <div className="flex flex-col justify-between gap-5 border-b border-line pb-6 md:flex-row md:items-start">
@@ -184,29 +186,33 @@ export function AdminFeedbackInbox({ initialFeedback }: AdminFeedbackInboxProps)
                             </div>
                             <div className="flex flex-wrap gap-2">
                                 {!selectedFeedback.is_read ? (
-                                    <button
+                                    <Button
                                         type="button"
+                                        variant="outline"
+                                        size="md"
                                         onClick={() => markAsRead(selectedFeedback.id)}
                                         disabled={isPending}
-                                        className="inline-flex items-center gap-2 rounded-xl border border-line px-4 py-3 text-sm font-semibold text-ink transition hover:border-navy hover:text-navy disabled:opacity-60"
+                                        className="border-line text-ink hover:border-navy hover:text-navy"
                                     >
                                         <MailOpen className="h-4 w-4" />
                                         Mark as Read
-                                    </button>
+                                    </Button>
                                 ) : null}
-                                <button
+                                <Button
                                     type="button"
+                                    variant="outline"
+                                    size="md"
                                     onClick={() => deleteFeedback(selectedFeedback.id)}
                                     disabled={isPending}
-                                    className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 transition hover:bg-rose-100 disabled:opacity-60 dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-300"
+                                    className="border-rose-200 bg-rose-50 text-rose-700 hover:border-rose-300 hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-300 dark:hover:bg-rose-950/50"
                                 >
                                     <Trash2 className="h-4 w-4" />
                                     Delete
-                                </button>
+                                </Button>
                             </div>
                         </div>
 
-                        <div className="mt-6 rounded-[1.5rem] border border-line bg-mist p-5 dark:bg-panel-alt/60">
+                        <div className="mt-6 rounded-2xl border border-line bg-mist p-5 dark:bg-panel-alt/60">
                             <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">Message</p>
                             <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-ink">{selectedFeedback.message}</p>
                         </div>
@@ -221,21 +227,22 @@ export function AdminFeedbackInbox({ initialFeedback }: AdminFeedbackInboxProps)
                                 onChange={(event) => setReplyDraft(event.target.value)}
                                 rows={6}
                                 placeholder="Write an internal reply or resolution note for this feedback."
-                                className="w-full rounded-[1.5rem] border border-line bg-mist px-4 py-4 text-sm text-ink outline-none transition focus:border-ember dark:bg-panel-alt/60"
+                                className="w-full rounded-2xl border border-line bg-mist px-4 py-4 text-sm text-ink outline-none transition focus:border-ember dark:bg-panel-alt/60"
                             />
                             <div className="flex flex-wrap items-center justify-between gap-3">
                                 <div className="text-xs text-muted">
                                     {selectedFeedback.replied_at ? `Last updated ${formatDate(selectedFeedback.replied_at)}` : 'No reply saved yet.'}
                                 </div>
-                                <button
+                                <Button
                                     type="button"
+                                    variant="teal"
+                                    size="md"
                                     onClick={saveReply}
                                     disabled={isPending || !replyDraft.trim()}
-                                    className="inline-flex items-center gap-2 rounded-xl bg-teal px-4 py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     <MessageSquareReply className="h-4 w-4" />
                                     Save Reply
-                                </button>
+                                </Button>
                             </div>
                         </div>
 

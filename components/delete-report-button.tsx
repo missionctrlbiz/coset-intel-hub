@@ -43,7 +43,7 @@ export function DeleteReportButton({ id, title }: { id: string; title: string })
                     className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 backdrop-blur-sm"
                     onClick={(e) => { if (e.target === e.currentTarget) setOpen(false); }}
                 >
-                    <div className="relative w-full max-w-md rounded-[2rem] border border-line bg-panel p-8 shadow-editorial">
+                    <div className="relative w-full max-w-md rounded-3xl border border-line bg-panel p-8 shadow-editorial">
                         <button
                             type="button"
                             aria-label="Close"

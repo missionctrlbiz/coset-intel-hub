@@ -86,7 +86,7 @@ export default async function AdminDashboardPage() {
                         <thead className="bg-panel-alt/50 text-[10px] font-black uppercase tracking-[0.25em] text-muted">
                             <tr>
                                 <th className="px-6 py-4">Report Asset</th>
-                                <th className="px-6 py-4 text-center">Curator</th>
+                                <th className="hidden px-6 py-4 text-center md:table-cell">Curator</th>
                                 <th className="px-6 py-4 text-center">Status</th>
                                 <th className="px-6 py-4 text-right">Last Modified</th>
                             </tr>
@@ -111,7 +111,7 @@ export default async function AdminDashboardPage() {
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4">
+                                    <td className="hidden px-6 py-4 md:table-cell">
                                         <div className="flex flex-col items-center justify-center">
                                             <p className="text-sm font-bold text-navy">{item.author}</p>
                                             <p className="text-[10px] text-muted uppercase tracking-wider font-semibold">Editorial Team</p>

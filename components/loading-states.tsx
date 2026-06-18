@@ -17,12 +17,12 @@ export function HomepageSkeleton() {
                         </div>
                         {/* Mission/Philosophy blocks */}
                         <div className="mt-10 grid gap-4 sm:grid-cols-2">
-                            <div className="rounded-[1.5rem] border border-white/10 bg-white/8 p-5 backdrop-blur">
+                            <div className="rounded-2xl border border-white/10 bg-white/8 p-5 backdrop-blur">
                                 <div className="h-3 w-24 rounded-full bg-white/20" />
                                 <div className="mt-3 h-4 w-full rounded-full bg-white/20" />
                                 <div className="mt-2 h-4 w-4/5 rounded-full bg-white/20" />
                             </div>
-                            <div className="rounded-[1.5rem] border border-white/10 bg-white/8 p-5 backdrop-blur">
+                            <div className="rounded-2xl border border-white/10 bg-white/8 p-5 backdrop-blur">
                                 <div className="h-3 w-28 rounded-full bg-white/20" />
                                 <div className="mt-3 h-4 w-full rounded-full bg-white/20" />
                                 <div className="mt-2 h-4 w-4/5 rounded-full bg-white/20" />
@@ -32,8 +32,8 @@ export function HomepageSkeleton() {
 
                     {/* Right column - Stats card */}
                     <div className="self-end">
-                        <div className="rounded-[2.25rem] border border-white/10 bg-black/20 p-5 shadow-editorial backdrop-blur-xl">
-                            <div className="rounded-[1.75rem] border border-white/10 bg-white/6 p-6">
+                        <div className="rounded-3xl border border-white/10 bg-black/20 p-5 shadow-editorial backdrop-blur-xl">
+                            <div className="rounded-3xl border border-white/10 bg-white/6 p-6">
                                 <div className="flex items-start justify-between gap-4 border-b border-white/10 pb-5">
                                     <div className="flex-1 space-y-3">
                                         <div className="h-3 w-36 rounded-full bg-white/20" />
@@ -44,7 +44,7 @@ export function HomepageSkeleton() {
                                 {/* Stats grid */}
                                 <div className="mt-6 grid gap-4 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
                                     {[1, 2, 3].map((i) => (
-                                        <div key={i} className={`rounded-[1.6rem] border p-5 shadow-soft ${i === 2 ? 'border-white/20 bg-white' : 'border-white/10 bg-white/8'}`}>
+                                        <div key={i} className={`rounded-2xl border p-5 shadow-soft ${i === 2 ? 'border-white/20 bg-white' : 'border-white/10 bg-white/8'}`}>
                                             <div className={`h-3 w-24 rounded-full ${i === 2 ? 'bg-slate-200' : 'bg-white/20'}`} />
                                             <div className={`mt-3 h-10 w-28 rounded-xl ${i === 2 ? 'bg-slate-200' : 'bg-white/20'}`} />
                                             <div className={`mt-3 h-4 w-20 rounded-full ${i === 2 ? 'bg-slate-200' : 'bg-white/20'}`} />
@@ -52,7 +52,7 @@ export function HomepageSkeleton() {
                                     ))}
                                 </div>
                                 {/* Bottom card */}
-                                <div className="mt-6 rounded-[1.6rem] border border-white/10 bg-white/10 p-5">
+                                <div className="mt-6 rounded-2xl border border-white/10 bg-white/10 p-5">
                                     <div className="h-3 w-40 rounded-full bg-white/20" />
                                     <div className="mt-2 h-4 w-full rounded-full bg-white/20" />
                                     <div className="mt-2 h-4 w-3/4 rounded-full bg-white/20" />
@@ -66,7 +66,7 @@ export function HomepageSkeleton() {
             {/* Filter sidebar + Reports section */}
             <section className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[280px_1fr] lg:px-8">
                 {/* Sidebar skeleton */}
-                <aside className="h-fit rounded-[2rem] border border-line bg-panel p-6 shadow-soft dark:bg-panel/92">
+                <aside className="h-fit rounded-3xl border border-line bg-panel p-6 shadow-soft dark:bg-panel/92">
                     <div className="h-7 w-40 rounded-lg bg-mist dark:bg-slate-700" />
                     <div className="mt-1 h-4 w-full rounded-full bg-mist dark:bg-slate-700" />
                     <div className="mt-8 space-y-6">
@@ -91,7 +91,7 @@ export function HomepageSkeleton() {
                         </div>
                         <div className="grid gap-6 lg:grid-cols-2">
                             {[1, 2].map((i) => (
-                                <div key={i} className="overflow-hidden rounded-[2rem] border border-line bg-panel shadow-soft">
+                                <div key={i} className="overflow-hidden rounded-3xl border border-line bg-panel shadow-soft">
                                     <div className="relative h-[420px] bg-mist dark:bg-slate-700" />
                                 </div>
                             ))}
@@ -109,7 +109,7 @@ export function HomepageSkeleton() {
                         </div>
                         <div className="grid gap-6 xl:grid-cols-3">
                             {[1, 2, 3].map((i) => (
-                                <div key={i} className="rounded-[2rem] border border-line bg-panel p-6 shadow-soft dark:bg-gradient-to-b dark:from-panel dark:to-panel-alt/90">
+                                <div key={i} className="rounded-3xl border border-line bg-panel p-6 shadow-soft dark:bg-gradient-to-b dark:from-panel dark:to-panel-alt/90">
                                     <div className="mb-6 flex items-start justify-between">
                                         <div className="h-11 w-11 rounded-2xl bg-mist dark:bg-slate-700" />
                                         <div className="h-4 w-24 rounded-full bg-mist dark:bg-slate-700" />
@@ -130,8 +130,8 @@ export function HomepageSkeleton() {
                     </div>
 
                     {/* Mission/Philosophy section */}
-                    <div className="grid gap-8 rounded-[2rem] border border-line bg-panel p-8 shadow-soft lg:grid-cols-2 dark:bg-gradient-to-br dark:from-panel dark:to-panel-alt/80">
-                        <div className="rounded-[1.75rem] bg-gradient-to-br from-navy to-teal p-8">
+                    <div className="grid gap-8 rounded-3xl border border-line bg-panel p-8 shadow-soft lg:grid-cols-2 dark:bg-gradient-to-br dark:from-panel dark:to-panel-alt/80">
+                        <div className="rounded-3xl bg-gradient-to-br from-navy to-teal p-8">
                             <div className="h-3 w-24 rounded-full bg-white/30" />
                             <div className="mt-4 h-9 w-3/4 rounded-xl bg-white/30" />
                             <div className="mt-6 space-y-2">
@@ -140,7 +140,7 @@ export function HomepageSkeleton() {
                                 <div className="h-4 w-2/3 rounded-full bg-white/30" />
                             </div>
                         </div>
-                        <div className="rounded-[1.75rem] border border-line bg-panel-alt p-8 dark:bg-panel/80">
+                        <div className="rounded-3xl border border-line bg-panel-alt p-8 dark:bg-panel/80">
                             <div className="h-3 w-32 rounded-full bg-mist dark:bg-slate-700" />
                             <div className="mt-4 h-9 w-4/5 rounded-xl bg-mist dark:bg-slate-700" />
                             <div className="mt-6 space-y-2">
@@ -174,7 +174,7 @@ export function AdminDashboardSkeleton() {
             {/* Stats grid skeleton - 3 columns */}
             <div className="grid gap-6 md:grid-cols-3">
                 {[1, 2, 3].map((i) => (
-                    <div key={i} className={`overflow-hidden rounded-[2.5rem] border p-8 shadow-soft ${i === 1 ? 'border-line bg-panel dark:bg-panel/90' :
+                    <div key={i} className={`overflow-hidden rounded-3xl border p-8 shadow-soft ${i === 1 ? 'border-line bg-panel dark:bg-panel/90' :
                         i === 2 ? 'border-emerald-100 bg-emerald-50/30 dark:border-emerald-900/50 dark:bg-emerald-900/20' :
                             'border-amber-100 bg-amber-50/30 dark:border-amber-900/50 dark:bg-amber-900/20'
                         }`}>
@@ -201,7 +201,7 @@ export function AdminDashboardSkeleton() {
             </div>
 
             {/* Activity table skeleton */}
-            <section className="mt-10 overflow-hidden rounded-[2.5rem] border border-line bg-panel shadow-soft dark:bg-panel/90">
+            <section className="mt-10 overflow-hidden rounded-3xl border border-line bg-panel shadow-soft dark:bg-panel/90">
                 <div className="flex items-center justify-between border-b border-line px-8 py-6">
                     <div className="flex items-center gap-3">
                         <div className="h-3 w-3 rounded-full bg-ember" />
@@ -236,7 +236,7 @@ export function AdminDashboardSkeleton() {
 
 export function EmptyReports() {
     return (
-        <div className="col-span-full flex flex-col items-center justify-center rounded-[2rem] border-2 border-dashed border-line bg-panel/50 px-8 py-20 text-center">
+        <div className="col-span-full flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-line bg-panel/50 px-8 py-20 text-center">
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-mist">
                 <svg className="h-7 w-7 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
@@ -252,7 +252,7 @@ export function EmptyReports() {
 
 export function EmptyBlogPosts() {
     return (
-        <div className="col-span-full flex flex-col items-center justify-center rounded-[2rem] border-2 border-dashed border-line bg-panel/50 px-8 py-16 text-center">
+        <div className="col-span-full flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-line bg-panel/50 px-8 py-16 text-center">
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-mist">
                 <svg className="h-7 w-7 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5" />
@@ -285,7 +285,7 @@ export function ReportsPageSkeleton() {
         <main className="site-shell py-12">
             <div className="grid gap-10 lg:grid-cols-[270px_1fr] animate-pulse">
                 {/* Sidebar Skeleton */}
-                <aside className="h-fit rounded-[2rem] border border-line bg-panel p-6 shadow-soft lg:sticky lg:top-28">
+                <aside className="h-fit rounded-3xl border border-line bg-panel p-6 shadow-soft lg:sticky lg:top-28">
                     <div className="h-7 w-36 rounded-lg bg-mist dark:bg-slate-700" />
                     <div className="mt-1 h-4 w-full rounded-full bg-mist dark:bg-slate-700" />
                     <div className="mt-8 space-y-8">
@@ -306,7 +306,7 @@ export function ReportsPageSkeleton() {
 
                 <div className="space-y-8">
                     {/* Header Section Skeleton */}
-                    <div className="rounded-[2rem] border border-line bg-panel p-8 shadow-soft">
+                    <div className="rounded-3xl border border-line bg-panel p-8 shadow-soft">
                         <div className="h-12 w-80 rounded-xl bg-mist dark:bg-slate-700" />
                         <div className="mt-3 h-5 w-full max-w-2xl rounded-full bg-mist dark:bg-slate-700" />
                         <div className="mt-2 h-5 w-3/4 rounded-full bg-mist dark:bg-slate-700" />
@@ -322,9 +322,9 @@ export function ReportsPageSkeleton() {
                     {/* Report Cards Skeleton */}
                     <div className="space-y-6">
                         {[1, 2, 3].map((i) => (
-                            <div key={i} className="grid gap-6 rounded-[2rem] border border-line bg-panel p-6 shadow-soft md:grid-cols-[220px_1fr]">
+                            <div key={i} className="grid gap-6 rounded-3xl border border-line bg-panel p-6 shadow-soft md:grid-cols-[220px_1fr]">
                                 {/* Image skeleton */}
-                                <div className="relative overflow-hidden rounded-[1.5rem] bg-mist dark:bg-slate-700 aspect-[4/5]" />
+                                <div className="relative overflow-hidden rounded-2xl bg-mist dark:bg-slate-700 aspect-[4/5]" />
                                 {/* Content skeleton */}
                                 <div className="flex flex-col space-y-4">
                                     <div className="h-3 w-32 rounded-full bg-mist dark:bg-slate-700" />
@@ -368,7 +368,7 @@ export function BlogPageSkeleton() {
                 <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] xl:grid-cols-[1fr_300px]">
                     <div className="space-y-8 xl:col-span-1">
                         {/* Featured Post Skeleton */}
-                        <div className="grid overflow-hidden rounded-[2rem] border border-line bg-panel shadow-editorial md:grid-cols-[1.1fr_1fr]">
+                        <div className="grid overflow-hidden rounded-3xl border border-line bg-panel shadow-editorial md:grid-cols-[1.1fr_1fr]">
                             <div className="min-h-[360px] bg-mist dark:bg-slate-700" />
                             <div className="p-8 space-y-4">
                                 <div className="h-3 w-24 rounded-full bg-mist dark:bg-slate-700" />
@@ -384,7 +384,7 @@ export function BlogPageSkeleton() {
                         {/* Blog Grid Skeleton */}
                         <div className="grid gap-8 md:grid-cols-2">
                             {[1, 2, 3, 4].map((i) => (
-                                <div key={i} className="overflow-hidden rounded-[2rem] border border-line bg-panel shadow-soft">
+                                <div key={i} className="overflow-hidden rounded-3xl border border-line bg-panel shadow-soft">
                                     <div className="aspect-[16/10] bg-mist dark:bg-slate-700" />
                                     <div className="p-6 space-y-3">
                                         <div className="h-3 w-24 rounded-full bg-mist dark:bg-slate-700" />
@@ -401,7 +401,7 @@ export function BlogPageSkeleton() {
 
                     {/* Sidebar Skeleton */}
                     <div className="space-y-6 xl:col-span-1">
-                        <div className="rounded-[2rem] bg-ink p-6">
+                        <div className="rounded-3xl bg-ink p-6">
                             <div className="h-6 w-6 rounded bg-white/10" />
                             <div className="mt-5 h-8 w-40 rounded-lg bg-white/10" />
                             <div className="mt-3 h-4 w-full rounded-full bg-white/10" />
@@ -411,7 +411,7 @@ export function BlogPageSkeleton() {
                                 <div className="h-10 w-full rounded-xl bg-white/10" />
                             </div>
                         </div>
-                        <div className="rounded-[2rem] border border-line bg-panel p-6 shadow-soft">
+                        <div className="rounded-3xl border border-line bg-panel p-6 shadow-soft">
                             <div className="h-6 w-32 rounded-lg bg-mist dark:bg-slate-700" />
                             <div className="mt-4 flex flex-wrap gap-2">
                                 {[1, 2, 3, 4, 5].map((i) => (
@@ -440,7 +440,7 @@ export function ContentManagementSkeleton() {
             </div>
 
             {/* Filters + Table skeleton */}
-            <div className="overflow-hidden rounded-[2.5rem] border border-line bg-panel shadow-soft dark:bg-panel/90">
+            <div className="overflow-hidden rounded-3xl border border-line bg-panel shadow-soft dark:bg-panel/90">
                 {/* Filters bar */}
                 <div className="flex flex-col gap-4 border-b border-line px-8 py-6 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex flex-wrap gap-3">
@@ -507,11 +507,11 @@ export function AnalyticsSkeleton() {
             <div className="grid gap-6 xl:grid-cols-[1.45fr_0.85fr]">
                 {/* Left column */}
                 <div className="space-y-6">
-                    <section className="rounded-[2rem] border border-line bg-panel p-6 shadow-soft dark:bg-panel/90">
+                    <section className="rounded-3xl border border-line bg-panel p-6 shadow-soft dark:bg-panel/90">
                         {/* Traffic stats */}
                         <div className="grid gap-4 md:grid-cols-3">
                             {[1, 2, 3].map((i) => (
-                                <div key={i} className="rounded-[1.5rem] bg-panel-alt p-5 dark:bg-slate-800/50">
+                                <div key={i} className="rounded-2xl bg-panel-alt p-5 dark:bg-slate-800/50">
                                     <div className="h-4 w-28 rounded-full bg-mist dark:bg-slate-700" />
                                     <div className="mt-3 flex items-center gap-3">
                                         <div className="h-10 w-24 rounded-xl bg-mist dark:bg-slate-700" />
@@ -522,10 +522,10 @@ export function AnalyticsSkeleton() {
                         </div>
 
                         {/* Chart section */}
-                        <div className="mt-6 rounded-[1.75rem] bg-mist p-6 dark:bg-slate-800/50">
+                        <div className="mt-6 rounded-3xl bg-mist p-6 dark:bg-slate-800/50">
                             <div className="h-7 w-48 rounded-lg bg-panel-alt dark:bg-slate-700" />
                             <div className="mt-2 h-4 w-64 rounded-full bg-panel-alt dark:bg-slate-700" />
-                            <div className="mt-8 h-[320px] rounded-[1.5rem] bg-panel p-6 shadow-soft dark:bg-slate-900/50" />
+                            <div className="mt-8 h-[320px] rounded-2xl bg-panel p-6 shadow-soft dark:bg-slate-900/50" />
                         </div>
                     </section>
                 </div>
@@ -533,7 +533,7 @@ export function AnalyticsSkeleton() {
                 {/* Right column */}
                 <div className="space-y-6">
                     {/* Sector interest card */}
-                    <section className="rounded-[2rem] bg-ink p-6 shadow-editorial">
+                    <section className="rounded-3xl bg-ink p-6 shadow-editorial">
                         <div className="h-7 w-40 rounded-lg bg-white/10" />
                         <div className="mt-6 flex justify-center">
                             <div className="h-56 w-56 rounded-full bg-white/10" />
@@ -549,14 +549,14 @@ export function AnalyticsSkeleton() {
                     </section>
 
                     {/* Export activity table */}
-                    <section className="rounded-[2rem] border border-line bg-panel p-6 shadow-soft dark:bg-panel/90">
+                    <section className="rounded-3xl border border-line bg-panel p-6 shadow-soft dark:bg-panel/90">
                         <div className="flex items-center justify-between">
                             <div className="h-7 w-48 rounded-lg bg-mist dark:bg-slate-700" />
                             <div className="h-5 w-32 rounded-full bg-mist dark:bg-slate-700" />
                         </div>
                         <div className="mt-5 space-y-3">
                             {[1, 2, 3, 4].map((i) => (
-                                <div key={i} className="flex gap-4 rounded-[1.25rem] border border-line p-4 dark:border-slate-700">
+                                <div key={i} className="flex gap-4 rounded-2xl border border-line p-4 dark:border-slate-700">
                                     <div className="h-4 w-32 rounded-full bg-mist dark:bg-slate-700" />
                                     <div className="h-4 w-24 rounded-full bg-mist dark:bg-slate-700" />
                                     <div className="h-4 w-20 rounded-full bg-mist dark:bg-slate-700" />
@@ -589,7 +589,7 @@ export function SubscribersSkeleton() {
             {/* Stats cards skeleton */}
             <div className="mb-10 grid gap-6 md:grid-cols-4">
                 {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="rounded-[2rem] border border-line bg-panel p-6 shadow-soft dark:bg-panel/90">
+                    <div key={i} className="rounded-3xl border border-line bg-panel p-6 shadow-soft dark:bg-panel/90">
                         <div className="mb-6 flex items-center justify-between">
                             <div className="h-12 w-12 rounded-2xl bg-mist dark:bg-slate-700" />
                         </div>
@@ -601,7 +601,7 @@ export function SubscribersSkeleton() {
             </div>
 
             {/* Automation card skeleton */}
-            <div className="mb-10 rounded-[2.5rem] border border-line bg-ink p-8 shadow-editorial">
+            <div className="mb-10 rounded-3xl border border-line bg-ink p-8 shadow-editorial">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="flex-1">
                         <div className="h-4 w-48 rounded-full bg-white/10" />
@@ -613,7 +613,7 @@ export function SubscribersSkeleton() {
             </div>
 
             {/* Table skeleton */}
-            <div className="overflow-hidden rounded-[2.5rem] border border-line bg-panel shadow-soft dark:bg-panel/90">
+            <div className="overflow-hidden rounded-3xl border border-line bg-panel shadow-soft dark:bg-panel/90">
                 <div className="flex items-center justify-between border-b border-line px-8 py-6">
                     <div className="flex gap-4">
                         <div className="h-9 w-48 rounded-full bg-mist dark:bg-slate-700" />

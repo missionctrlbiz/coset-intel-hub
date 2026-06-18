@@ -58,10 +58,10 @@ export default async function AdminFeedbackPage() {
             <div className="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
                 <div>
                     <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Engagement Desk</p>
-                    <h1 className="mt-3 font-display text-5xl font-extrabold tracking-[-0.05em] text-ink">Hub Feedback</h1>
+                    <h1 className="mt-3 font-display text-3xl font-extrabold tracking-[-0.05em] text-ink sm:text-4xl lg:text-5xl">Hub Feedback</h1>
                     <p className="mt-3 max-w-3xl text-lg text-muted">Review public feedback, mark items as read, save internal replies, and remove resolved submissions.</p>
                 </div>
-                <div className="rounded-[1.5rem] border border-line bg-panel px-5 py-4 shadow-soft">
+                <div className="rounded-2xl border border-line bg-panel px-5 py-4 shadow-soft">
                     <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">Current Inbox</p>
                     <div className="mt-3 flex items-center gap-3">
                         <div className="rounded-xl bg-ember/10 p-3 text-ember">
@@ -76,19 +76,19 @@ export default async function AdminFeedbackPage() {
             </div>
 
             {!user ? (
-                <section className="rounded-[2rem] border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900 shadow-soft">
+                <section className="rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900 shadow-soft">
                     Sign in to review public feedback.
                 </section>
             ) : null}
 
             {user && (!profile || !['admin', 'editor'].includes(profile.role)) ? (
-                <section className="rounded-[2rem] border border-blue-200 bg-blue-50 px-5 py-4 text-sm text-navy shadow-soft">
+                <section className="rounded-3xl border border-blue-200 bg-blue-50 px-5 py-4 text-sm text-navy shadow-soft">
                     You are signed in as {profile?.email ?? user.email}, but your profile role is `{profile?.role ?? 'viewer'}`. Editor or admin role is required to manage feedback.
                 </section>
             ) : null}
 
             {loadError ? (
-                <section className="rounded-[2rem] border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-800 shadow-soft">
+                <section className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-800 shadow-soft">
                     Could not load feedback right now: {loadError}
                 </section>
             ) : null}

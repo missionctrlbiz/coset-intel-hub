@@ -128,21 +128,21 @@ export function SiteFooter() {
 
                 {/* Structured Contact Row */}
                 <div className="grid gap-6 sm:grid-cols-3 lg:gap-8">
-                    <div className="flex items-start gap-4 rounded-[1.5rem] border border-line bg-mist p-6 dark:bg-panel-alt">
+                    <div className="flex items-start gap-4 rounded-2xl border border-line bg-mist p-6 dark:bg-panel-alt">
                         <div className="rounded-full bg-navy/10 p-3 text-navy dark:bg-ember/10 dark:text-ember"><MapPin className="h-6 w-6" /></div>
                         <div>
                             <p className="text-xs font-bold uppercase tracking-[0.18em] text-navy/55 dark:text-white/68">Headquarters</p>
                             <p className="mt-2 text-sm font-semibold text-navy dark:text-white">Marrakesh Street, Wuse 2<br />Abuja, Nigeria</p>
                         </div>
                     </div>
-                    <div className="flex items-start gap-4 rounded-[1.5rem] border border-line bg-mist p-6 dark:bg-panel-alt">
+                    <div className="flex items-start gap-4 rounded-2xl border border-line bg-mist p-6 dark:bg-panel-alt">
                         <div className="rounded-full bg-ember/10 p-3 text-ember"><Mail className="h-6 w-6" /></div>
                         <div>
                             <p className="text-xs font-bold uppercase tracking-[0.18em] text-navy/55 dark:text-white/68">Email Us</p>
                             <a href="mailto:cosetng@gmail.com" className="mt-2 block text-sm font-semibold text-navy transition hover:text-ember dark:text-white dark:hover:text-ember">cosetng@gmail.com</a>
                         </div>
                     </div>
-                    <div className="flex items-start gap-4 rounded-[1.5rem] border border-line bg-mist p-6 dark:bg-panel-alt">
+                    <div className="flex items-start gap-4 rounded-2xl border border-line bg-mist p-6 dark:bg-panel-alt">
                         <div className="rounded-full bg-teal/10 p-3 text-teal"><Phone className="h-6 w-6" /></div>
                         <div>
                             <p className="text-xs font-bold uppercase tracking-[0.18em] text-navy/55 dark:text-white/68">Call Us</p>

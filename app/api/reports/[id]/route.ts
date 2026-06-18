@@ -1,18 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-
 import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/supabase/clients';
-
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import { reportIdSchema, validationError } from '@/lib/validation';
+import { logger } from '@/lib/logger';
 
 export const runtime = 'nodejs';
+
+function validateId(id: string): string | null {
+    const parsed = reportIdSchema.safeParse({ id });
+    return parsed.success ? parsed.data.id : null;
+}
 
 export async function GET(
     req: NextRequest,
     { params }: { params: { id: string } },
 ) {
-    const { id } = params;
-
-    if (!id || !UUID_RE.test(id)) {
+    const id = validateId(params.id);
+    if (!id) {
         return NextResponse.json({ error: 'Invalid report id.' }, { status: 400 });
     }
 
@@ -55,8 +58,8 @@ export async function DELETE(
     _req: NextRequest,
     { params }: { params: { id: string } },
 ) {
-    const { id } = params;
-    if (!id || !UUID_RE.test(id)) {
+    const id = validateId(params.id);
+    if (!id) {
         return NextResponse.json({ error: 'Invalid report id.' }, { status: 400 });
     }
 
@@ -85,9 +88,8 @@ export async function POST(
     req: NextRequest,
     { params }: { params: { id: string } },
 ) {
-    const { id } = params;
-
-    if (!id || !UUID_RE.test(id)) {
+    const id = validateId(params.id);
+    if (!id) {
         return NextResponse.json({ error: 'Invalid report id.' }, { status: 400 });
     }
 

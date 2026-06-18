@@ -3,6 +3,8 @@
 import { CheckCircle2, Loader2, MessageSquare } from 'lucide-react';
 import { useState } from 'react';
 
+import { Button } from '@/components/ui/button';
+
 type FeedbackResponse = {
     success?: boolean;
     message?: string;
@@ -65,7 +67,7 @@ export function FeedbackForm() {
 
     if (isSubmitted) {
         return (
-            <div className="rounded-[2rem] border border-ember/20 bg-panel p-6 text-ink shadow-soft">
+            <div className="rounded-3xl border border-ember/20 bg-panel p-6 text-ink shadow-soft">
                 <div className="flex items-start gap-4">
                     <div className="rounded-full bg-ember/10 p-3 text-ember">
                         <CheckCircle2 className="h-6 w-6" />
@@ -80,18 +82,20 @@ export function FeedbackForm() {
                         <p className="mt-3 text-sm leading-7 text-muted">
                             {successMessage}
                         </p>
-                        <button
+                        <Button
                             type="button"
+                            variant="primary"
+                            size="md"
+                            className="mt-5"
                             onClick={() => {
                                 setIsSubmitted(false);
                                 setSuccessMessage('');
                                 setError(null);
                             }}
-                            className="mt-5 inline-flex items-center gap-2 rounded-xl bg-ember px-4 py-3 text-sm font-semibold text-white transition hover:brightness-110"
                         >
                             <MessageSquare className="h-4 w-4" />
                             Send Another Message
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -166,14 +170,16 @@ export function FeedbackForm() {
                     {error}
                 </div>
             ) : null}
-            <button
+            <Button
                 type="submit"
+                variant="primary"
+                size="lg"
+                fullWidth
                 disabled={isSubmitting}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-ember px-4 py-4 font-bold text-white shadow-soft transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
             >
                 {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
                 {isSubmitting ? 'Sending Feedback…' : 'Send Message'}
-            </button>
+            </Button>
         </form>
     );
 }

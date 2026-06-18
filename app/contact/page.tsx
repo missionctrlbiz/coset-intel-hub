@@ -36,7 +36,7 @@ export default function ContactPage() {
                             {/* Left Column: Map */}
                             <div className="space-y-8 flex flex-col h-full">
                                 {/* Map Card */}
-                                <div className="flex-1 flex flex-col rounded-[2rem] border border-line bg-panel p-8 shadow-soft dark:bg-panel-alt/80">
+                                <div className="flex-1 flex flex-col rounded-3xl border border-line bg-panel p-8 shadow-soft dark:bg-panel-alt/80">
                                     <div className="mb-4 flex items-center gap-3">
                                         <div className="rounded-xl bg-teal/10 p-3 text-teal"><MapPin className="h-6 w-6" /></div>
                                         <h3 className="font-display text-2xl font-bold text-ink">Headquarters</h3>
@@ -49,7 +49,7 @@ export default function ContactPage() {
 
                             {/* Right Column: Feedback Form */}
                             <div className="space-y-8 flex flex-col h-full">
-                                <div className="flex-1 rounded-[2rem] border border-line bg-panel p-8 shadow-soft dark:bg-panel-alt/80">
+                                <div className="flex-1 rounded-3xl border border-line bg-panel p-8 shadow-soft dark:bg-panel-alt/80">
                                     <div className="mb-6 flex items-center gap-3">
                                         <div className="rounded-xl bg-ember/10 p-3 text-ember"><MessageSquare className="h-6 w-6" /></div>
                                         <h3 className="font-display text-2xl font-bold text-ink">Submit Hub Feedback</h3>
@@ -59,7 +59,7 @@ export default function ContactPage() {
                             </div>
 
                             {/* FAQ Section Full Row */}
-                            <div className="lg:col-span-2 rounded-[2rem] border border-line bg-panel p-8 shadow-soft dark:bg-panel-alt/80">
+                            <div className="lg:col-span-2 rounded-3xl border border-line bg-panel p-8 shadow-soft dark:bg-panel-alt/80">
                                 <div className="mb-8 flex items-center gap-3">
                                     <div className="rounded-xl bg-navy/10 p-3 text-navy"><HelpCircle className="h-6 w-6" /></div>
                                     <h3 className="font-display text-2xl font-bold text-ink">Frequently Asked Questions</h3>

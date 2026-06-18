@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 import type { Database } from '@/lib/database.types';
 import { generateExtractionDraft, MAX_HTML_EXCERPT_LENGTH } from '@/lib/genai';
 import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/supabase/clients';
+import { extractUrlSchema, validationError } from '@/lib/validation';
+import { logger } from '@/lib/logger';
 
 type ProfileRow = Database['public']['Tables']['profiles']['Row'];
 
@@ -78,17 +80,18 @@ async function createUniqueSlug(
 
 export async function POST(request: Request) {
     try {
-        const body = (await request.json()) as { url?: string; previewOnly?: boolean };
-        const { url, previewOnly = false } = body;
-
-        if (!url || typeof url !== 'string') {
-            return NextResponse.json({ error: 'A URL is required.' }, { status: 400 });
+        const body = await request.json().catch(() => ({}));
+        const parsed = extractUrlSchema.safeParse(body);
+        if (!parsed.success) {
+            return NextResponse.json({ error: validationError(parsed) }, { status: 400 });
         }
+
+        const { url, previewOnly = false } = parsed.data;
 
         if (!isSafePublicUrl(url)) {
             return NextResponse.json(
                 { error: 'Only public http/https URLs are accepted.' },
-                { status: 400 }
+                { status: 400 },
             );
         }
 

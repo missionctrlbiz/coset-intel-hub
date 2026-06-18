@@ -29,7 +29,7 @@ export function ContentFilters({ categories, currentStatus, currentCategory, tot
     }
 
     return (
-        <section className="mb-8 flex flex-wrap items-center gap-4 rounded-[2rem] border border-line bg-panel p-5 shadow-soft dark:border-white/10 dark:bg-[#0d1828]">
+        <section className="mb-8 flex flex-wrap items-center gap-4 rounded-3xl border border-line bg-panel p-5 shadow-soft dark:border-white/10 dark:bg-[#0d1828]">
             <div className="inline-flex items-center gap-3 rounded-full bg-mist px-4 py-2.5 text-sm font-semibold text-navy dark:bg-[#132033] dark:text-ember">
                 <span className="rounded-full bg-white px-2.5 py-1 text-xs font-bold uppercase tracking-[0.14em] text-ember dark:bg-[#0b1626] dark:text-ember">Filters</span>
                 <span className="text-muted dark:text-white/72">{totalCount} reports</span>

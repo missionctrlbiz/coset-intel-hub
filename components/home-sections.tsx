@@ -13,6 +13,7 @@ import {
 import { EmptyBlogPosts, EmptyReports } from '@/components/loading-states';
 import { SectionReveal, StaggerReveal, FadeIn } from '@/components/section-reveal';
 import { SubscribeModalTrigger } from '@/components/subscribe-modal-trigger';
+import { Button } from '@/components/ui/button';
 import { type BlogCard } from '@/lib/content';
 import { type Report, cosetOrgLinks } from '@/lib/site-data';
 
@@ -84,7 +85,7 @@ export function HeroCarousel({ featured }: { featured: Report[] }) {
                             </span>
                         </FadeIn>
                         <FadeIn>
-                            <h1 className="mb-6 font-display text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
+                            <h1 className="mb-6 font-display text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
                                 {currentSlide.title}
                             </h1>
                         </FadeIn>
@@ -95,30 +96,36 @@ export function HeroCarousel({ featured }: { featured: Report[] }) {
                         </FadeIn>
                         <FadeIn>
                             <div className="flex flex-wrap items-center gap-4">
-                                <Link
+                                <Button
+                                    variant="primary"
+                                    size="lg"
                                     href={`/reports/${currentSlide.slug}`}
-                                    className="inline-flex items-center gap-2 rounded-full bg-ember px-6 py-3 font-bold text-white shadow-[0_0_20px_rgba(242,140,40,0.3)] transition hover:brightness-110"
+                                    className="shadow-[0_0_20px_rgba(242,140,40,0.3)]"
                                 >
                                     Read Post
                                     <ArrowRight className="h-4 w-4" />
-                                </Link>
+                                </Button>
                                 {currentSlide.downloadHref ? (
-                                    <Link
+                                    <Button
+                                        variant="outline"
+                                        size="lg"
                                         href={currentSlide.downloadHref}
-                                        className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 py-3 font-semibold text-white backdrop-blur transition hover:bg-white/20"
+                                        className="border-white/20 bg-white/10 text-white backdrop-blur hover:bg-white/20 hover:text-white dark:border-white/20"
                                     >
                                         <Download className="h-4 w-4" />
                                         Download PDF
-                                    </Link>
+                                    </Button>
                                 ) : (
-                                    <button
+                                    <Button
                                         type="button"
+                                        variant="outline"
+                                        size="lg"
                                         disabled
-                                        className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3 font-semibold text-white/50 backdrop-blur"
+                                        className="border-white/10 bg-white/5 text-white/50 backdrop-blur dark:border-white/10"
                                     >
                                         <Download className="h-4 w-4" />
                                         Download PDF
-                                    </button>
+                                    </Button>
                                 )}
                             </div>
                         </FadeIn>
@@ -126,7 +133,7 @@ export function HeroCarousel({ featured }: { featured: Report[] }) {
                 </AnimatePresence>
 
                 {/* Indicators */}
-                <div className="absolute bottom-8 right-8 flex gap-2 sm:right-auto">
+                <div className="absolute bottom-6 left-4 flex gap-2 sm:left-0 sm:bottom-8">
                     {featuredSlides.map((_, i) => (
                         <button
                             key={i}
@@ -149,7 +156,7 @@ export function IntelSnapshot() {
     return (
         <section className="border-b border-line bg-panel shadow-sm">
             <div className="site-shell py-8">
-                <div className="flex flex-wrap items-center justify-between gap-6 md:flex-nowrap">
+                <div className="flex flex-wrap items-center justify-between gap-6 xl:flex-nowrap">
                     <div className="w-full md:w-auto">
                         <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Intelligence Snapshot</p>
                         <h2 className="mt-1 font-display text-2xl font-bold text-ink">Operational signal at a glance</h2>
@@ -233,12 +240,12 @@ export function ReportsGrid({ reports }: { reports: Report[] }) {
                                 <List className="h-4 w-4" />
                             </button>
                         </div>
-                        <button className="inline-flex items-center gap-2 rounded-xl border border-line bg-panel px-4 py-2 text-sm font-semibold text-navy shadow-soft transition hover:border-navy">
+                        <Button variant="outline" size="sm" className="bg-panel border-line hover:border-navy shadow-soft">
                             <Filter className="h-4 w-4" /> Filter
-                        </button>
-                        <button className="inline-flex items-center gap-2 rounded-xl border border-line bg-panel px-4 py-2 text-sm font-semibold text-navy shadow-soft transition hover:border-navy">
+                        </Button>
+                        <Button variant="outline" size="sm" className="bg-panel border-line hover:border-navy shadow-soft">
                             <SortDesc className="h-4 w-4" /> Sort
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </FadeIn>
@@ -251,7 +258,7 @@ export function ReportsGrid({ reports }: { reports: Report[] }) {
                         <Link
                             key={report.slug}
                             href={`/reports/${report.slug}`}
-                            className={`group flex overflow-hidden rounded-[2rem] border border-line bg-panel shadow-soft transition hover:-translate-y-1 hover:shadow-editorial dark:bg-gradient-to-b dark:from-panel dark:to-panel-alt/90 ${viewMode === 'grid' ? 'flex-col' : 'flex-col sm:flex-row'}`}
+                            className={`group flex overflow-hidden rounded-3xl border border-line bg-panel shadow-soft transition hover:-translate-y-1 hover:shadow-editorial dark:bg-gradient-to-b dark:from-panel dark:to-panel-alt/90 ${viewMode === 'grid' ? 'flex-col' : 'flex-col sm:flex-row'}`}
                         >
                             <div className={`relative overflow-hidden ${viewMode === 'row' ? 'w-full sm:w-1/3 min-h-[240px]' : 'h-56 w-full'}`}>
                                 <ReportCardImage src={report.image || '/community-engagement.jpg'} alt={report.title} />
@@ -276,9 +283,14 @@ export function ReportsGrid({ reports }: { reports: Report[] }) {
 
             <FadeIn>
                 <div className="mt-12 flex justify-center">
-                    <Link href="/reports" className="inline-flex items-center gap-2 rounded-full border-2 border-navy bg-transparent px-8 py-3 text-sm font-bold text-navy transition hover:bg-navy hover:text-white dark:hover:bg-navy">
+                    <Button
+                        variant="outline"
+                        size="lg"
+                        href="/reports"
+                        className="border-2 border-navy bg-transparent px-8 font-bold text-navy hover:bg-navy hover:text-white"
+                    >
                         Load More Intelligence
-                    </Link>
+                    </Button>
                 </div>
             </FadeIn>
         </StaggerReveal>
@@ -291,7 +303,7 @@ export function ReportsGrid({ reports }: { reports: Report[] }) {
 export function MissionAndPhilosophy() {
     return (
         <StaggerReveal>
-            <div className="relative overflow-hidden rounded-[2rem] border border-line bg-panel py-16 text-ink shadow-editorial dark:border-white/10 dark:bg-[#0A1421] dark:text-white">
+            <div className="relative overflow-hidden rounded-3xl border border-line bg-panel py-16 text-ink shadow-editorial dark:border-white/10 dark:bg-[#0A1421] dark:text-white">
                 <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-teal/10 blur-3xl pointer-events-none" />
                 <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-ember/10 blur-3xl pointer-events-none" />
 
@@ -351,9 +363,9 @@ export function PlanetPulse({ blogPosts }: { blogPosts: BlogCard[] }) {
                 ) : displayPosts.map((post) => (
                     <div
                         key={post.title}
-                        className="group flex flex-col rounded-[1.5rem] border border-line bg-panel p-4 shadow-soft transition hover:-translate-y-1 hover:shadow-editorial dark:bg-panel-alt/80"
+                        className="group flex flex-col rounded-2xl border border-line bg-panel p-4 shadow-soft transition hover:-translate-y-1 hover:shadow-editorial dark:bg-panel-alt/80"
                     >
-                        <div className="relative mb-6 aspect-video w-full overflow-hidden rounded-[1rem]">
+                        <div className="relative mb-6 aspect-video w-full overflow-hidden rounded-2xl">
                             <Image
                                 src={post.image}
                                 alt={post.title}
@@ -393,7 +405,7 @@ export function LearnMoreCarousel() {
 
     return (
         <StaggerReveal>
-            <div className="rounded-[2rem] border border-line bg-panel p-8 shadow-soft lg:p-12 dark:bg-gradient-to-br dark:from-panel dark:to-panel-alt/80">
+            <div className="rounded-3xl border border-line bg-panel p-8 shadow-soft lg:p-12 dark:bg-gradient-to-br dark:from-panel dark:to-panel-alt/80">
                 <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
                     <div>
                         <FadeIn>
@@ -408,15 +420,20 @@ export function LearnMoreCarousel() {
                             </p>
                         </FadeIn>
                         <FadeIn className="mt-8">
-                            <Link href={cosetOrgLinks.mainSite} className="inline-flex items-center justify-center gap-2 rounded-full bg-navy px-8 py-4 font-bold text-white shadow-soft transition hover:brightness-110">
+                            <Button
+                                variant="secondary"
+                                size="lg"
+                                href={cosetOrgLinks.mainSite}
+                                className="px-8 py-4 font-bold shadow-soft"
+                            >
                                 Visit Uwem Nnyin
                                 <ArrowUpRight className="h-5 w-5" />
-                            </Link>
+                            </Button>
                         </FadeIn>
                     </div>
 
                     <FadeIn className="relative">
-                        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[2rem] shadow-editorial bg-mist">
+                        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl shadow-editorial bg-mist">
                             <AnimatePresence mode="wait">
                                 <motion.div
                                     key={currentIndex}
@@ -462,14 +479,14 @@ export function HubServices() {
     return (
         <StaggerReveal>
             {/* Newsletter CTA Block */}
-            <div className="relative w-full rounded-[2rem] border border-line bg-panel p-8 shadow-editorial dark:bg-gradient-to-br dark:from-panel dark:to-panel-alt/80 overflow-hidden lg:p-12" id="subscribe">
+            <div className="relative w-full rounded-3xl border border-line bg-panel p-8 shadow-editorial dark:bg-gradient-to-br dark:from-panel dark:to-panel-alt/80 overflow-hidden lg:p-12" id="subscribe">
                 <div className="absolute -bottom-16 -right-16 p-6 opacity-[0.04] dark:opacity-[0.08] pointer-events-none">
                     <Mail className="h-80 w-80 text-navy dark:text-white" />
                 </div>
                 <div className="absolute -top-24 -left-24 h-64 w-64 rounded-full bg-teal/10 blur-3xl pointer-events-none" />
                 <div className="absolute -bottom-24 -right-24 h-64 w-64 rounded-full bg-navy/10 blur-3xl pointer-events-none" />
 
-                <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 lg:gap-12">
                     <div className="flex-1 text-left">
                         <FadeIn>
                             <span className="inline-block rounded-full bg-navy/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-navy dark:bg-white/10 dark:text-white/80">Newsletter</span>
@@ -481,14 +498,16 @@ export function HubServices() {
                     </div>
 
                     <FadeIn className="flex-1 w-full max-w-md lg:max-w-xl">
-                        <div className="rounded-[1.5rem] border border-line bg-mist p-5 dark:bg-panel-alt/70 sm:p-6">
+                        <div className="rounded-2xl border border-line bg-mist p-5 dark:bg-panel-alt/70 sm:p-6">
                             <p className="text-sm leading-7 text-muted">
                                 Join the CoSET publication list and receive new research, position papers, and briefings as soon as they are released.
                             </p>
                             <div className="mt-5">
                                 <SubscribeModalTrigger
                                     label="Save My Email"
-                                    className="inline-flex w-full items-center justify-center rounded-xl bg-navy px-8 py-4 text-sm font-bold text-white transition hover:brightness-110 sm:w-auto"
+                                    variant="secondary"
+                                    size="lg"
+                                    className="w-full font-bold shadow-soft sm:w-auto"
                                 />
                             </div>
                         </div>

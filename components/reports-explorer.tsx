@@ -7,6 +7,7 @@ import { ArrowUpRight, Download, Eye, Grid2X2, List, SlidersHorizontal, ChevronD
 import { useState } from 'react';
 
 import { SectionReveal } from '@/components/section-reveal';
+import { Button } from '@/components/ui/button';
 import { type Report } from '@/lib/site-data';
 import { cosetOrgLinks, filterGroups } from '@/lib/site-data';
 
@@ -75,7 +76,7 @@ export function ReportsExplorer({ initialReports, categoryFilters, tagFilters }:
 
     return (
         <div className="grid gap-10 lg:grid-cols-[270px_1fr]">
-            <aside className="h-fit rounded-[2rem] border border-line bg-panel p-6 shadow-soft lg:sticky lg:top-28">
+            <aside className="h-fit rounded-3xl border border-line bg-panel p-6 shadow-soft lg:sticky lg:top-28">
                 <p className="font-display text-2xl font-bold text-navy">Research Filters</p>
                 <p className="mt-1 text-sm text-muted">Climate justice, divestment, and just transition research.</p>
                 <div className="mt-8 space-y-8">
@@ -103,7 +104,7 @@ export function ReportsExplorer({ initialReports, categoryFilters, tagFilters }:
 
             <div className="space-y-8">
                 <SectionReveal>
-                    <div className="relative overflow-hidden flex flex-col justify-end gap-6 rounded-[2rem] border border-line bg-panel p-8 shadow-soft md:p-12 min-h-[280px]">
+                    <div className="relative overflow-hidden flex flex-col justify-end gap-6 rounded-3xl border border-line bg-panel p-8 shadow-soft md:p-12 min-h-[280px]">
                         {/* Background Effect context aware */}
                         <div className="absolute inset-0 z-0">
                             <Image
@@ -117,7 +118,7 @@ export function ReportsExplorer({ initialReports, categoryFilters, tagFilters }:
                         </div>
 
                         <div className="relative z-10 max-w-2xl">
-                            <h1 className="font-display text-5xl font-extrabold tracking-[-0.05em] text-ink drop-shadow-sm">
+                            <h1 className="font-display text-3xl font-extrabold tracking-[-0.05em] text-ink drop-shadow-sm sm:text-4xl lg:text-5xl">
                                 {initialQuery ? `Search Results: "${initialQuery}"` : 'Intelligence Reports'}
                             </h1>
                             <p className="mt-3 text-lg leading-8 text-muted font-medium">
@@ -128,19 +129,19 @@ export function ReportsExplorer({ initialReports, categoryFilters, tagFilters }:
                 </SectionReveal>
 
                 <SectionReveal delay={0.08}>
-                    <div className="flex flex-col gap-4 border-b border-line pb-6 xl:flex-row xl:items-start xl:justify-between">
-                        <div className="space-y-3 xl:min-w-0 xl:flex-1">
+                    <div className="flex flex-col gap-4 border-b border-line pb-6 lg:flex-row lg:items-start lg:justify-between">
+                        <div className="space-y-3 lg:min-w-0 lg:flex-1">
                             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-muted">
                                 <span>{displayReports.length} reports</span>
                                 {initialCategory ? <span className="text-ember">Filtered</span> : null}
                             </div>
-                            <div className="rounded-[1.5rem] border border-line bg-panel/70 p-2 shadow-soft dark:bg-panel-alt/40">
-                                <div className="flex flex-wrap gap-2">
+                            <div className="rounded-2xl border border-line bg-panel/70 p-2 shadow-soft dark:bg-panel-alt/40">
+                                <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
                                     {(categoryFilters.length > 0 ? categoryFilters : filterGroups.categories).map((item) => (
                                         <button
                                             key={item}
                                             onClick={() => updateFilter('category', item)}
-                                            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${initialCategory === item ? 'bg-ember text-white shadow-soft' : 'bg-mist text-muted hover:bg-panel-alt hover:text-ink dark:bg-panel dark:hover:bg-mist dark:hover:text-white'}`}
+                                            className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${initialCategory === item ? 'bg-ember text-white shadow-soft' : 'bg-mist text-muted hover:bg-panel-alt hover:text-ink dark:bg-panel dark:hover:bg-mist dark:hover:text-white'}`}
                                         >
                                             {item}
                                         </button>
@@ -148,7 +149,7 @@ export function ReportsExplorer({ initialReports, categoryFilters, tagFilters }:
                                 </div>
                             </div>
                         </div>
-                        <div className="flex self-start rounded-[1.5rem] border border-line bg-panel px-3 py-3 shadow-soft dark:bg-panel-alt/50">
+                        <div className="flex self-start rounded-2xl border border-line bg-panel px-3 py-3 shadow-soft dark:bg-panel-alt/50">
                             <div className="flex flex-wrap items-center gap-3 text-sm text-muted">
                                 <div className="flex items-center gap-1 rounded-xl border border-line bg-mist p-1 dark:bg-panel">
                                     <button
@@ -192,15 +193,15 @@ export function ReportsExplorer({ initialReports, categoryFilters, tagFilters }:
 
                 <div className={viewMode === 'grid' ? "grid gap-6 md:grid-cols-2 lg:grid-cols-2" : "space-y-6"}>
                     {displayReports.length === 0 ? (
-                        <div className={`col-span-full rounded-[2rem] border-2 border-dashed border-line bg-panel/50 px-8 py-20 text-center`}>
+                        <div className={`col-span-full rounded-3xl border-2 border-dashed border-line bg-panel/50 px-8 py-20 text-center`}>
                             <p className="font-display text-2xl font-bold text-navy">No reports found</p>
                             <p className="mt-2 text-sm text-muted">Try adjusting your search or filters.</p>
                         </div>
                     ) : (
                         displayReports.map((report, index) => (
                             <SectionReveal key={report.slug} delay={index * 0.05} className={viewMode === 'grid' ? 'h-full flex' : ''}>
-                                <article className={`group flex w-full rounded-[2rem] border border-line bg-panel p-5 shadow-soft transition hover:shadow-editorial ${viewMode === 'grid' ? 'flex-col gap-5' : 'flex-col gap-6 md:flex-row md:items-start md:p-6'}`}>
-                                    <div className={`relative overflow-hidden rounded-[1.5rem] bg-mist shrink-0 ${viewMode === 'grid' ? 'aspect-video w-full' : 'aspect-[4/5] w-full md:w-[220px]'}`}>
+                                <article className={`group flex w-full rounded-3xl border border-line bg-panel p-5 shadow-soft transition hover:shadow-editorial ${viewMode === 'grid' ? 'flex-col gap-5' : 'flex-col gap-6 md:flex-row md:items-start md:p-6'}`}>
+                                    <div className={`relative overflow-hidden rounded-2xl bg-mist shrink-0 ${viewMode === 'grid' ? 'aspect-video w-full' : 'aspect-[4/5] w-full md:w-[220px]'}`}>
                                         <Image src={report.image} alt={report.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition duration-500 group-hover:scale-105" />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                                     </div>
@@ -236,19 +237,25 @@ export function ReportsExplorer({ initialReports, categoryFilters, tagFilters }:
                                         </div>
 
                                         <div className="mt-auto flex flex-wrap items-center gap-3 pt-6">
-                                            <Link href={`/reports/${report.slug}`} className="inline-flex items-center rounded-xl border border-line px-4 py-3 text-sm font-semibold text-navy transition hover:border-navy">
+                                            <Button variant="outline" size="md" href={`/reports/${report.slug}`}>
                                                 Read
-                                            </Link>
+                                            </Button>
                                             {report.downloadHref ? (
-                                                <Link href={report.downloadHref} className="inline-flex items-center gap-2 rounded-xl bg-ember px-4 py-3 text-sm font-semibold text-white transition hover:brightness-110">
+                                                <Button variant="primary" size="md" href={report.downloadHref}>
                                                     <Download className="h-4 w-4" />
                                                     <span className="hidden sm:inline">Download</span>
-                                                </Link>
+                                                </Button>
                                             ) : (
-                                                <button type="button" disabled className="inline-flex items-center gap-2 rounded-xl bg-ember/50 px-4 py-3 text-sm font-semibold text-white/70">
+                                                <Button
+                                                    type="button"
+                                                    variant="primary"
+                                                    size="md"
+                                                    disabled
+                                                    className="bg-ember/50 hover:bg-ember/50 text-white/70"
+                                                >
                                                     <Download className="h-4 w-4" />
                                                     <span className="hidden sm:inline">Download</span>
-                                                </button>
+                                                </Button>
                                             )}
                                         </div>
                                     </div>
@@ -259,7 +266,7 @@ export function ReportsExplorer({ initialReports, categoryFilters, tagFilters }:
                 </div>
 
                 <SectionReveal delay={0.08}>
-                    <div className="rounded-[2rem] border border-line bg-panel p-8 shadow-soft dark:bg-gradient-to-br dark:from-panel dark:to-panel-alt/80">
+                    <div className="rounded-3xl border border-line bg-panel p-8 shadow-soft dark:bg-gradient-to-br dark:from-panel dark:to-panel-alt/80">
                         <div className="mb-8">
                             <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Frequently Asked Questions</p>
                             <h2 className="mt-3 font-display text-4xl font-extrabold tracking-[-0.04em] text-ink">Common Questions About CoSET</h2>
@@ -267,7 +274,7 @@ export function ReportsExplorer({ initialReports, categoryFilters, tagFilters }:
                         </div>
                         <div className="space-y-4">
                             {faqs.map((faq, idx) => (
-                                <div key={idx} className={`overflow-hidden rounded-[1.5rem] border transition-colors ${openFaq === idx ? 'border-ember bg-panel shadow-sm' : 'border-line bg-panel-alt hover:border-muted/30 dark:bg-panel/40'}`}>
+                                <div key={idx} className={`overflow-hidden rounded-2xl border transition-colors ${openFaq === idx ? 'border-ember bg-panel shadow-sm' : 'border-line bg-panel-alt hover:border-muted/30 dark:bg-panel/40'}`}>
                                     <button
                                         onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
                                         className="flex w-full items-center justify-between p-6 text-left focus:outline-none"
@@ -289,7 +296,7 @@ export function ReportsExplorer({ initialReports, categoryFilters, tagFilters }:
                 </SectionReveal>
 
                 <SectionReveal delay={0.12}>
-                    <div className="grid gap-6 rounded-[2rem] border border-line bg-panel p-6 shadow-soft lg:grid-cols-[1.2fr_0.8fr] lg:p-8 dark:bg-gradient-to-br dark:from-panel dark:to-panel-alt/80">
+                    <div className="grid gap-6 rounded-3xl border border-line bg-panel p-6 shadow-soft lg:grid-cols-[1.2fr_0.8fr] lg:p-8 dark:bg-gradient-to-br dark:from-panel dark:to-panel-alt/80">
                         <div>
                             <p className="text-xs font-bold uppercase tracking-[0.18em] text-ember">Need The Full Organization Context?</p>
                             <h2 className="mt-3 font-display text-3xl font-extrabold tracking-[-0.04em] text-ink">Continue to CoSET’s main publications and advocacy site</h2>
@@ -297,17 +304,17 @@ export function ReportsExplorer({ initialReports, categoryFilters, tagFilters }:
                                 This hub curates report discovery. For CoSET’s live position papers, public campaigns, events, and direct organizational updates, continue to the main site.
                             </p>
                             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                                <Link href={cosetOrgLinks.positionPapers} className="inline-flex items-center justify-center gap-2 rounded-full bg-ember px-5 py-3 font-semibold text-white transition hover:brightness-110">
+                                <Button variant="primary" size="md" href={cosetOrgLinks.positionPapers}>
                                     Open Position Papers
                                     <ArrowUpRight className="h-4 w-4" />
-                                </Link>
-                                <Link href={cosetOrgLinks.mainSite} className="inline-flex items-center justify-center gap-2 rounded-full border border-line px-5 py-3 font-semibold text-navy transition hover:border-navy">
+                                </Button>
+                                <Button variant="outline" size="md" href={cosetOrgLinks.mainSite}>
                                     Visit Main Site
                                     <ArrowUpRight className="h-4 w-4" />
-                                </Link>
+                                </Button>
                             </div>
                         </div>
-                        <div className="rounded-[1.5rem] border border-line bg-panel-alt p-5 dark:bg-panel/80">
+                        <div className="rounded-2xl border border-line bg-panel-alt p-5 dark:bg-panel/80">
                             <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">Live CoSET Links</p>
                             <div className="mt-4 space-y-3 text-sm">
                                 <Link href={cosetOrgLinks.about} className="flex items-center justify-between rounded-xl border border-line bg-panel px-4 py-3 font-medium text-navy transition hover:border-navy dark:bg-panel-alt/40">
