@@ -173,7 +173,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                             </h2>
                             <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
                                 We publish new intelligence and commentary every week. Subscribe
-                                and we'll send it straight to you.
+                                and we&apos;ll send it straight to you.
                             </p>
                             <div className="mt-6 max-w-md">
                                 <SubscribeForm tone="auto" submitLabel="Subscribe me" />
