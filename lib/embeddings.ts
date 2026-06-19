@@ -1,5 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
 import { createSupabaseServerClient } from '@/lib/supabase/clients';
+import { MODELS } from '@/lib/genai';
 
 export async function processAndEmbedReport(reportId: string, extractedText: string) {
     if (!extractedText.trim()) return;
@@ -25,7 +26,7 @@ export async function processAndEmbedReport(reportId: string, extractedText: str
             const responses = await Promise.all(
                 batch.map(text =>
                     client.models.embedContent({
-                        model: 'gemini-embedding-001',
+                        model: MODELS.embedding,
                         contents: [text],
                         config: { outputDimensionality: 768 },
                     }).catch(() => null)

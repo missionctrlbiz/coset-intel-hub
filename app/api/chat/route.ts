@@ -107,7 +107,7 @@ async function retrieveRelevantChunks(
     try {
         const embeddingClient = new GoogleGenAI({ apiKey });
         const embeddingResponse = await embeddingClient.models.embedContent({
-            model: 'gemini-embedding-001',
+            model: MODELS.embedding,
             contents: [query],
             config: { outputDimensionality: 768 },
         });

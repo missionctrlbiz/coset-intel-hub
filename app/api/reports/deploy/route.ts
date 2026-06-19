@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import type { Database } from '@/lib/database.types';
 import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/supabase/clients';
 import { reportDeploySchema, validationError } from '@/lib/validation';
+import { notifySubscribersForReport } from '@/lib/notifications';
 import { logger } from '@/lib/logger';
 
 export const runtime = 'nodejs';
@@ -66,12 +67,46 @@ export async function PATCH(request: Request) {
             );
         }
 
+        // Fire-and-forget subscriber broadcast when a report goes live.
+        // Failures are logged but do not block the publish response — the
+        // report is already saved and editors can re-send via
+        // /api/subscriptions/notify if the audience was unreachable.
+        if (status === 'published') {
+            try {
+                const { data: fullReport } = await adminSupabase
+                    .from('reports')
+                    .select('id, slug, title, description, cover_image_path, category')
+                    .eq('id', reportId)
+                    .single();
+
+                if (fullReport) {
+                    const notifyResult = await notifySubscribersForReport({
+                        id: fullReport.id,
+                        slug: fullReport.slug,
+                        title: fullReport.title,
+                        summary: fullReport.description ?? null,
+                        cover_image_path: fullReport.cover_image_path ?? null,
+                        category: (fullReport.category as string[] | null) ?? null,
+                    });
+
+                    if (!notifyResult.attempted) {
+                        logger.warn('Subscriber broadcast skipped on deploy', {
+                            reportId,
+                            reason: notifyResult.reason,
+                        });
+                    }
+                }
+            } catch (notifyError) {
+                logger.warn('Subscriber broadcast error on deploy', { notifyError });
+            }
+        }
+
         return NextResponse.json({ success: true, report });
     } catch (error) {
         logger.error('Report deploy error', error);
         return NextResponse.json(
             { error: 'An unexpected error occurred.' },
-            { status: 500 },
+            { status: 500 }
         );
     }
 }

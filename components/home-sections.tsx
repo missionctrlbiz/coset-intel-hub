@@ -13,7 +13,7 @@ import {
 
 import { EmptyBlogPosts, EmptyReports } from '@/components/loading-states';
 import { SectionReveal, StaggerReveal, FadeIn } from '@/components/section-reveal';
-import { SubscribeModalTrigger } from '@/components/subscribe-modal-trigger';
+import { SubscribeForm } from '@/components/subscribe-form';
 import { Button } from '@/components/ui/button';
 import { type BlogCard } from '@/lib/content';
 import { type Report, cosetOrgLinks } from '@/lib/site-data';
@@ -133,8 +133,8 @@ export function HeroCarousel({ featured }: { featured: Report[] }) {
                     </motion.div>
                 </AnimatePresence>
 
-                {/* Indicators */}
-                <div className="absolute bottom-6 left-4 flex gap-2 sm:left-0 sm:bottom-8">
+                {/* Indicators — left offset matches .site-shell padding (40/56/72) so they align with the hero text */}
+                <div className="absolute bottom-6 left-10 flex gap-2 sm:left-14 sm:bottom-8 lg:left-[72px]">
                     {featuredSlides.map((_, i) => (
                         <button
                             key={i}
@@ -556,16 +556,14 @@ export function HubServices() {
                     </div>
 
                     <FadeIn className="flex-1 w-full max-w-md lg:max-w-xl">
-                        <div className="rounded-2xl border border-line bg-mist p-5 dark:bg-panel-alt/70 sm:p-6">
+                        <div className="rounded-2xl bg-mist p-5 dark:bg-panel-alt/70 sm:p-6">
                             <p className="text-sm leading-7 text-muted">
                                 Join the CoSET publication list and receive new research, position papers, and briefings as soon as they are released.
                             </p>
                             <div className="mt-5">
-                                <SubscribeModalTrigger
-                                    label="Save My Email"
-                                    variant="secondary"
-                                    size="lg"
-                                    className="w-full font-bold shadow-soft sm:w-auto"
+                                <SubscribeForm
+                                    tone="auto"
+                                    submitLabel="Save My Email"
                                 />
                             </div>
                         </div>

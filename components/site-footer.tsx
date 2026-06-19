@@ -159,7 +159,7 @@ export function SiteFooter() {
                             Made with ❤️ by MissionCTRL
                         </Link>
                         <span className="hidden h-4 w-px bg-line sm:block" />
-                        <Link href="#" className="flex items-center gap-1 font-semibold text-navy underline decoration-ember/45 underline-offset-4 transition hover:text-ember dark:text-white dark:decoration-white/35 dark:hover:text-ember">
+                        <Link href="/legal" className="flex items-center gap-1 font-semibold text-navy underline decoration-ember/45 underline-offset-4 transition hover:text-ember dark:text-white dark:decoration-white/35 dark:hover:text-ember">
                             <AlertCircle className="h-4 w-4" /> Legal
                         </Link>
                     </div>

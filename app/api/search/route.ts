@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { createSupabasePublicClient } from '@/lib/supabase/clients';
+import { MODELS } from '@/lib/genai';
 import { searchQuerySchema, validationError } from '@/lib/validation';
 import { withRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest) {
         try {
             const client = new GoogleGenAI({ apiKey });
             const embeddingResponse = await client.models.embedContent({
-                model: 'gemini-embedding-001',
+                model: MODELS.embedding,
                 contents: [query],
                 config: { outputDimensionality: 768 },
             });

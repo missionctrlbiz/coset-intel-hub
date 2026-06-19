@@ -144,6 +144,8 @@ export type Database = {
           last_synced_at: string | null
           resend_contact_id: string | null
           source: string
+          unsubscribed_at: string | null
+          unsubscribe_token: string | null
           updated_at: string
         }
         Insert: {
@@ -154,6 +156,8 @@ export type Database = {
           last_synced_at?: string | null
           resend_contact_id?: string | null
           source?: string
+          unsubscribed_at?: string | null
+          unsubscribe_token?: string | null
           updated_at?: string
         }
         Update: {
@@ -164,6 +168,8 @@ export type Database = {
           last_synced_at?: string | null
           resend_contact_id?: string | null
           source?: string
+          unsubscribed_at?: string | null
+          unsubscribe_token?: string | null
           updated_at?: string
         }
         Relationships: []

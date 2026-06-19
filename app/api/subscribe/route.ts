@@ -42,6 +42,18 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: saveError.message }, { status: 500 });
         }
 
+        // Re-read the row so we get the auto-generated unsubscribe_token.
+        const { data: subscriberRow } = await admin
+            .from('newsletter_subscribers')
+            .select('unsubscribe_token')
+            .eq('email', email)
+            .maybeSingle<{ unsubscribe_token: string | null }>();
+
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+        const unsubscribeUrl = subscriberRow?.unsubscribe_token
+            ? `${siteUrl.replace(/\/$/, '')}/unsubscribe?token=${subscriberRow.unsubscribe_token}`
+            : `${siteUrl.replace(/\/$/, '')}/unsubscribe`;
+
         const resendClient = getResend();
         if (!resendClient) {
             return NextResponse.json({
@@ -90,6 +102,13 @@ export async function POST(request: Request) {
                     <p style="margin: 0 0 14px;">Thank you for subscribing to publication updates from CoSET.</p>
                     <p style="margin: 0 0 14px;">We will send you new reports, briefs, and major publication updates as they are released.</p>
                     <p style="margin: 24px 0 0;">The CoSET Intelligence Team</p>
+                    <hr style="margin: 28px 0; border: none; border-top: 1px solid #dbe3ee;" />
+                    <p style="margin: 0; font-size: 12px; color: #5e6b7d;">
+                        You are receiving this because you subscribed at the CoSET Intelligence Hub.
+                        <a href="${unsubscribeUrl}" style="color: #5e6b7d; text-decoration: underline;">Unsubscribe</a>
+                        &nbsp;·&nbsp;
+                        <a href="${siteUrl.replace(/\/$/, '')}/legal" style="color: #5e6b7d; text-decoration: underline;">Privacy</a>
+                    </p>
                 </div>
             `,
         });

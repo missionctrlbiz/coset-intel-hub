@@ -38,7 +38,7 @@ const VARIANTS: Record<ButtonVariant, string> = {
     primary:
         'rounded-full bg-ember text-white shadow-soft hover:brightness-110 active:scale-[0.98]',
     secondary:
-        'rounded-full bg-navy text-white hover:brightness-110 active:scale-[0.98] dark:bg-ink',
+        'rounded-full bg-navy text-white hover:brightness-110 active:scale-[0.98] dark:bg-ink dark:text-navy',
     outline:
         'rounded-full border border-line text-navy hover:border-navy hover:text-ink dark:text-white dark:hover:border-white/60 dark:hover:text-white',
     ghost:
@@ -136,7 +136,7 @@ const ICON_SIZES: Record<IconOnlySize, string> = {
 
 const ICON_VARIANTS: Record<ButtonVariant, string> = {
     primary: 'bg-ember text-white hover:brightness-110',
-    secondary: 'bg-navy text-white hover:brightness-110 dark:bg-ink',
+    secondary: 'bg-navy text-white hover:brightness-110 dark:bg-ink dark:text-navy',
     outline:
         'border border-line text-navy hover:border-navy dark:border-white/15 dark:text-white dark:hover:border-white/60',
     ghost:
