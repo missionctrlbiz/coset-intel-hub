@@ -1,22 +1,11 @@
 import type { User } from '@supabase/supabase-js';
 
 import type { Database, Json } from '@/lib/database.types';
-import { blogPosts as fallbackBlogPosts, getReportBySlug as getFallbackReportBySlug, reports as fallbackReports, type Report as SeedReport } from '@/lib/site-data';
+import { getReportBySlug as getFallbackReportBySlug, reports as fallbackReports, type Report as SeedReport } from '@/lib/site-data';
 import { createSupabasePublicClient, createSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase/clients';
 
 type ReportRow = Database['public']['Tables']['reports']['Row'];
-type BlogPostRow = Database['public']['Tables']['blog_posts']['Row'];
 type ProfileRow = Database['public']['Tables']['profiles']['Row'];
-
-export type BlogCard = {
-    slug: string;
-    title: string;
-    excerpt: string;
-    category: string;
-    publishedAt: string;
-    author: string;
-    image: string;
-};
 
 export type AdminContentRow = {
     id: string;
@@ -157,30 +146,6 @@ function mapReportRow(row: ReportRow): SeedReport {
     };
 }
 
-function mapBlogPostRow(row: BlogPostRow): BlogCard {
-    return {
-        slug: row.slug,
-        title: row.title,
-        excerpt: row.excerpt,
-        category: row.category,
-        publishedAt: formatDate(row.published_at ?? row.created_at),
-        author: row.author || 'CoSET Editorial Desk',
-        image: resolveImagePath(row.image_path, '/coset-eye-banner.jpg'),
-    };
-}
-
-function mapFallbackBlogPosts(): BlogCard[] {
-    return fallbackBlogPosts.map((post, index) => ({
-        slug: `seed-blog-${index + 1}`,
-        title: post.title,
-        excerpt: post.excerpt,
-        category: post.category,
-        publishedAt: post.publishedAt,
-        author: post.author,
-        image: post.image,
-    }));
-}
-
 function mapAdminReportRow(row: Pick<ReportRow, 'id' | 'slug' | 'title' | 'category' | 'author' | 'published_at' | 'updated_at' | 'status'>): AdminContentRow {
     return {
         id: row.id,
@@ -279,59 +244,6 @@ export async function getRelatedReports(slug: string, categories: string[]) {
         return data.map(mapReportRow);
     } catch {
         return fallbackReports.filter((report) => report.slug !== slug).slice(0, 3);
-    }
-}
-
-export async function getPublishedBlogPosts() {
-    try {
-        const supabase = createSupabasePublicClient();
-        const { data, error } = await supabase
-            .from('blog_posts')
-            .select('*')
-            .eq('status', 'published')
-            .order('featured', { ascending: false })
-            .order('published_at', { ascending: false });
-
-        if (error || !data || data.length === 0) {
-            return mapFallbackBlogPosts();
-        }
-
-        return data.map(mapBlogPostRow);
-    } catch {
-        return mapFallbackBlogPosts();
-    }
-}
-
-export async function getPublishedBlogPostBySlug(slug: string) {
-    try {
-        const supabase = createSupabasePublicClient();
-        const { data, error } = await supabase
-            .from('blog_posts')
-            .select('*')
-            .eq('slug', slug)
-            .maybeSingle();
-
-        if (error || !data) {
-            // Find in fallback
-            const fallbackIndex = parseInt(slug.replace('seed-blog-', ''), 10) - 1;
-            const fallback = mapFallbackBlogPosts()[fallbackIndex];
-
-            return fallback
-                ? { ...fallback, htmlContent: `<p>${fallback.excerpt}</p><p>This is a placeholder for the seed blog post content. In a production environment, this would be replaced with the full HTML content from the Supabase database.</p>` }
-                : null;
-        }
-
-        // We will map row + html_content
-        return {
-            ...mapBlogPostRow(data),
-            htmlContent: data.html_content || '<p>No content available for this post.</p>',
-        };
-    } catch {
-        const fallbackIndex = parseInt(slug.replace('seed-blog-', ''), 10) - 1;
-        const fallback = mapFallbackBlogPosts()[fallbackIndex];
-        return fallback
-            ? { ...fallback, htmlContent: `<p>${fallback.excerpt}</p><p>This is a placeholder for the seed blog post content. In a production environment, this would be replaced with the full HTML content from the Supabase database.</p>` }
-            : null;
     }
 }
 

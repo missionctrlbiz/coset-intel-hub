@@ -11,11 +11,10 @@ import {
     MessageSquare, HelpCircle, Send, LayoutGrid, List, Mail
 } from 'lucide-react';
 
-import { EmptyBlogPosts, EmptyReports } from '@/components/loading-states';
+import { EmptyReports } from '@/components/loading-states';
 import { SectionReveal, StaggerReveal, FadeIn } from '@/components/section-reveal';
 import { SubscribeForm } from '@/components/subscribe-form';
 import { Button } from '@/components/ui/button';
-import { type BlogCard } from '@/lib/content';
 import { type Report, cosetOrgLinks } from '@/lib/site-data';
 
 // ============================================================================
@@ -404,9 +403,35 @@ export function MissionAndPhilosophy() {
 // ============================================================================
 // Featured Perspectives
 // ============================================================================
-export function PlanetPulse({ blogPosts }: { blogPosts: BlogCard[] }) {
-    const displayPosts = blogPosts.slice(0, 3);
+/**
+ * Hardcoded outbound blog cards — these link to real posts on cosetng.org
+ * instead of internal /blog/[slug] routes that no longer exist.
+ */
+const FEATURED_BLOGS = [
+    {
+        title: "CoSET\u2019s Post-COP28 Reflection: A Turning Point?",
+        category: 'Policy Update',
+        publishedAt: 'Nov 24, 2024',
+        image: '/coset-eye-banner.jpg',
+        url: 'https://cosetng.org/cosets-post-cop28-reflection-charting-the-course-for-environmental-justice-in-nigeria/',
+    },
+    {
+        title: 'Overview of Divestment for Just Transition',
+        category: 'Finance',
+        publishedAt: 'Nov 11, 2024',
+        image: '/community-engagement.jpg',
+        url: 'https://cosetng.org/overview-of-divestment-of-the-nigerian-economy-for-ecological-and-environmental-sustainability-position-paper/',
+    },
+    {
+        title: 'Overview of Climate-Induced Loss and Damage',
+        category: 'Nature-Based',
+        publishedAt: 'Mar 06, 2024',
+        image: '/CoSET-5-600x540.png',
+        url: 'https://cosetng.org/overview-of-climate-induced-loss-and-damage-position-paper/',
+    },
+] as const;
 
+export function PlanetPulse() {
     return (
         <StaggerReveal>
             <FadeIn className="flex flex-col items-center text-center">
@@ -416,11 +441,12 @@ export function PlanetPulse({ blogPosts }: { blogPosts: BlogCard[] }) {
             </FadeIn>
 
             <FadeIn className="mt-12 grid gap-6 md:grid-cols-3">
-                {displayPosts.length === 0 ? (
-                    <EmptyBlogPosts />
-                ) : displayPosts.map((post) => (
-                    <div
-                        key={post.title}
+                {FEATURED_BLOGS.map((post) => (
+                    <a
+                        key={post.url}
+                        href={post.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="group flex flex-col rounded-2xl border border-line bg-panel p-4 shadow-soft transition hover:-translate-y-1 hover:shadow-editorial dark:bg-panel-alt/80"
                     >
                         <div className="relative mb-6 aspect-video w-full overflow-hidden rounded-2xl">
@@ -440,7 +466,7 @@ export function PlanetPulse({ blogPosts }: { blogPosts: BlogCard[] }) {
                             <h3 className="mt-4 font-display text-xl font-bold tracking-tight text-ink group-hover:text-ember">{post.title}</h3>
                             <p className="mt-auto text-xs font-semibold text-muted">{post.publishedAt}</p>
                         </div>
-                    </div>
+                    </a>
                 ))}
             </FadeIn>
         </StaggerReveal>
