@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { beautifyHtmlContent } from '@/lib/genai';
+import { beautifyHtmlContent } from '@/lib/ai/generate';
 import { requireRole } from '@/lib/auth';
 import { beautifyContentSchema, validationError } from '@/lib/validation';
 import { logger } from '@/lib/logger';

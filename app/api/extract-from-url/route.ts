@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import type { Database } from '@/lib/database.types';
-import { generateExtractionDraft, MAX_HTML_EXCERPT_LENGTH } from '@/lib/genai';
+import { generateExtractionDraft, MAX_HTML_EXCERPT_LENGTH } from '@/lib/ai/generate';
 import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/supabase/clients';
 import { extractUrlSchema, validationError } from '@/lib/validation';
 import { logger } from '@/lib/logger';

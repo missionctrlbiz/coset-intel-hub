@@ -1,54 +1,31 @@
-import { GoogleGenAI } from '@google/genai';
 import { createSupabaseServerClient } from '@/lib/supabase/clients';
-import { MODELS } from '@/lib/genai';
+import { chunkReportText, embedTexts } from '@/lib/ai/embed';
 
 export async function processAndEmbedReport(reportId: string, extractedText: string) {
     if (!extractedText.trim()) return;
 
-    const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
-    if (!apiKey) return;
-    const client = new GoogleGenAI({ apiKey });
-
-    // Chunk text by paragraphs roughly (split by double newlines)
-    const chunks = extractedText
-        .split(/\n\s*\n/)
-        .map(chunk => chunk.trim())
-        .filter(chunk => chunk.length > 50 && chunk.length < 5000); // Exclude very short or excessively long chunks
-
+    const chunks = chunkReportText(extractedText);
     if (chunks.length === 0) return;
+
+    const embeddings = await embedTexts(chunks);
+    if (!embeddings) return;
 
     const supabase = await createSupabaseServerClient();
 
-    for (let i = 0; i < chunks.length; i += 50) {
-        const batch = chunks.slice(i, i + 50);
+    const insertedRows = chunks
+        .map((text, index) => {
+            const embedding = embeddings[index];
+            if (!embedding) return null;
+            return {
+                report_id: reportId,
+                content: text,
+                embedding,
+            };
+        })
+        .filter(Boolean);
 
-        try {
-            const responses = await Promise.all(
-                batch.map(text =>
-                    client.models.embedContent({
-                        model: MODELS.embedding,
-                        contents: [text],
-                        config: { outputDimensionality: 768 },
-                    }).catch(() => null)
-                )
-            );
+    if (insertedRows.length === 0) return;
 
-            const insertedRows = batch.map((text, index) => {
-                const embedding = responses[index]?.embeddings?.[0]?.values;
-                if (!embedding) return null;
-                return {
-                    report_id: reportId,
-                    content: text,
-                    embedding,
-                };
-            }).filter(Boolean);
-
-            if (insertedRows.length > 0) {
-                // @ts-ignore - Supabase types might not have vector(768) properly, ts-ignore is safe here
-                await supabase.from('report_embeddings').insert(insertedRows);
-            }
-        } catch (error) {
-            console.error('Failed to embed chunk batch:', error);
-        }
-    }
+    // @ts-ignore - Supabase types might not have vector(1024) properly, ts-ignore is safe here
+    await supabase.from('report_embeddings').insert(insertedRows);
 }

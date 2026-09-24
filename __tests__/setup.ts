@@ -24,16 +24,27 @@ vi.mock('next/headers', () => ({
     headers: () => new Map(),
 }));
 
-// Mock @google/genai
-vi.mock('@google/genai', () => ({
-    GoogleGenAI: vi.fn().mockImplementation(() => ({
-        models: {
-            generateContent: vi.fn().mockResolvedValue({
-                text: '{"title":"Test","summary":"Test","category":["Test"],"tags":["test"]}',
-            }),
-            generateContentStream: vi.fn(),
-            embedContent: vi.fn().mockResolvedValue({
-                embeddings: [{ values: new Array(768).fill(0.1) }],
+// Mock openai (provider SDK used by lib/ai — Agnes/Poolside/OpenRouter all
+// speak the OpenAI-compatible API)
+vi.mock('openai', () => ({
+    default: vi.fn().mockImplementation(() => ({
+        chat: {
+            completions: {
+                create: vi.fn().mockResolvedValue({
+                    choices: [
+                        {
+                            message: {
+                                content:
+                                    '{"title":"Test","summary":"Test","category":["Test"],"tags":["test"]}',
+                            },
+                        },
+                    ],
+                }),
+            },
+        },
+        embeddings: {
+            create: vi.fn().mockResolvedValue({
+                data: [{ index: 0, embedding: new Array(1024).fill(0.1) }],
             }),
         },
     })),

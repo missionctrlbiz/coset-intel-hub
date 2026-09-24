@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
+import type { ChatCompletionCreateParamsStreaming } from 'openai/resources/chat/completions';
+import { getPrimaryClient, MODELS, withPrimarySlot } from '@/lib/ai/clients';
+import { embedQuery } from '@/lib/ai/embed';
 import { createSupabasePublicClient } from '@/lib/supabase/clients';
-import { MODELS } from '@/lib/genai';
 import { chatRequestSchema, validationError } from '@/lib/validation';
 import { withRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
@@ -97,24 +98,10 @@ async function retrieveRelevantChunks(
     mode: ChatMode,
     reportId: string | null,
 ): Promise<RetrievedChunk[]> {
-    const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
-    if (!apiKey) return [];
-
     const supabase = createSupabasePublicClient();
 
-    // Step 1: Generate query embedding
-    let queryEmbedding: number[] | undefined;
-    try {
-        const embeddingClient = new GoogleGenAI({ apiKey });
-        const embeddingResponse = await embeddingClient.models.embedContent({
-            model: MODELS.embedding,
-            contents: [query],
-            config: { outputDimensionality: 768 },
-        });
-        queryEmbedding = embeddingResponse?.embeddings?.[0]?.values;
-    } catch {
-        return [];
-    }
+    // Step 1: Generate query embedding via the embeddings provider (Jina query mode)
+    const queryEmbedding = await embedQuery(query);
 
     if (!queryEmbedding) return [];
 
@@ -258,7 +245,7 @@ export async function POST(request: Request) {
 
         const { message, mode, slug, history } = parsed.data;
 
-        const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+        const primaryClient = getPrimaryClient();
 
         // ── Resolve report id for report-scoped mode ──────────────────────
         let reportId: string | null = null;
@@ -296,8 +283,8 @@ export async function POST(request: Request) {
             );
         }
 
-        // ── If no Gemini key, return search results in a formatted response ─
-        if (!apiKey) {
+        // ── If no generation provider, return search results in a formatted response ─
+        if (!primaryClient) {
             const lines: string[] = [
                 '**CoSET Intelligence reports matching your query:**',
                 '',
@@ -311,7 +298,7 @@ export async function POST(request: Request) {
                 }
                 lines.push('');
             });
-            lines.push('Enable Gemini AI for richer, conversational answers.');
+            lines.push('AI conversational answers are not configured right now.');
             return fallbackText(lines.join('\n'));
         }
 
@@ -326,46 +313,47 @@ export async function POST(request: Request) {
             `REPORT EXCERPTS:\n${contextBlock}\n\n` +
             `USER QUESTION: ${message}`;
 
-        // Convert frontend history roles to Gemini roles
-        const geminiContents: { role: string; parts: { text: string }[] }[] = history.map(
-            (msg) => ({
-                role: msg.role === 'assistant' ? 'model' : 'user',
-                parts: [{ text: msg.content }],
-            }),
-        );
+        // Convert frontend history roles to chat messages (roles map 1:1)
+        const chatMessages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
+            { role: 'system', content: SYSTEM_INSTRUCTION },
+        ];
+
+        for (const msg of history) {
+            chatMessages.push({ role: msg.role, content: msg.content });
+        }
 
         // Add the current contextualized question
-        geminiContents.push({ role: 'user', parts: [{ text: userPrompt }] });
+        chatMessages.push({ role: 'user', content: userPrompt });
 
-        // ── Stream the Gemini response ────────────────────────────────────
-        const genaiClient = new GoogleGenAI({ apiKey });
-
-        const stream = await genaiClient.models.generateContentStream({
-            model: MODELS.fast,
-            contents: geminiContents,
-            config: {
-                systemInstruction: SYSTEM_INSTRUCTION,
-                maxOutputTokens: 1500,
-                temperature: 0.4,
-            },
-        });
-
+        // ── Stream the model response (OpenAI-compatible SSE) ─────────────
         const encoder = new TextEncoder();
-        let fullText = '';
 
         const readableStream = new ReadableStream({
             async start(controller) {
                 try {
-                    for await (const chunk of stream) {
-                        const chunkText = chunk.text ?? '';
-                        if (chunkText.length > fullText.length) {
-                            const delta = chunkText.slice(fullText.length);
-                            fullText = chunkText;
-                            controller.enqueue(encoder.encode(delta));
+                    // Hold the primary-provider slot for the whole stream so
+                    // concurrent wizard calls queue instead of hitting 429s
+                    await withPrimarySlot(async () => {
+                        // `reasoning` is an Agnes gateway extension — cast keeps it
+                        // in the JSON body (see lib/ai/generate.ts)
+                        const stream = await primaryClient.chat.completions.create({
+                            model: MODELS.fast,
+                            messages: chatMessages,
+                            max_tokens: 1500,
+                            temperature: 0.4,
+                            stream: true,
+                            reasoning: { enabled: false, exclude: true },
+                        } as unknown as ChatCompletionCreateParamsStreaming);
+
+                        for await (const chunk of stream) {
+                            const delta = chunk.choices?.[0]?.delta?.content ?? '';
+                            if (delta) {
+                                controller.enqueue(encoder.encode(delta));
+                            }
                         }
-                    }
+                    });
                 } catch (err) {
-                    logger.error('Gemini stream error', err);
+                    logger.error('AI stream error', err);
                     controller.enqueue(
                         encoder.encode(
                             '\n\n*I encountered an error while generating the response. Please try again.*',

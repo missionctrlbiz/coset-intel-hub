@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 import type { Database } from '@/lib/database.types';
 import { parseDocument } from '@/lib/document-parser';
-import { analyzeContentForMetadata, beautifyHtmlContent, extractContentFromImage, generateExtractionDraft } from '@/lib/genai';
+import { analyzeContentForMetadata, beautifyHtmlContent, extractContentFromImage, generateExtractionDraft } from '@/lib/ai/generate';
 import { processAndEmbedReport } from '@/lib/embeddings';
 import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/supabase/clients';
 

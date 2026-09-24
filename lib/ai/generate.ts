@@ -1,14 +1,14 @@
-import { GoogleGenAI } from '@google/genai';
+import OpenAI from 'openai';
+import type {
+  ChatCompletionCreateParamsNonStreaming,
+  ChatCompletionCreateParamsStreaming,
+} from 'openai/resources/chat/completions';
 import DOMPurify from 'isomorphic-dompurify';
 
-const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY || '';
-const client = apiKey ? new GoogleGenAI({ apiKey }) : null;
+import { MODELS, getHtmlClient, getPrimaryClient, resolveBeautifyTarget, withPrimarySlot } from './clients';
+import { parseModelJson } from './json';
 
-export const MODELS = {
-  fast: process.env.GOOGLE_GENERATIVE_AI_FAST_MODEL ?? 'gemini-2.5-flash',
-  standard: process.env.GOOGLE_GENERATIVE_AI_MODEL ?? 'gemini-2.5-pro',
-  embedding: 'gemini-embedding-001',
-} as const;
+export { MODELS } from './clients';
 
 export const MAX_HTML_EXCERPT_LENGTH = 30_000;
 
@@ -21,78 +21,40 @@ export type ExtractionDraft = {
   formattedContent?: string;
 };
 
-function normalizeJsonResponse(rawText: string) {
-  const cleaned = rawText
-    .trim()
-    .replace(/^```(?:json)?\s*/i, '')
-    .replace(/```$/i, '')
-    .trim();
+export type ContentMetadata = {
+  title: string;
+  summary: string;
+  category: string[];
+  tags: string[];
+};
 
-  const jsonBlock = extractFirstJsonBlock(cleaned);
-  return jsonBlock ?? cleaned;
-}
-
-function extractFirstJsonBlock(rawText: string) {
-  const startIndex = rawText.search(/[\[{]/);
-  if (startIndex === -1) {
-    return null;
-  }
-
-  const openingChar = rawText[startIndex];
-  const closingChar = openingChar === '{' ? '}' : ']';
-  let depth = 0;
-  let inString = false;
-  let isEscaped = false;
-
-  for (let index = startIndex; index < rawText.length; index += 1) {
-    const character = rawText[index];
-
-    if (inString) {
-      if (isEscaped) {
-        isEscaped = false;
-        continue;
-      }
-
-      if (character === '\\') {
-        isEscaped = true;
-        continue;
-      }
-
-      if (character === '"') {
-        inString = false;
-      }
-
-      continue;
-    }
-
-    if (character === '"') {
-      inString = true;
-      continue;
-    }
-
-    if (character === openingChar) {
-      depth += 1;
-      continue;
-    }
-
-    if (character === closingChar) {
-      depth -= 1;
-      if (depth === 0) {
-        return rawText.slice(startIndex, index + 1).trim();
-      }
-    }
-  }
-
-  return null;
-}
-
-function parseModelJson<T>(rawText: string): T | null {
-  const normalized = normalizeJsonResponse(rawText);
+/**
+ * Single non-streaming text completion. Returns null on any failure so callers
+ * keep their graceful fallbacks. Agnes is a reasoning model: requests disable
+ * thinking via the gateway-accepted `reasoning` flag so answers aren't eaten
+ * by reasoning tokens, and primary-provider calls go through a shared slot to
+ * respect the free tier's per-minute rate limit.
+ */
+async function completeText(
+  client: OpenAI,
+  model: string,
+  prompt: string,
+): Promise<string | null> {
+  const call = () =>
+    // `reasoning` is an Agnes gateway extension (not in the OpenAI schema) —
+    // casting keeps it in the JSON body so thinking tokens don't consume the
+    // response budget.
+    client.chat.completions.create({
+      model,
+      messages: [{ role: 'user', content: prompt }],
+      reasoning: { enabled: false, exclude: true },
+    } as unknown as ChatCompletionCreateParamsNonStreaming);
 
   try {
-    return JSON.parse(normalized) as T;
+    const response = client === getPrimaryClient() ? await withPrimarySlot(call) : await call();
+    return response.choices?.[0]?.message?.content?.trim() ?? null;
   } catch (error) {
-    console.error('Failed to parse Gemini JSON response:', error, rawText);
+    console.error(`Generation failed for model ${model}:`, error);
     return null;
   }
 }
@@ -103,15 +65,16 @@ export async function generateExtractionDraft(input: {
   excerpt: string;
   purpose?: string;
 }) {
+  const client = getPrimaryClient();
   if (!client || !input.excerpt.trim()) {
     return null;
   }
 
   const prompt = input.purpose === 'web-scraping'
-    ? `You are CoSET's URL scraping assistant. 
+    ? `You are CoSET's URL scraping assistant.
            Extract the core report content from this HTML while ignoring navigation, headers, and footers.
            Return JSON only.
-           
+
            Required JSON shape:
            {
              "title": "string",
@@ -121,7 +84,7 @@ export async function generateExtractionDraft(input: {
              "recommendedSlug": "string",
              "formattedContent": "string (semantic HTML of the main article only)"
            }
-           
+
            HTML Excerpt:
            ${input.excerpt.slice(0, MAX_HTML_EXCERPT_LENGTH)}`
     : `You are CoSET's report extraction assistant.
@@ -141,40 +104,24 @@ export async function generateExtractionDraft(input: {
            Excerpt:
            ${input.excerpt.slice(0, MAX_HTML_EXCERPT_LENGTH)}`;
 
-  try {
-    const response = await client.models.generateContent({
-      model: MODELS.fast,
-      contents: [{ role: 'user', parts: [{ text: prompt }] }]
-    });
+  const rawText = await completeText(client, MODELS.fast, prompt);
+  if (!rawText) return null;
 
-    const rawText = response.text?.trim();
-    if (!rawText) return null;
+  const parsed = parseModelJson<ExtractionDraft>(rawText);
+  if (!parsed) return null;
 
-    const parsed = parseModelJson<ExtractionDraft>(rawText);
-    if (!parsed) return null;
-
-    return {
-      ...parsed,
-      model: MODELS.fast,
-    };
-  } catch (error) {
-    console.error('Failed to generate extraction draft:', error);
-    return null;
-  }
+  return {
+    ...parsed,
+    model: MODELS.fast,
+  };
 }
-
-export type ContentMetadata = {
-  title: string;
-  summary: string;
-  category: string[];
-  tags: string[];
-};
 
 /**
  * Analyse a block of text or HTML and return structured report metadata.
  * Used by the /api/analyze-content route to let editors auto-fill Step 1.
  */
 export async function analyzeContentForMetadata(content: string): Promise<ContentMetadata | null> {
+  const client = getPrimaryClient();
   if (!client || !content.trim()) return null;
 
   const prompt = `You are CoSET's intelligence analyst.
@@ -191,26 +138,16 @@ Required JSON shape:
 Content:
 ${content.slice(0, MAX_HTML_EXCERPT_LENGTH)}`;
 
-  try {
-    const response = await client.models.generateContent({
-      model: MODELS.fast,
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-    });
+  const rawText = await completeText(client, MODELS.fast, prompt);
+  if (!rawText) return null;
 
-    const rawText = response.text?.trim();
-    if (!rawText) return null;
-
-    return parseModelJson<ContentMetadata>(rawText);
-  } catch (error) {
-    console.error('Failed to analyze content for metadata:', error);
-    return null;
-  }
+  return parseModelJson<ContentMetadata>(rawText);
 }
 
 /**
  * Pre-process raw HTML to extract chart/visualization data from <script> tags.
  * This data would otherwise be lost since scripts are stripped for security.
- * We feed this extracted data explicitly into the Gemini prompt so it can
+ * We feed this extracted data explicitly into the model prompt so it can
  * recreate the visualizations as pure HTML/CSS.
  */
 function extractVisualizationData(rawHtml: string): string {
@@ -332,12 +269,24 @@ Do not invent legal citations or actors. Only structure what is genuinely presen
 /**
  * Reformat raw extracted text or HTML into a premium intelligence-report HTML layout.
  * Returns a full HTML snippet with sections, pull-quotes, stat callouts, and recreated charts.
- * 
+ *
  * This function transforms raw/messy content into beautifully structured, interactive
- * intelligence reports using Gemini with comprehensive design guidelines.
+ * intelligence reports using the configured HTML provider (Poolside) with the primary
+ * provider (Agnes) as automatic fallback.
  */
 export async function beautifyHtmlContent(content: string): Promise<string | null> {
-  if (!client || !content.trim()) return null;
+  if (!content.trim()) return null;
+
+  const primary = getPrimaryClient();
+  const html = getHtmlClient();
+  const target = resolveBeautifyTarget(Boolean(html));
+
+  // No provider at all — keep the historic "no key" behavior of returning null
+  if (!primary && !html) return null;
+
+  const client = target === 'html' && html ? html : primary;
+  const model = target === 'html' ? MODELS.html : MODELS.standard;
+  if (!client) return null;
 
   // Pre-extract visualization data and styles before they get stripped
   const vizData = extractVisualizationData(content);
@@ -369,7 +318,7 @@ This means:
 
 ## STRICT COLOR PALETTE (use ONLY these CoSET brand colors):
 - Ink (Navy): #1A202C or rgb(26, 32, 44) — headings, dark section backgrounds, primary text
-- Navy: rgb(15, 23, 42) or #0F172A — alternate dark sections  
+- Navy: rgb(15, 23, 42) or #0F172A — alternate dark sections
 - Teal: #0D9488 or rgb(13, 148, 136) — positive indicators, success, growth data
 - Ember (Orange-Red): #E54B22 or rgb(229, 75, 34) — highlights, callout icons, important numbers, CTA buttons, alerts
 - Mist: #F8F9FA or rgb(248, 249, 250) — light panel backgrounds
@@ -572,35 +521,25 @@ RAW CONTENT TO TRANSFORM:
 
 ${content.slice(0, MAX_HTML_EXCERPT_LENGTH)}`;
 
-  try {
-    const response = await client.models.generateContent({
-      model: MODELS.standard,
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-    });
+  const rawText = await completeText(client, model, prompt);
+  if (!rawText) return null;
 
-    const rawText = response.text?.trim();
-    if (!rawText) return null;
+  // Strip markdown fences if the model wrapped output in them
+  const cleaned = rawText
+    .replace(/```html\n?/g, '')
+    .replace(/```\n?/g, '')
+    .trim();
 
-    // Strip markdown fences if Gemini wrapped output in them
-    const cleaned = rawText
-      .replace(/```html\n?/g, '')
-      .replace(/```\n?/g, '')
-      .trim();
-
-    // Sanitize AI-generated HTML before returning — prevents stored XSS
-    return DOMPurify.sanitize(cleaned, {
-      ADD_TAGS: ['style'],
-      ADD_ATTR: ['style', 'data-section-style', 'data-report-toc', 'id'],
-      FORCE_BODY: false,
-    });
-  } catch (error) {
-    console.error('Failed to beautify HTML content:', error);
-    return null;
-  }
+  // Sanitize AI-generated HTML before returning — prevents stored XSS
+  return DOMPurify.sanitize(cleaned, {
+    ADD_TAGS: ['style'],
+    ADD_ATTR: ['style', 'data-section-style', 'data-report-toc', 'id'],
+    FORCE_BODY: false,
+  });
 }
 
 /**
- * Extract raw text content from an image, PDF screenshot, or presentation slide via Gemini vision.
+ * Extract raw text content from an image, PDF screenshot, or presentation slide via vision.
  * This provides OCR-like extraction for files that pdf-parse cannot handle (scanned PDFs, image-based
  * reports, screenshots of web pages, etc.). The output is plain text suitable for feeding into
  * `beautifyHtmlContent()` or `generateExtractionDraft()`.
@@ -610,6 +549,7 @@ export async function extractContentFromImage(
   mimeType: string,
   fileName: string,
 ): Promise<string | null> {
+  const client = getPrimaryClient();
   if (!client) return null;
   if (!base64Data) return null;
 
@@ -626,21 +566,30 @@ Rules:
 File name: ${fileName}`;
 
   try {
-    const response = await client.models.generateContent({
-      model: MODELS.standard,
-      contents: [{
-        role: 'user',
-        parts: [
-          { text: prompt },
-          { inlineData: { mimeType, data: base64Data } },
+    const call = () =>
+      client.chat.completions.create({
+        model: MODELS.standard,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: prompt },
+              // Agnes accepts OpenAI-style image_url parts; a base64 data URL avoids needing external hosting
+              {
+                type: 'image_url',
+                image_url: { url: `data:${mimeType || 'image/png'};base64,${base64Data}` },
+              },
+            ],
+          },
         ],
-      }],
-    });
+      });
 
-    const rawText = response.text?.trim();
+    const response = await withPrimarySlot(call);
+
+    const rawText = response.choices?.[0]?.message?.content?.trim();
     if (!rawText) return null;
 
-    // Strip markdown fences that Gemini sometimes wraps output in
+    // Strip markdown fences that models sometimes wrap output in
     return rawText
       .replace(/^```(?:markdown)?\s*/i, '')
       .replace(/```\s*$/i, '')

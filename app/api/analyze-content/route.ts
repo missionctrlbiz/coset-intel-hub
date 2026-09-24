@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { analyzeContentForMetadata } from '@/lib/genai';
+import { analyzeContentForMetadata } from '@/lib/ai/generate';
 import { createSupabaseServerClient } from '@/lib/supabase/clients';
 import { analyzeContentSchema, validationError } from '@/lib/validation';
 import { logger } from '@/lib/logger';
