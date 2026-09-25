@@ -37,8 +37,11 @@ function LoginPageContent() {
     }
 
     return (
-        <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-hero-radial p-4 sm:p-6">
-            <div className="absolute inset-0 bg-gradient-to-br from-ink/88 via-ink/82 to-ink/70" />
+        // Literal brand constants, NOT theme tokens: this page is always dark,
+        // but html.dark redefines --color-ink/--color-ember to light values,
+        // which previously turned the whole page near-white.
+        <main className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-[#081A33] p-4 sm:p-6">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#081A33]/95 via-[#0B2F52]/85 to-[#081A33]/75" />
 
             <div className="absolute inset-0">
                 <Image
@@ -56,11 +59,11 @@ function LoginPageContent() {
                     <div className="mb-8 text-center">
                         <Link href="/" className="inline-block">
                             <Image
-                                src="/logo.png"
+                                src="/logo-white.png"
                                 alt="CoSET"
                                 width={512}
                                 height={256}
-                                className="mx-auto w-[144px] invert brightness-200"
+                                className="mx-auto w-[144px]"
                             />
                         </Link>
                         <h1 className="mt-6 font-display text-4xl font-extrabold tracking-[-0.04em] text-white">Sign in</h1>
@@ -139,7 +142,7 @@ function LoginPageContent() {
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="group flex w-full items-center justify-center gap-3 rounded-2xl bg-ember py-4 font-semibold text-white shadow-soft transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+                                    className="group flex w-full items-center justify-center gap-3 rounded-2xl bg-[#F28C28] py-4 font-semibold text-white shadow-soft transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
                                 >
                                     {isLoading ? (
                                         <Loader2 className="h-5 w-5 animate-spin" />
